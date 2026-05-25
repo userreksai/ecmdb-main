@@ -6,10 +6,6 @@
 ![Go Version](https://img.shields.io/badge/go-1.25+-green.svg)
 ![License](https://img.shields.io/badge/license-MIT-orange.svg)
 ![Status](https://img.shields.io/badge/status-GA-brightgreen.svg)
-
-[![官方文档](https://img.shields.io/badge/官方文档-文档跳转-blue.svg)](https://duke1616.github.io)
-[![在线演示](https://img.shields.io/badge/在线演示-立即体验-brightgreen.svg)](http://82.156.165.98:8888)
-
 </div>
 
 ## 🎯 核心功能
@@ -39,7 +35,6 @@
 
 ### 🌐 在线演示
 **立即体验**：无需安装，直接访问在线演示环境
-- **演示地址**：[http://82.156.165.98:8888](http://82.156.165.98:8888)
 - **演示账户**：demo / **密码**：123456
 > 💡 **提示**：演示环境拥有平台的读取权限。
 
@@ -158,7 +153,5 @@ task endpoint
 **🌟 如果这个项目对您有帮助，请给我们一个 Star！**
 
 **💡 欢迎贡献代码，一起打造更好用的现代级 CMDB 运维底座！**
-
-Made with ❤️ by [Duke1616](https://github.com/Duke1616)
 
 </div>
