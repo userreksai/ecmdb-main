@@ -1,0 +1,91 @@
+crypto_aes_key: "1234567890"
+
+web:
+  host: "0.0.0.0"
+  port: 8000
+
+# 数据加密，根据模块划分
+encryption:
+  user:
+    version: "V1"
+    key: "1234567890"
+  resource:
+    version: "V1"
+    key: "1234567890"
+  runner:
+    version: "V1"
+    key: "1234567890"
+
+ldap:
+  url: "ldap://127.0.0.1:389"
+  base_dn: "DC=example,DC=com"
+  bind_dn: "CN=cn,OU=ou,DC=example,DC=com"
+  bind_password: "1234567890"
+  username_attribute: "sAMAccountName"
+  mail_attribute: "mail"
+  display_name_attribute: "displayName"
+  title_attribute: "title"
+  group_name_attribute: "cn"
+  user_filter: "(&(sAMAccountName={input})(!(UserAccountControl=514)))"
+  group_filter: "(|(member={dn}))"
+  sync_user_filter: "(&(objectClass=user)(userAccountControl:1.2.840.113556.1.4.803:=512)(userAccountControl:1.2.840.113556.1.4.803:=512)(!(userAccountControl:1.2.840.113556.1.4.803:=2)))"
+  sync_exclude_ou: "unknown"
+
+session:
+  session_encrypted_key: "1234567890Key"
+  cookie:
+    domain: ".example.com"
+    name: "ecmdb-token-key"
+
+redis:
+  addr: "127.0.0.1:6379"
+  password: "ecmdb@redis123"
+  db: 0
+
+mongodb:
+  dsn: mongodb://127.0.0.1:27017/cmdb
+  username: cmdb
+  password: 123456
+
+kafka:
+  network: tcp
+  addresses:
+    - 127.0.0.1:9092
+
+etcd:
+  endpoints:
+    - 127.0.0.1:2379
+
+minio:
+  endpoint: 127.0.0.1:9000
+  access_key_id: minio
+  secret_access_key: minio123
+  use_ssl: false
+
+# 用于飞书发送消息通知
+lark:
+  app_id: ""
+  app_secret: ""
+  callback:
+    frontend_url: http://localhost:3333/logicflow-preview
+    debug: true
+
+wechat:
+  corp_id: ""
+  corp_secret: ""
+  agent_id: 1000002
+
+# 如果工单需要自动化任务必须开启
+cronjob:
+  enabled: true
+
+grpc:
+  server:
+    ecmdb:
+      name: "ecmdb"
+      listen_addr: "0.0.0.0:8097"
+      auth_token: "1234567890"
+  client:
+    ealert:
+      name: "ealert"
+      auth_token: "1234567890"
