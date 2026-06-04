@@ -179,5 +179,6 @@ func (repo *userRepo) toEntity(user domain.User) dao.User {
 		},
 		Status:     user.Status.ToUint8(),
 		CreateType: user.CreateType.ToUint8(),
+		RoleCodes:  user.RoleCodes,
 	}
 }

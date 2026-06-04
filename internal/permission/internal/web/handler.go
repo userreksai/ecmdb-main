@@ -77,14 +77,19 @@ func (h *Handler) ListRolePermission(ctx *gin.Context, req RolePermissionReq) (g
 }
 
 func (h *Handler) ChangePermissionForRoleReq(ctx *gin.Context, req ChangePermissionForRoleReq) (ginx.Result, error) {
+	menuIds, err := h.expandMenuIdsWithParents(ctx, req.MenuIds)
+	if err != nil {
+		return systemErrorResult, err
+	}
+
 	// 角色拥有菜单权限
-	_, err := h.roleSvc.CreateOrUpdateRoleMenuIds(ctx, req.RoleCode, req.MenuIds)
+	_, err = h.roleSvc.CreateOrUpdateRoleMenuIds(ctx, req.RoleCode, menuIds)
 	if err != nil {
 		return systemErrorResult, err
 	}
 
 	// casbin 刷新后端接口权限
-	err = h.svc.AddPermissionForRole(ctx, req.RoleCode, req.MenuIds)
+	err = h.svc.AddPermissionForRole(ctx, req.RoleCode, menuIds)
 	if err != nil {
 		return systemErrorResult, err
 	}
@@ -93,6 +98,44 @@ func (h *Handler) ChangePermissionForRoleReq(ctx *gin.Context, req ChangePermiss
 		Msg:  "添加角色权限成功",
 		Data: "ok",
 	}, nil
+}
+
+func (h *Handler) expandMenuIdsWithParents(ctx context.Context, menuIds []int64) ([]int64, error) {
+	if len(menuIds) == 0 {
+		return menuIds, nil
+	}
+
+	menus, err := h.menuSvc.GetAllMenu(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	parentByID := make(map[int64]int64, len(menus))
+	for _, m := range menus {
+		parentByID[m.Id] = m.Pid
+	}
+
+	seen := make(map[int64]struct{}, len(menuIds))
+	result := make([]int64, 0, len(menuIds))
+	var appendWithParents func(id int64)
+	appendWithParents = func(id int64) {
+		if id == 0 {
+			return
+		}
+		if _, ok := seen[id]; ok {
+			return
+		}
+		if pid, ok := parentByID[id]; ok {
+			appendWithParents(pid)
+		}
+		seen[id] = struct{}{}
+		result = append(result, id)
+	}
+
+	for _, id := range menuIds {
+		appendWithParents(id)
+	}
+	return result, nil
 }
 
 func (h *Handler) FindUserPermissionMenus(ctx *gin.Context) (ginx.Result, error) {

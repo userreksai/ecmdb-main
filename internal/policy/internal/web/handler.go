@@ -116,9 +116,10 @@ func (h *Handler) GetImplicitPermissionsForUser(ctx *gin.Context, req GetPermiss
 
 	policies := slice.Map(resp, func(idx int, src domain.Policy) Policy {
 		return Policy{
-			Path:   src.Path,
-			Method: src.Method,
-			Effect: Effect(src.Effect),
+			Path:     src.Path,
+			Method:   src.Method,
+			Resource: src.Resource,
+			Effect:   Effect(src.Effect),
 		}
 	})
 
@@ -138,9 +139,10 @@ func (h *Handler) GetPermissionsForRole(ctx *gin.Context, req GetPermissionsForR
 
 	policies := slice.Map(pers, func(idx int, src domain.Policy) Policy {
 		return Policy{
-			Path:   src.Path,
-			Method: src.Method,
-			Effect: Effect(src.Effect),
+			Path:     src.Path,
+			Method:   src.Method,
+			Resource: src.Resource,
+			Effect:   Effect(src.Effect),
 		}
 	})
 
@@ -200,9 +202,10 @@ func (h *Handler) toDomain(req PolicyReq) domain.Policies {
 		RoleCode: req.RoleCode,
 		Policies: slice.Map(req.Policies, func(idx int, src Policy) domain.Policy {
 			return domain.Policy{
-				Path:   src.Path,
-				Method: src.Method,
-				Effect: domain.Effect(src.Effect),
+				Path:     src.Path,
+				Method:   src.Method,
+				Resource: src.Resource,
+				Effect:   domain.Effect(src.Effect),
 			}
 		}),
 	}

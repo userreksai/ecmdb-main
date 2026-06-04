@@ -21,6 +21,7 @@ type Service interface {
 
 	// SyncCreateLdapUser 同步 LDAP 用户
 	SyncCreateLdapUser(ctx context.Context, req domain.User) (int64, error)
+	SyncRoleBindings(ctx context.Context) (int64, error)
 
 	// FindOrCreateBySystem 查找或创建来自本系统的用户
 	FindOrCreateBySystem(ctx context.Context, user domain.User) (domain.User, error)
@@ -93,7 +94,15 @@ func (s *service) FindByIds(ctx context.Context, ids []int64) ([]domain.User, er
 }
 
 func (s *service) SyncCreateLdapUser(ctx context.Context, req domain.User) (int64, error) {
-	return s.repo.CreatUser(ctx, req)
+	id, err := s.repo.CreatUser(ctx, req)
+	if err != nil {
+		return 0, err
+	}
+
+	if err = s.syncRoleBindingsForUser(ctx, id, req.RoleCodes); err != nil {
+		return 0, err
+	}
+	return id, nil
 }
 
 func (s *service) FindByWechatUser(ctx context.Context, wechatUserId string) (domain.User, error) {
@@ -240,6 +249,15 @@ func (s *service) FindOrCreateByLdap(ctx context.Context, req domain.User) (doma
 	// 查询数据
 	u, err := s.repo.FindByUsername(ctx, req.Username)
 	if !errors.Is(err, mongo.ErrNoDocuments) {
+		if err == nil && len(req.RoleCodes) > 0 {
+			if _, bindErr := s.repo.AddRoleBind(ctx, u.Id, req.RoleCodes); bindErr != nil {
+				return domain.User{}, bindErr
+			}
+			if bindErr := s.syncRoleBindingsForUser(ctx, u.Id, req.RoleCodes); bindErr != nil {
+				return domain.User{}, bindErr
+			}
+			u.RoleCodes = req.RoleCodes
+		}
 		return u, err
 	}
 
@@ -250,6 +268,9 @@ func (s *service) FindOrCreateByLdap(ctx context.Context, req domain.User) (doma
 	}
 
 	req.Id = id
+	if err = s.syncRoleBindingsForUser(ctx, req.Id, req.RoleCodes); err != nil {
+		return domain.User{}, err
+	}
 	return req, nil
 }
 
@@ -277,6 +298,15 @@ func (s *service) FindOrCreateBySystem(ctx context.Context, req domain.User) (do
 	}()
 
 	if !errors.Is(err, mongo.ErrNoDocuments) {
+		if err == nil && len(req.RoleCodes) > 0 {
+			if _, bindErr := s.repo.AddRoleBind(ctx, u.Id, req.RoleCodes); bindErr != nil {
+				return domain.User{}, bindErr
+			}
+			if bindErr := s.syncRoleBindingsForUser(ctx, u.Id, req.RoleCodes); bindErr != nil {
+				return domain.User{}, bindErr
+			}
+			u.RoleCodes = req.RoleCodes
+		}
 		return u, err
 	}
 
@@ -295,6 +325,7 @@ func (s *service) FindOrCreateBySystem(ctx context.Context, req domain.User) (do
 		},
 		Status:     domain.ENABLED,
 		CreateType: domain.SYSTEM,
+		RoleCodes:  req.RoleCodes,
 	}
 
 	// 创建用户
@@ -304,5 +335,50 @@ func (s *service) FindOrCreateBySystem(ctx context.Context, req domain.User) (do
 	}
 
 	user.Id = id
+	if err = s.syncRoleBindingsForUser(ctx, user.Id, user.RoleCodes); err != nil {
+		return domain.User{}, err
+	}
 	return user, nil
+}
+
+func (s *service) syncRoleBindingsForUser(ctx context.Context, id int64, roleCodes []string) error {
+	ok, err := s.policySvc.UpdateFilteredGrouping(ctx, id, roleCodes)
+	if err != nil {
+		s.logger.Warn("sync user role casbin grouping failed", elog.Int64("user_id", id), elog.FieldErr(err))
+		return err
+	}
+	if !ok {
+		s.logger.Warn("sync user role casbin grouping had no changes", elog.Int64("user_id", id), elog.Any("role_codes", roleCodes))
+	}
+	return nil
+}
+
+func (s *service) SyncRoleBindings(ctx context.Context) (int64, error) {
+	const batchSize int64 = 500
+	var (
+		offset int64
+		total  int64
+	)
+
+	for {
+		users, err := s.repo.ListUser(ctx, offset, batchSize)
+		if err != nil {
+			return total, err
+		}
+		if len(users) == 0 {
+			return total, nil
+		}
+
+		for _, u := range users {
+			if err = s.syncRoleBindingsForUser(ctx, u.Id, u.RoleCodes); err != nil {
+				return total, err
+			}
+			total++
+		}
+
+		if int64(len(users)) < batchSize {
+			return total, nil
+		}
+		offset += batchSize
+	}
 }

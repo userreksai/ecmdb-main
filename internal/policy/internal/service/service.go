@@ -175,12 +175,26 @@ func (s *service) AddGroupingPolicy(ctx context.Context, req domain.AddGroupingP
 }
 
 func (s *service) UpdateFilteredGrouping(ctx context.Context, userId int64, roleCodes []string) (bool, error) {
-	var rcs [][]string
-	for _, policy := range roleCodes {
-		rcs = append(rcs, []string{strconv.FormatInt(userId, 10), policy})
+	userIdStr := strconv.FormatInt(userId, 10)
+	uniqueRoleCodes := make([]string, 0, len(roleCodes))
+	seen := make(map[string]struct{}, len(roleCodes))
+	for _, roleCode := range roleCodes {
+		if roleCode == "" {
+			continue
+		}
+		if _, ok := seen[roleCode]; ok {
+			continue
+		}
+		seen[roleCode] = struct{}{}
+		uniqueRoleCodes = append(uniqueRoleCodes, roleCode)
 	}
 
-	ok, err := s.enforcer.RemoveFilteredGroupingPolicy(0, strconv.FormatInt(userId, 10))
+	var rcs [][]string
+	for _, policy := range uniqueRoleCodes {
+		rcs = append(rcs, []string{userIdStr, policy})
+	}
+
+	ok, err := s.enforcer.RemoveFilteredGroupingPolicy(0, userIdStr)
 	if err != nil {
 		return ok, err
 	}

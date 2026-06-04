@@ -153,9 +153,10 @@ func (h *Handler) toDomain(req CreateMenuReq) domain.Menu {
 		},
 		Endpoints: slice.Map(req.Endpoints, func(idx int, src Endpoint) domain.Endpoint {
 			return domain.Endpoint{
-				Path:   src.Path,
-				Method: src.Method,
-				Desc:   src.Desc,
+				Path:     src.Path,
+				Method:   src.Method,
+				Resource: src.Resource,
+				Desc:     src.Desc,
 			}
 		}),
 	}
@@ -191,9 +192,10 @@ func (h *Handler) toDomainUpdate(req UpdateMenuReq) domain.Menu {
 		},
 		Endpoints: slice.Map(req.Endpoints, func(idx int, src Endpoint) domain.Endpoint {
 			return domain.Endpoint{
-				Path:   src.Path,
-				Method: src.Method,
-				Desc:   src.Desc,
+				Path:     src.Path,
+				Method:   src.Method,
+				Resource: src.Resource,
+				Desc:     src.Desc,
 			}
 		}),
 	}

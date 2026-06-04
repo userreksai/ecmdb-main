@@ -32,10 +32,11 @@ type Menu struct {
 }
 
 type Endpoint struct {
-	Id     int64  `json:"id"`
-	Path   string `json:"path"`
-	Method string `json:"method"`
-	Desc   string `json:"desc"`
+	Id       int64  `json:"id"`
+	Path     string `json:"path"`
+	Method   string `json:"method"`
+	Resource string `json:"resource"`
+	Desc     string `json:"desc"`
 }
 
 type Meta struct {

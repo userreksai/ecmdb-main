@@ -15,9 +15,10 @@ type PolicyReq struct {
 }
 
 type Policy struct {
-	Path   string `json:"path"`
-	Method string `json:"method"`
-	Effect Effect `json:"effect"`
+	Path     string `json:"path"`
+	Method   string `json:"method"`
+	Resource string `json:"resource"`
+	Effect   Effect `json:"effect"`
 }
 
 type AddGroupingPolicyReq struct {

@@ -668,6 +668,45 @@ func (c *MockServiceSyncCreateLdapUserCall) DoAndReturn(f func(context.Context, 
 	return c
 }
 
+// SyncRoleBindings mocks base method.
+func (m *MockService) SyncRoleBindings(ctx context.Context) (int64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SyncRoleBindings", ctx)
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SyncRoleBindings indicates an expected call of SyncRoleBindings.
+func (mr *MockServiceMockRecorder) SyncRoleBindings(ctx any) *MockServiceSyncRoleBindingsCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SyncRoleBindings", reflect.TypeOf((*MockService)(nil).SyncRoleBindings), ctx)
+	return &MockServiceSyncRoleBindingsCall{Call: call}
+}
+
+// MockServiceSyncRoleBindingsCall wrap *gomock.Call
+type MockServiceSyncRoleBindingsCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockServiceSyncRoleBindingsCall) Return(arg0 int64, arg1 error) *MockServiceSyncRoleBindingsCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockServiceSyncRoleBindingsCall) Do(f func(context.Context) (int64, error)) *MockServiceSyncRoleBindingsCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockServiceSyncRoleBindingsCall) DoAndReturn(f func(context.Context) (int64, error)) *MockServiceSyncRoleBindingsCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // UpdateUser mocks base method.
 func (m *MockService) UpdateUser(ctx context.Context, req domain.User) (int64, error) {
 	m.ctrl.T.Helper()

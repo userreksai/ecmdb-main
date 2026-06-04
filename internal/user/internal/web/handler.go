@@ -42,6 +42,7 @@ func (h *Handler) PublicRoutes(server *gin.Engine) {
 func (h *Handler) PrivateRoutes(server *gin.Engine) {
 	g := server.Group("/api/user")
 	g.POST("/role/bind", ginx.WrapBody[UserBindRoleReq](h.UserRoleBind))
+	g.POST("/role/sync", ginx.Wrap(h.SyncUserRoleBindings))
 	g.POST("/list", ginx.WrapBody[Page](h.ListUser))
 	g.POST("/update", ginx.WrapBody[UpdateUserReq](h.UpdateUser))
 	g.POST("/info", ginx.Wrap(h.GetUserInfo))
@@ -434,6 +435,18 @@ func (h *Handler) UserRoleBind(ctx *gin.Context, req UserBindRoleReq) (ginx.Resu
 	return ginx.Result{
 		Data: "ok",
 		Msg:  "用户角色绑定成功",
+	}, nil
+}
+
+func (h *Handler) SyncUserRoleBindings(ctx *gin.Context) (ginx.Result, error) {
+	total, err := h.svc.SyncRoleBindings(ctx)
+	if err != nil {
+		return systemErrorResult, err
+	}
+
+	return ginx.Result{
+		Data: gin.H{"total": total},
+		Msg:  "鐢ㄦ埛瑙掕壊 Casbin 鍏崇郴鍚屾鎴愬姛",
 	}, nil
 }
 
