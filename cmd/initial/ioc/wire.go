@@ -14,6 +14,7 @@ import (
 	"github.com/Duke1616/ecmdb/internal/menu"
 	"github.com/Duke1616/ecmdb/internal/model"
 	"github.com/Duke1616/ecmdb/internal/permission"
+	"github.com/Duke1616/ecmdb/internal/pkg/servicetoken"
 	"github.com/Duke1616/ecmdb/internal/policy"
 	"github.com/Duke1616/ecmdb/internal/relation"
 	"github.com/Duke1616/ecmdb/internal/resource"
@@ -36,6 +37,7 @@ var BaseSet = wire.NewSet(ioc.InitMongoDB, ioc.InitMySQLDB, ioc.InitRedis, ioc.I
 func InitApp() (*App, error) {
 	wire.Build(wire.Struct(new(App), "*"),
 		BaseSet,
+		servicetoken.NewManager,
 		ioc.InitCasbin,
 		ioc.InitSession,
 		user.InitModule,

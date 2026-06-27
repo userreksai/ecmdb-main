@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/Duke1616/ecmdb/internal/pkg/authctx"
 	"github.com/Duke1616/ecmdb/internal/policy"
 	"github.com/ecodeclub/ginx"
 	"github.com/ecodeclub/ginx/session"
@@ -27,28 +28,28 @@ func NewCheckPolicyMiddlewareBuilder(svc policy.Service, sp session.Provider) *C
 
 func (c *CheckPolicyMiddlewareBuilder) Build() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		sess, err := c.sp.Get(&ginx.Context{Context: ctx})
-		if err != nil {
-			c.logger.Warn("用户未登录", elog.FieldErr(err))
-			ctx.AbortWithStatus(http.StatusUnauthorized)
-			return
+		uid, ok := authctx.UID(ctx)
+		if !ok {
+			sess, err := c.sp.Get(&ginx.Context{Context: ctx})
+			if err != nil {
+				c.logger.Warn("user not logged in", elog.FieldErr(err))
+				ctx.AbortWithStatus(http.StatusUnauthorized)
+				return
+			}
+			uid = sess.Claims().Uid
 		}
 
-		// 获取请求元数据
 		path := ctx.Request.URL.Path
 		method := ctx.Request.Method
-		uid := sess.Claims().Uid
-
-		// 调用鉴权服务，目前系统资源统一标识为 "CMDB"
 		result, err := c.svc.Authorize(ctx.Request.Context(), strconv.FormatInt(uid, 10), path, method, "CMDB")
 		if err != nil {
-			c.logger.Error("权限鉴权服务异常", elog.FieldErr(err), elog.Int64("uid", uid), elog.String("path", path))
+			c.logger.Error("policy service failed", elog.FieldErr(err), elog.Int64("uid", uid), elog.String("path", path))
 			ctx.AbortWithStatus(http.StatusInternalServerError)
 			return
 		}
 
 		if !result.Allowed {
-			c.logger.Warn("用户访问被拒绝",
+			c.logger.Warn("user access denied",
 				elog.Int64("uid", uid),
 				elog.String("path", path),
 				elog.String("method", method),

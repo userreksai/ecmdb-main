@@ -10,6 +10,7 @@ import (
 	"github.com/Duke1616/ecmdb/internal/policy/internal/grpc"
 	"github.com/Duke1616/ecmdb/internal/policy/internal/service"
 	"github.com/Duke1616/ecmdb/internal/policy/internal/web"
+	"github.com/Duke1616/ecmdb/internal/pkg/servicetoken"
 	"github.com/casbin/casbin/v2"
 	"github.com/ecodeclub/ginx/session"
 	"github.com/google/wire"
@@ -17,9 +18,9 @@ import (
 
 // Injectors from wire.go:
 
-func InitModule(enforcer *casbin.SyncedEnforcer, sp session.Provider) (*Module, error) {
+func InitModule(enforcer *casbin.SyncedEnforcer, sp session.Provider, tokenMgr *servicetoken.Manager) (*Module, error) {
 	serviceService := service.NewService(enforcer)
-	v := web.NewHandler(serviceService, sp)
+	v := web.NewHandler(serviceService, sp, tokenMgr)
 	v2 := grpc.NewPolicyServer(serviceService, sp)
 	module := &Module{
 		Hdl:       v,

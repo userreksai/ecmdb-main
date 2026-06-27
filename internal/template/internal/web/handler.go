@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sort"
 
+	"github.com/Duke1616/ecmdb/internal/pkg/authctx"
 	"github.com/Duke1616/ecmdb/internal/pkg/rule"
 	"github.com/Duke1616/ecmdb/internal/template/internal/domain"
 	"github.com/Duke1616/ecmdb/internal/template/internal/service"
@@ -349,6 +350,10 @@ func (h *Handler) toUpdateDomain(req UpdateTemplateReq) (domain.Template, error)
 }
 
 func (h *Handler) getUid(ctx *gin.Context) (int64, error) {
+	if uid, ok := authctx.UID(ctx); ok {
+		return uid, nil
+	}
+
 	sess, err := session.Get(&gctx.Context{Context: ctx})
 	if err != nil {
 		return 0, fmt.Errorf("获取 Session 失败: %w", err)

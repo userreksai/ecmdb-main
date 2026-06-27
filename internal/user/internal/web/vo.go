@@ -10,6 +10,19 @@ type LoginSystemReq struct {
 	Password string `json:"password"`
 }
 
+type IssueServiceTokenReq struct {
+	Username string `json:"username"`
+	TTLDays  int    `json:"ttl_days,omitempty"`
+}
+
+type IssueServiceTokenResp struct {
+	Token     string `json:"token"`
+	TokenType string `json:"token_type"`
+	ExpiresAt string `json:"expires_at"`
+	Username  string `json:"username"`
+	UID       int64  `json:"uid"`
+}
+
 type RegisterUserReq struct {
 	Username     string     `json:"username"`
 	DepartmentId int64      `json:"department_id"`

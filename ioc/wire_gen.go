@@ -24,6 +24,7 @@ import (
 	"github.com/Duke1616/ecmdb/internal/permission"
 	"github.com/Duke1616/ecmdb/internal/pkg/middleware"
 	"github.com/Duke1616/ecmdb/internal/pkg/notification/sender"
+	"github.com/Duke1616/ecmdb/internal/pkg/servicetoken"
 	"github.com/Duke1616/ecmdb/internal/policy"
 	"github.com/Duke1616/ecmdb/internal/relation"
 	"github.com/Duke1616/ecmdb/internal/resource"
@@ -56,9 +57,10 @@ import (
 func InitApp() (*App, error) {
 	cmdable := InitRedis()
 	provider := InitSession(cmdable)
+	manager := servicetoken.NewManager()
 	db := InitMySQLDB()
 	syncedEnforcer := InitCasbin(db)
-	module, err := policy.InitModule(syncedEnforcer, provider)
+	module, err := policy.InitModule(syncedEnforcer, provider, manager)
 	if err != nil {
 		return nil, err
 	}
@@ -96,7 +98,7 @@ func InitApp() (*App, error) {
 	if err != nil {
 		return nil, err
 	}
-	userModule, err := user.InitModule(mongo, client, config, module, departmentModule, provider, cryptoRegistry)
+	userModule, err := user.InitModule(mongo, client, config, module, departmentModule, provider, cryptoRegistry, manager)
 	if err != nil {
 		return nil, err
 	}
@@ -207,7 +209,7 @@ func InitApp() (*App, error) {
 		return nil, err
 	}
 	handler22 := dataioModule.Hdl
-	checkLoginMiddlewareBuilder := middleware.NewCheckLoginMiddlewareBuilder(provider)
+	checkLoginMiddlewareBuilder := middleware.NewCheckLoginMiddlewareBuilder(provider, userModule.Svc, manager)
 	listener := InitListener()
 	component := InitWebServer(provider, checkPolicyMiddlewareBuilder, v, handler, webHandler, handler2, relationModelHandler, relationResourceHandler, relationTypeHandler, handler3, handler4, handler5, handler6, handler7, handler8, handler9, groupHandler, handler10, handler11, handler12, handler13, handler14, handler15, handler16, handler17, handler18, handler19, handler20, handler21, handler22, checkLoginMiddlewareBuilder, listener)
 	workOrderServer := orderModule.RpcServer

@@ -6,6 +6,7 @@ import (
 	"github.com/Duke1616/ecmdb/internal/policy/internal/grpc"
 	"github.com/Duke1616/ecmdb/internal/policy/internal/service"
 	"github.com/Duke1616/ecmdb/internal/policy/internal/web"
+	"github.com/Duke1616/ecmdb/internal/pkg/servicetoken"
 	"github.com/casbin/casbin/v2"
 	"github.com/ecodeclub/ginx/session"
 	"github.com/google/wire"
@@ -17,7 +18,7 @@ var ProviderSet = wire.NewSet(
 	grpc.NewPolicyServer,
 )
 
-func InitModule(enforcer *casbin.SyncedEnforcer, sp session.Provider) (*Module, error) {
+func InitModule(enforcer *casbin.SyncedEnforcer, sp session.Provider, tokenMgr *servicetoken.Manager) (*Module, error) {
 	wire.Build(
 		ProviderSet,
 		wire.Struct(new(Module), "*"),

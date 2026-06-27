@@ -4,6 +4,7 @@ package user
 
 import (
 	"github.com/Duke1616/ecmdb/internal/department"
+	"github.com/Duke1616/ecmdb/internal/pkg/servicetoken"
 	"github.com/Duke1616/ecmdb/internal/policy"
 	"github.com/Duke1616/ecmdb/internal/user/internal/grpc"
 	"github.com/Duke1616/ecmdb/internal/user/internal/repository"
@@ -37,7 +38,7 @@ func InitCrypto(reg *cryptox.CryptoRegistry) cryptox.Crypto {
 }
 
 func InitModule(db *mongox.Mongo, redisClient *redisearch.Client, ldapConfig ldapx.Config, policyModule *policy.Module,
-	departmentModule *department.Module, sp session.Provider, crypto *cryptox.CryptoRegistry) (*Module, error) {
+	departmentModule *department.Module, sp session.Provider, crypto *cryptox.CryptoRegistry, tokenMgr *servicetoken.Manager) (*Module, error) {
 	wire.Build(
 		ProviderSet,
 		InitLdapUserCache,

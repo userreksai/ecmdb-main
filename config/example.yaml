@@ -37,6 +37,14 @@ session:
     domain: ".example.com"
     name: "ecmdb-token-key"
 
+service_token:
+  enabled: true
+  issuer: "ecmdb"
+  ttl_days: 1095
+  secret: ""
+  accounts:
+    - "svc_ecmdb_script"
+
 redis:
   addr: "127.0.0.1:6379"
   password: "ecmdb@redis123"

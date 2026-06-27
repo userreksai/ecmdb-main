@@ -2,8 +2,12 @@ package web
 
 import (
 	"fmt"
+	"strings"
+	"time"
 
 	"github.com/Duke1616/ecmdb/internal/department"
+	"github.com/Duke1616/ecmdb/internal/pkg/authctx"
+	"github.com/Duke1616/ecmdb/internal/pkg/servicetoken"
 	"github.com/Duke1616/ecmdb/internal/user/internal/domain"
 	"github.com/Duke1616/ecmdb/internal/user/internal/service"
 	"github.com/Duke1616/ecmdb/pkg/ginx"
@@ -18,15 +22,17 @@ type Handler struct {
 	ldapSvc       service.LdapService
 	sp            session.Provider
 	departmentSvc department.Service
+	tokenMgr      *servicetoken.Manager
 }
 
 func NewHandler(svc service.Service, ldapSvc service.LdapService,
-	departmentSvc department.Service, sp session.Provider) *Handler {
+	departmentSvc department.Service, sp session.Provider, tokenMgr *servicetoken.Manager) *Handler {
 	return &Handler{
 		svc:           svc,
 		ldapSvc:       ldapSvc,
 		departmentSvc: departmentSvc,
 		sp:            sp,
+		tokenMgr:      tokenMgr,
 	}
 }
 
@@ -53,6 +59,7 @@ func (h *Handler) PrivateRoutes(server *gin.Engine) {
 	g.POST("/find/id", ginx.WrapBody[FindByIdReq](h.FindById))
 	g.POST("/find/by_ids", ginx.WrapBody[FindByIdsReq](h.FindByIds))
 	g.POST("/find/department_id", ginx.WrapBody[FindUsersByDepartmentIdReq](h.FindByDepartmentId))
+	g.POST("/service_token/issue", ginx.WrapBody[IssueServiceTokenReq](h.IssueServiceToken))
 
 	// 查询 LDAP 用户
 	g.POST("/ldap/search", ginx.WrapBody[SearchLdapUser](h.SearchLdapUser))
@@ -69,6 +76,41 @@ func (h *Handler) Logout(ctx *gin.Context) (ginx.Result, error) {
 		return systemErrorResult, err
 	}
 	return ginx.Result{
+		Msg: "OK",
+	}, nil
+}
+
+func (h *Handler) IssueServiceToken(ctx *gin.Context, req IssueServiceTokenReq) (ginx.Result, error) {
+	if h.tokenMgr == nil || !h.tokenMgr.Enabled() {
+		return systemErrorResult, fmt.Errorf("service token is disabled")
+	}
+
+	username := strings.TrimSpace(req.Username)
+	if username == "" || !h.tokenMgr.IsServiceAccount(username) {
+		return systemErrorResult, fmt.Errorf("invalid service account")
+	}
+
+	u, err := h.svc.FindByUsername(ctx, username)
+	if err != nil {
+		return systemErrorResult, err
+	}
+	if u.Status.ToUint8() != 1 {
+		return systemErrorResult, fmt.Errorf("service account is disabled")
+	}
+
+	token, expiresAt, err := h.tokenMgr.Issue(u.Id, u.Username, req.TTLDays)
+	if err != nil {
+		return systemErrorResult, err
+	}
+
+	return ginx.Result{
+		Data: IssueServiceTokenResp{
+			Token:     token,
+			TokenType: "Bearer",
+			ExpiresAt: expiresAt.Format(time.RFC3339),
+			Username:  u.Username,
+			UID:       u.Id,
+		},
 		Msg: "OK",
 	}, nil
 }
@@ -202,12 +244,12 @@ func (h *Handler) LoginSystem(ctx *gin.Context, req LoginSystemReq) (ginx.Result
 func (h *Handler) FindByUsername(ctx *gin.Context, req FindByUserNameReq) (ginx.Result, error) {
 	var u User
 	if req.Username == "" {
-		sess, err := h.sp.Get(&gctx.Context{Context: ctx})
+		uid, err := h.currentUID(ctx)
 		if err != nil {
 			return systemErrorResult, fmt.Errorf("获取 Session 失败, %w", err)
 		}
 
-		user, err := h.svc.FindById(ctx, sess.Claims().Uid)
+		user, err := h.svc.FindById(ctx, uid)
 		if err != nil {
 			return systemErrorResult, err
 		}
@@ -284,12 +326,12 @@ func (h *Handler) UpdateUser(ctx *gin.Context, req UpdateUserReq) (ginx.Result, 
 func (h *Handler) FindById(ctx *gin.Context, req FindByIdReq) (ginx.Result, error) {
 	var u User
 	if req.Id == 0 {
-		sess, err := h.sp.Get(&gctx.Context{Context: ctx})
+		uid, err := h.currentUID(ctx)
 		if err != nil {
 			return systemErrorResult, fmt.Errorf("获取 Session 失败, %w", err)
 		}
 
-		user, err := h.svc.FindById(ctx, sess.Claims().Uid)
+		user, err := h.svc.FindById(ctx, uid)
 		if err != nil {
 			return systemErrorResult, err
 		}
@@ -452,12 +494,12 @@ func (h *Handler) SyncUserRoleBindings(ctx *gin.Context) (ginx.Result, error) {
 
 func (h *Handler) GetUserInfo(ctx *gin.Context) (ginx.Result, error) {
 	// 获取登录用户 sess 获取ID
-	sess, err := h.sp.Get(&gctx.Context{Context: ctx})
+	uid, err := h.currentUID(ctx)
 	if err != nil {
 		return systemErrorResult, fmt.Errorf("获取 Session 失败, %w", err)
 	}
 
-	user, err := h.svc.FindById(ctx, sess.Claims().Uid)
+	user, err := h.svc.FindById(ctx, uid)
 	if err != nil {
 		return ginx.Result{}, err
 	}
@@ -465,6 +507,17 @@ func (h *Handler) GetUserInfo(ctx *gin.Context) (ginx.Result, error) {
 	return ginx.Result{
 		Data: h.ToUserVo(user),
 	}, nil
+}
+
+func (h *Handler) currentUID(ctx *gin.Context) (int64, error) {
+	if uid, ok := authctx.UID(ctx); ok {
+		return uid, nil
+	}
+	sess, err := h.sp.Get(&gctx.Context{Context: ctx})
+	if err != nil {
+		return 0, fmt.Errorf("get session failed: %w", err)
+	}
+	return sess.Claims().Uid, nil
 }
 
 func (h *Handler) toDomain(profile domain.Profile) domain.User {

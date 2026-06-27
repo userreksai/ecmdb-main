@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/Duke1616/ecmdb/internal/pkg/servicetoken"
 	"github.com/Duke1616/ecmdb/internal/policy/internal/domain"
 	"github.com/Duke1616/ecmdb/internal/policy/internal/service"
 	"github.com/Duke1616/ecmdb/pkg/ginx"
@@ -18,18 +19,19 @@ import (
 type Handler struct {
 	svc       service.Service
 	sp        session.Provider
+	tokenMgr  *servicetoken.Manager
 	threshold time.Duration
 }
 
-func NewHandler(svc service.Service, sp session.Provider) *Handler {
+func NewHandler(svc service.Service, sp session.Provider, tokenMgr *servicetoken.Manager) *Handler {
 	return &Handler{
 		svc:       svc,
 		sp:        sp,
+		tokenMgr:  tokenMgr,
 		threshold: time.Minute,
 	}
 }
 
-// PublicRoutes 公开路由，供第三方 SDK 通过 HTTP 调用，不经过登录和鉴权中间件
 func (h *Handler) PublicRoutes(server *gin.Engine) {
 	g := server.Group("/api/policy")
 	g.POST("/check_login", ginx.Wrap(h.CheckLoginForSDK))
@@ -46,47 +48,46 @@ func (h *Handler) PrivateRoutes(server *gin.Engine) {
 	g.POST("/role/permissions", ginx.WrapBody[GetPermissionsForRoleReq](h.GetPermissionsForRole))
 }
 
-// CheckLoginForSDK 供第三方 SDK 调用的登录验证接口
-// NOTE: Token 通过 HTTP Authorization Header 透传，session.Provider 原生处理
 func (h *Handler) CheckLoginForSDK(ctx *gin.Context) (ginx.Result, error) {
-	gCtx := &gctx.Context{Context: ctx}
-	sess, err := h.sp.Get(gCtx)
+	uid, serviceToken, expiration, err := h.currentSDKIdentity(ctx)
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusUnauthorized)
-		return ginx.Result{}, fmt.Errorf("登录验证失败: %w", err)
+		return ginx.Result{}, fmt.Errorf("login verification failed: %w", err)
 	}
 
-	// 检测 Token 是否过期
-	expiration := sess.Claims().Expiration
+	if serviceToken {
+		return ginx.Result{
+			Data: CheckLoginResp{
+				Uid: uid,
+			},
+		}, nil
+	}
+
 	now := time.Now().UnixMilli()
 	if expiration <= now {
 		ctx.AbortWithStatus(http.StatusUnauthorized)
-		return ginx.Result{}, fmt.Errorf("token 已过期")
+		return ginx.Result{}, fmt.Errorf("token expired")
 	}
 
-	// Token 即将过期时自动续期，新 Token 会通过 Response Header 返回
 	if expiration-now < h.threshold.Milliseconds() {
-		_ = h.sp.RenewAccessToken(gCtx)
+		_ = h.sp.RenewAccessToken(&gctx.Context{Context: ctx})
 	}
 
 	return ginx.Result{
 		Data: CheckLoginResp{
-			Uid: sess.Claims().Uid,
+			Uid: uid,
 		},
 	}, nil
 }
 
-// CheckPolicyForSDK 供第三方 SDK 调用的权限鉴权接口
-// NOTE: Token 通过 HTTP Authorization Header 透传
 func (h *Handler) CheckPolicyForSDK(ctx *gin.Context, req CheckPolicyReq) (ginx.Result, error) {
-	gCtx := &gctx.Context{Context: ctx}
-	sess, err := h.sp.Get(gCtx)
+	uid, _, _, err := h.currentSDKIdentity(ctx)
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusUnauthorized)
-		return ginx.Result{}, fmt.Errorf("登录验证失败: %w", err)
+		return ginx.Result{}, fmt.Errorf("login verification failed: %w", err)
 	}
 
-	userId := strconv.FormatInt(sess.Claims().Uid, 10)
+	userId := strconv.FormatInt(uid, 10)
 	result, err := h.svc.Authorize(ctx, userId, req.Path, req.Method, req.Resource)
 	if err != nil {
 		return systemErrorResult, err
@@ -95,6 +96,24 @@ func (h *Handler) CheckPolicyForSDK(ctx *gin.Context, req CheckPolicyReq) (ginx.
 	return ginx.Result{
 		Data: result,
 	}, nil
+}
+
+func (h *Handler) currentSDKIdentity(ctx *gin.Context) (int64, bool, int64, error) {
+	if h.tokenMgr != nil && h.tokenMgr.Enabled() {
+		token := servicetoken.ExtractBearerToken(ctx.GetHeader("Authorization"))
+		if token != "" {
+			claims, err := h.tokenMgr.Verify(token)
+			if err == nil {
+				return claims.UID, true, 0, nil
+			}
+		}
+	}
+
+	sess, err := h.sp.Get(&gctx.Context{Context: ctx})
+	if err != nil {
+		return 0, false, 0, err
+	}
+	return sess.Claims().Uid, false, sess.Claims().Expiration, nil
 }
 
 func (h *Handler) AddPolicies(ctx *gin.Context, req PolicyReq) (ginx.Result, error) {
@@ -124,7 +143,7 @@ func (h *Handler) GetImplicitPermissionsForUser(ctx *gin.Context, req GetPermiss
 	})
 
 	return ginx.Result{
-		Msg: "获取用户权限成功",
+		Msg: "OK",
 		Data: RetrievePolicies{
 			Policies: policies,
 		},
@@ -147,7 +166,7 @@ func (h *Handler) GetPermissionsForRole(ctx *gin.Context, req GetPermissionsForR
 	})
 
 	return ginx.Result{
-		Msg: "获取角色权限成功",
+		Msg: "OK",
 		Data: RetrievePolicies{
 			Policies: policies,
 		},

@@ -8,6 +8,7 @@ package user
 
 import (
 	"github.com/Duke1616/ecmdb/internal/department"
+	"github.com/Duke1616/ecmdb/internal/pkg/servicetoken"
 	"github.com/Duke1616/ecmdb/internal/policy"
 	"github.com/Duke1616/ecmdb/internal/user/internal/grpc"
 	"github.com/Duke1616/ecmdb/internal/user/internal/repository"
@@ -25,7 +26,7 @@ import (
 
 // Injectors from wire.go:
 
-func InitModule(db *mongox.Mongo, redisClient *redisearch.Client, ldapConfig ldapx.Config, policyModule *policy.Module, departmentModule *department.Module, sp session.Provider, crypto *cryptox.CryptoRegistry) (*Module, error) {
+func InitModule(db *mongox.Mongo, redisClient *redisearch.Client, ldapConfig ldapx.Config, policyModule *policy.Module, departmentModule *department.Module, sp session.Provider, crypto *cryptox.CryptoRegistry, tokenMgr *servicetoken.Manager) (*Module, error) {
 	userDAO := dao.NewUserDao(db)
 	userRepository := repository.NewResourceRepository(userDAO)
 	v := policyModule.Svc
@@ -34,7 +35,7 @@ func InitModule(db *mongox.Mongo, redisClient *redisearch.Client, ldapConfig lda
 	redisearchLdapUserCache := InitLdapUserCache(redisClient)
 	ldapService := service.NewLdapService(ldapConfig, redisearchLdapUserCache)
 	v2 := departmentModule.Svc
-	handler := web.NewHandler(serviceService, ldapService, v2, sp)
+	handler := web.NewHandler(serviceService, ldapService, v2, sp, tokenMgr)
 	v3 := grpc.NewUserServer(serviceService)
 	module := &Module{
 		Hdl:       handler,

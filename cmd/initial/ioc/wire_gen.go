@@ -16,6 +16,7 @@ import (
 	"github.com/Duke1616/ecmdb/internal/menu"
 	"github.com/Duke1616/ecmdb/internal/model"
 	"github.com/Duke1616/ecmdb/internal/permission"
+	"github.com/Duke1616/ecmdb/internal/pkg/servicetoken"
 	"github.com/Duke1616/ecmdb/internal/policy"
 	"github.com/Duke1616/ecmdb/internal/relation"
 	"github.com/Duke1616/ecmdb/internal/resource"
@@ -43,7 +44,8 @@ func InitApp() (*App, error) {
 	syncedEnforcer := ioc.InitCasbin(db)
 	cmdable := ioc.InitRedis()
 	provider := ioc.InitSession(cmdable)
-	module, err := policy.InitModule(syncedEnforcer, provider)
+	manager := servicetoken.NewManager()
+	module, err := policy.InitModule(syncedEnforcer, provider, manager)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +54,7 @@ func InitApp() (*App, error) {
 		return nil, err
 	}
 	cryptoRegistry := ioc.InitModuleCrypto()
-	userModule, err := user.InitModule(mongo, client, config, module, departmentModule, provider, cryptoRegistry)
+	userModule, err := user.InitModule(mongo, client, config, module, departmentModule, provider, cryptoRegistry, manager)
 	if err != nil {
 		return nil, err
 	}

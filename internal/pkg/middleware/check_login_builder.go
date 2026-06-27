@@ -4,6 +4,9 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/Duke1616/ecmdb/internal/pkg/authctx"
+	"github.com/Duke1616/ecmdb/internal/pkg/servicetoken"
+	"github.com/Duke1616/ecmdb/internal/user"
 	"github.com/ecodeclub/ginx/gctx"
 	"github.com/ecodeclub/ginx/session"
 	"github.com/gin-gonic/gin"
@@ -14,45 +17,88 @@ type CheckLoginMiddlewareBuilder struct {
 	threshold time.Duration
 	logger    *elog.Component
 	sp        session.Provider
+	userSvc   user.Service
+	tokenMgr  *servicetoken.Manager
 }
 
-func NewCheckLoginMiddlewareBuilder(sp session.Provider) *CheckLoginMiddlewareBuilder {
+func NewCheckLoginMiddlewareBuilder(sp session.Provider, userSvc user.Service, tokenMgr *servicetoken.Manager) *CheckLoginMiddlewareBuilder {
 	return &CheckLoginMiddlewareBuilder{
 		logger:    elog.DefaultLogger,
 		threshold: time.Minute * 1,
 		sp:        sp,
+		userSvc:   userSvc,
+		tokenMgr:  tokenMgr,
 	}
 }
 
 func (b *CheckLoginMiddlewareBuilder) Build() gin.HandlerFunc {
 	threshold := b.threshold.Milliseconds()
 	return func(ctx *gin.Context) {
+		if b.checkServiceToken(ctx) {
+			return
+		}
+
 		gCtx := &gctx.Context{Context: ctx}
 		sess, err := b.sp.Get(gCtx)
 		if err != nil {
-			b.logger.Error("未授权", elog.FieldErr(err))
+			b.logger.Error("unauthorized", elog.FieldErr(err))
 			ctx.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
+
 		expiration := sess.Claims().Expiration
 		now := time.Now().UnixMilli()
-
-		// 如果 token 已经过期，直接返回未授权
 		if expiration <= now {
-			b.logger.Error("token 已过期", elog.Int64("expiration", expiration), elog.Int64("now", now))
+			b.logger.Error("token expired", elog.Int64("expiration", expiration), elog.Int64("now", now))
 			ctx.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
 
-		// 只有当剩余时间小于阈值时才续期
-		remainingTime := expiration - now
-		if remainingTime < threshold {
-			// 刷新一个token
-			err = b.sp.RenewAccessToken(gCtx)
-			if err != nil {
-				b.logger.Warn("刷新 token 失败", elog.String("err", err.Error()))
+		if expiration-now < threshold {
+			if err = b.sp.RenewAccessToken(gCtx); err != nil {
+				b.logger.Warn("renew token failed", elog.FieldErr(err))
 			}
 		}
+
 		ctx.Set(session.CtxSessionKey, sess)
+		authctx.Set(ctx, authctx.Identity{
+			UID:      sess.Claims().Uid,
+			AuthType: authctx.AuthTypeSession,
+		})
 	}
+}
+
+func (b *CheckLoginMiddlewareBuilder) checkServiceToken(ctx *gin.Context) bool {
+	if b.tokenMgr == nil || !b.tokenMgr.Enabled() {
+		return false
+	}
+
+	tokenString := servicetoken.ExtractBearerToken(ctx.GetHeader("Authorization"))
+	if tokenString == "" {
+		return false
+	}
+
+	claims, err := b.tokenMgr.Verify(tokenString)
+	if err != nil {
+		return false
+	}
+
+	if b.userSvc != nil {
+		u, err := b.userSvc.FindById(ctx, claims.UID)
+		if err != nil || u.Username != claims.Username || u.Status.ToUint8() != 1 || !b.tokenMgr.IsServiceAccount(u.Username) {
+			b.logger.Warn("service token user validation failed",
+				elog.Int64("uid", claims.UID),
+				elog.String("username", claims.Username),
+				elog.FieldErr(err))
+			ctx.AbortWithStatus(http.StatusUnauthorized)
+			return true
+		}
+	}
+
+	authctx.Set(ctx, authctx.Identity{
+		UID:      claims.UID,
+		Username: claims.Username,
+		AuthType: authctx.AuthTypeServiceToken,
+	})
+	return true
 }

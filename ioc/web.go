@@ -62,7 +62,7 @@ func InitWebServer(sp session.Provider, checkPolicyMiddleware *middleware.CheckP
 	policyHdl.PublicRoutes(server.Engine)
 
 	// 验证是否登录
-	server.Use(session.CheckLoginMiddleware())
+	server.Use(checkLoginMiddleware.Build())
 
 	// 查看用户拥有权限
 	permissionHdl.PublicRoutes(server.Engine)
