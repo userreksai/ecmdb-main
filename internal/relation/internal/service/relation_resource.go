@@ -15,6 +15,7 @@ type RelationResourceService interface {
 	// ListSrcResources 查询资源关联列表
 	ListSrcResources(ctx context.Context, modelUid string, id int64) ([]domain.ResourceRelation, int64, error)
 	ListDstResources(ctx context.Context, modelUid string, id int64) ([]domain.ResourceRelation, int64, error)
+	ListByResourceIDs(ctx context.Context, modelUid string, ids []int64) ([]domain.ResourceRelation, error)
 
 	// ListDiagram 通过 model_uid 和 resource_id 查询 SRC 和 DST 的数据
 	ListDiagram(ctx context.Context, modelUid string, id int64) (domain.ResourceDiagram, int64, error)
@@ -89,6 +90,10 @@ func (s *resourceService) ListDstResources(ctx context.Context, modelUid string,
 	})
 
 	return rrs, total, eg.Wait()
+}
+
+func (s *resourceService) ListByResourceIDs(ctx context.Context, modelUid string, ids []int64) ([]domain.ResourceRelation, error) {
+	return s.repo.ListByResourceIDs(ctx, modelUid, ids)
 }
 
 func (s *resourceService) ListDiagram(ctx context.Context, modelUid string, id int64) (domain.ResourceDiagram, int64, error) {

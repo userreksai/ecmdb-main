@@ -24,10 +24,17 @@ type IDataIOService interface {
 }
 
 type ExportParams struct {
+	ModelUID      string
+	Scope         string // "all", "current", "selected"
+	ResourceIDs   []int64
+	FilterGroups  []resource.FilterGroup
+	Fields        []string
+	RelatedFields []RelatedFieldParam
+	FileName      string
+}
+
+type RelatedFieldParam struct {
+	RelationName string
 	ModelUID     string
-	Scope        string // "all", "current", "selected"
-	ResourceIDs  []int64
-	FilterGroups []resource.FilterGroup
-	Fields       []string
-	FileName     string
+	FieldUID     string
 }

@@ -47,11 +47,18 @@ type ExportFilterGroup struct {
 }
 
 // ExportReq 导出数据请求
+type ExportRelatedField struct {
+	RelationName string `json:"relation_name"`
+	ModelUID     string `json:"model_uid"`
+	FieldUID     string `json:"field_uid"`
+}
+
 type ExportReq struct {
 	ModelUID     string              `json:"model_uid" binding:"required"`
 	Scope        ExportScope         `json:"scope" binding:"required"`
 	ResourceIDs  []int64             `json:"resource_ids"`  // string or number
 	FilterGroups []ExportFilterGroup `json:"filter_groups"` // scope='all' 或 'current' 时可选
-	Fields       []string            `json:"fields"`        // 导出字段列表 (可选)
-	FileName     string              `json:"file_name"`     // 文件名 (可选)
+	Fields        []string             `json:"fields"`        // 导出字段列表 (可选)
+	RelatedFields []ExportRelatedField `json:"related_fields"`
+	FileName      string               `json:"file_name"` // 文件名 (可选)
 }

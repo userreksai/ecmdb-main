@@ -41,6 +41,45 @@ func (m *MockRelationResourceService) EXPECT() *MockRelationResourceServiceMockR
 	return m.recorder
 }
 
+// ListByResourceIDs mocks base method.
+func (m *MockRelationResourceService) ListByResourceIDs(ctx context.Context, modelUid string, ids []int64) ([]domain.ResourceRelation, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListByResourceIDs", ctx, modelUid, ids)
+	ret0, _ := ret[0].([]domain.ResourceRelation)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListByResourceIDs indicates an expected call of ListByResourceIDs.
+func (mr *MockRelationResourceServiceMockRecorder) ListByResourceIDs(ctx, modelUid, ids any) *MockRelationResourceServiceListByResourceIDsCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListByResourceIDs", reflect.TypeOf((*MockRelationResourceService)(nil).ListByResourceIDs), ctx, modelUid, ids)
+	return &MockRelationResourceServiceListByResourceIDsCall{Call: call}
+}
+
+// MockRelationResourceServiceListByResourceIDsCall wrap *gomock.Call
+type MockRelationResourceServiceListByResourceIDsCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockRelationResourceServiceListByResourceIDsCall) Return(arg0 []domain.ResourceRelation, arg1 error) *MockRelationResourceServiceListByResourceIDsCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockRelationResourceServiceListByResourceIDsCall) Do(f func(context.Context, string, []int64) ([]domain.ResourceRelation, error)) *MockRelationResourceServiceListByResourceIDsCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockRelationResourceServiceListByResourceIDsCall) DoAndReturn(f func(context.Context, string, []int64) ([]domain.ResourceRelation, error)) *MockRelationResourceServiceListByResourceIDsCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // CountByRelationTypeUID mocks base method.
 func (m *MockRelationResourceService) CountByRelationTypeUID(ctx context.Context, uid string) (int64, error) {
 	m.ctrl.T.Helper()

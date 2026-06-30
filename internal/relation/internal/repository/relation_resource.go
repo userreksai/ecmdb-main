@@ -14,6 +14,7 @@ type RelationResourceRepository interface {
 	// ListSrcResources 查询资源列表
 	ListSrcResources(ctx context.Context, modelUid string, id int64) ([]domain.ResourceRelation, error)
 	ListDstResources(ctx context.Context, modelUid string, id int64) ([]domain.ResourceRelation, error)
+	ListByResourceIDs(ctx context.Context, modelUid string, ids []int64) ([]domain.ResourceRelation, error)
 	TotalSrc(ctx context.Context, modelUid string, id int64) (int64, error)
 	TotalDst(ctx context.Context, modelUid string, id int64) (int64, error)
 
@@ -73,6 +74,13 @@ func (r *resourceRepository) ListSrcResources(ctx context.Context, modelUid stri
 
 func (r *resourceRepository) ListDstResources(ctx context.Context, modelUid string, id int64) ([]domain.ResourceRelation, error) {
 	rrs, err := r.dao.ListDstResources(ctx, modelUid, id)
+	return slice.Map(rrs, func(idx int, src dao.ResourceRelation) domain.ResourceRelation {
+		return r.toResourceDomain(src)
+	}), err
+}
+
+func (r *resourceRepository) ListByResourceIDs(ctx context.Context, modelUid string, ids []int64) ([]domain.ResourceRelation, error) {
+	rrs, err := r.dao.ListByResourceIDs(ctx, modelUid, ids)
 	return slice.Map(rrs, func(idx int, src dao.ResourceRelation) domain.ResourceRelation {
 		return r.toResourceDomain(src)
 	}), err

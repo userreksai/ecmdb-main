@@ -52,7 +52,14 @@ func (h *Handler) Export(ctx *gin.Context, req ExportReq) (ginx.Result, error) {
 		ResourceIDs:  req.ResourceIDs,
 		FilterGroups: groups,
 		Fields:       req.Fields,
-		FileName:     req.FileName,
+		RelatedFields: slice.Map(req.RelatedFields, func(idx int, src ExportRelatedField) service.RelatedFieldParam {
+			return service.RelatedFieldParam{
+				RelationName: src.RelationName,
+				ModelUID:     src.ModelUID,
+				FieldUID:     src.FieldUID,
+			}
+		}),
+		FileName: req.FileName,
 	}
 
 	// 调用 Service 导出数据

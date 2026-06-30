@@ -10,6 +10,7 @@ import (
 	"github.com/Duke1616/ecmdb/internal/attribute"
 	"github.com/Duke1616/ecmdb/internal/dataio/internal/domain"
 	"github.com/Duke1616/ecmdb/internal/model"
+	"github.com/Duke1616/ecmdb/internal/relation"
 	"github.com/Duke1616/ecmdb/internal/resource"
 	"github.com/ecodeclub/ekit/slice"
 	"github.com/xuri/excelize/v2"
@@ -46,10 +47,20 @@ func sortAttributesByPriority(attrs []attribute.Attribute) []attribute.Attribute
 }
 
 // NOTE: dataIOService 实现数据交换功能,依赖三个模块的 Service
+type relatedExportColumn struct {
+	Key          string
+	RelationName string
+	ModelUID     string
+	FieldUID     string
+	Attr         attribute.Attribute
+}
+
 type dataIOService struct {
 	attrSvc  attribute.Service
 	resSvc   resource.EncryptedSvc
 	modelSvc model.Service
+	rmSvc    relation.RMSvc
+	rrSvc    relation.RRSvc
 }
 
 // NewDataIOService 创建数据交换服务实例
@@ -57,12 +68,15 @@ func NewDataIOService(
 	attrSvc attribute.Service,
 	resSvc resource.EncryptedSvc,
 	modelSvc model.Service,
-
+	rmSvc relation.RMSvc,
+	rrSvc relation.RRSvc,
 ) IDataIOService {
 	return &dataIOService{
 		attrSvc:  attrSvc,
 		resSvc:   resSvc,
 		modelSvc: modelSvc,
+		rmSvc:    rmSvc,
+		rrSvc:    rrSvc,
 	}
 }
 
@@ -168,8 +182,8 @@ func (s *dataIOService) Export(ctx context.Context, req ExportParams) ([]byte, e
 		return nil, err
 	}
 
-	// 2. 处理字段过滤: 如果请求指定了字段, 则只保留这些字段
-	if len(req.Fields) > 0 {
+	// 2. 处理字段过滤: 未传 fields 时默认导出全部字段; 传空数组表示不导出当前模型字段
+	if req.Fields != nil {
 		reqFieldMap := slice.ToMap(req.Fields, func(f string) string { return f })
 		attrs = slice.FilterMap(attrs, func(idx int, src attribute.Attribute) (attribute.Attribute, bool) {
 			_, ok := reqFieldMap[src.FieldUid]
@@ -179,6 +193,11 @@ func (s *dataIOService) Export(ctx context.Context, req ExportParams) ([]byte, e
 
 	// 3. 对字段进行排序 (根据 fieldPriority)
 	sortedAttrs := sortAttributesByPriority(attrs)
+
+	relatedColumns, err := s.buildRelatedExportColumns(ctx, req.ModelUID, req.RelatedFields)
+	if err != nil {
+		return nil, err
+	}
 
 	// 4. 提取最终的 FieldUIDs 用于查询
 	dstFields := slice.Map(sortedAttrs, func(idx int, attr attribute.Attribute) string {
@@ -192,7 +211,7 @@ func (s *dataIOService) Export(ctx context.Context, req ExportParams) ([]byte, e
 	for {
 		resources, _, err1 := s.resSvc.ListResourcesWithFilters(ctx, dstFields, req.ModelUID, req.ResourceIDs, offset, limit, req.FilterGroups)
 		if err1 != nil {
-			return nil, fmt.Errorf("获取资源列表失败: %w", err)
+			return nil, fmt.Errorf("获取资源列表失败: %w", err1)
 		}
 		allResources = append(allResources, resources...)
 
@@ -202,8 +221,313 @@ func (s *dataIOService) Export(ctx context.Context, req ExportParams) ([]byte, e
 		offset += limit
 	}
 
+	if len(relatedColumns) > 0 {
+		allResources, err = s.fillRelatedExportValues(ctx, req.ModelUID, allResources, relatedColumns)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	exportAttrs := make([]attribute.Attribute, 0, len(sortedAttrs)+len(relatedColumns))
+	exportAttrs = append(exportAttrs, sortedAttrs...)
+	for _, col := range relatedColumns {
+		exportAttrs = append(exportAttrs, col.Attr)
+	}
+
 	// 5. 构建 Excel
-	return s.buildExcel(mdl.SheetName(), sortedAttrs, allResources)
+	return s.buildExcel(mdl.SheetName(), exportAttrs, allResources)
+}
+
+func (s *dataIOService) buildRelatedExportColumns(ctx context.Context, modelUID string, fields []RelatedFieldParam) ([]relatedExportColumn, error) {
+	if len(fields) == 0 {
+		return nil, nil
+	}
+
+	modelRelations, err := s.listAllModelRelations(ctx, modelUID)
+	if err != nil {
+		return nil, err
+	}
+
+	relationMap := make(map[string]relation.ModelRelation, len(modelRelations))
+	relatedModelUIDSet := make(map[string]struct{}, len(modelRelations))
+	for _, rel := range modelRelations {
+		relationMap[rel.RelationName] = rel
+		if rel.SourceModelUID == modelUID {
+			relatedModelUIDSet[rel.TargetModelUID] = struct{}{}
+		}
+		if rel.TargetModelUID == modelUID {
+			relatedModelUIDSet[rel.SourceModelUID] = struct{}{}
+		}
+	}
+
+	relatedModelUIDs := stringSetKeys(relatedModelUIDSet)
+	modelsByUID, err := s.getModelsByUID(ctx, relatedModelUIDs)
+	if err != nil {
+		return nil, err
+	}
+
+	attrsByModel := make(map[string]map[string]attribute.Attribute, len(relatedModelUIDs))
+	for _, uid := range relatedModelUIDs {
+		attrs, _, err1 := s.attrSvc.ListAttributes(ctx, uid)
+		if err1 != nil {
+			return nil, fmt.Errorf("获取关联模型字段失败: %w", err1)
+		}
+		attrsByModel[uid] = slice.ToMap(attrs, func(attr attribute.Attribute) string {
+			return attr.FieldUid
+		})
+	}
+
+	columns := make([]relatedExportColumn, 0, len(fields))
+	seen := make(map[string]struct{}, len(fields))
+	for _, field := range fields {
+		relationName := strings.TrimSpace(field.RelationName)
+		fieldUID := strings.TrimSpace(field.FieldUID)
+		if relationName == "" || fieldUID == "" {
+			return nil, fmt.Errorf("关联导出字段缺少 relation_name 或 field_uid")
+		}
+
+		rel, ok := relationMap[relationName]
+		if !ok {
+			return nil, fmt.Errorf("当前模型不存在关联关系: %s", relationName)
+		}
+
+		relatedModelUID := ""
+		if rel.SourceModelUID == modelUID {
+			relatedModelUID = rel.TargetModelUID
+		} else if rel.TargetModelUID == modelUID {
+			relatedModelUID = rel.SourceModelUID
+		} else {
+			return nil, fmt.Errorf("关联关系 %s 不属于当前模型 %s", relationName, modelUID)
+		}
+
+		if field.ModelUID != "" && field.ModelUID != relatedModelUID {
+			return nil, fmt.Errorf("关联字段模型不匹配: relation=%s model=%s", relationName, field.ModelUID)
+		}
+
+		attrMap := attrsByModel[relatedModelUID]
+		attr, ok := attrMap[fieldUID]
+		if !ok {
+			return nil, fmt.Errorf("关联模型 %s 不存在字段: %s", relatedModelUID, fieldUID)
+		}
+
+		key := relatedFieldKey(relationName, relatedModelUID, fieldUID)
+		if _, ok = seen[key]; ok {
+			continue
+		}
+		seen[key] = struct{}{}
+
+		modelName := relatedModelUID
+		if mdl, ok := modelsByUID[relatedModelUID]; ok && mdl.Name != "" {
+			modelName = mdl.Name
+		}
+
+		exportAttr := attr
+		exportAttr.FieldUid = key
+		exportAttr.FieldName = fmt.Sprintf("%s/%s/%s", relationName, modelName, attr.FieldName)
+		exportAttr.Required = false
+		exportAttr.Secure = false
+
+		columns = append(columns, relatedExportColumn{
+			Key:          key,
+			RelationName: relationName,
+			ModelUID:     relatedModelUID,
+			FieldUID:     fieldUID,
+			Attr:         exportAttr,
+		})
+	}
+
+	return columns, nil
+}
+
+func (s *dataIOService) fillRelatedExportValues(ctx context.Context, modelUID string, resources []resource.Resource, columns []relatedExportColumn) ([]resource.Resource, error) {
+	if len(resources) == 0 || len(columns) == 0 {
+		return resources, nil
+	}
+
+	resourceIDs := make([]int64, 0, len(resources))
+	resourceIDSet := make(map[int64]struct{}, len(resources))
+	for _, res := range resources {
+		if _, ok := resourceIDSet[res.ID]; ok {
+			continue
+		}
+		resourceIDSet[res.ID] = struct{}{}
+		resourceIDs = append(resourceIDs, res.ID)
+	}
+
+	relations, err := s.rrSvc.ListByResourceIDs(ctx, modelUID, resourceIDs)
+	if err != nil {
+		return nil, fmt.Errorf("获取关联资源关系失败: %w", err)
+	}
+
+	columnsByRelation := make(map[string][]relatedExportColumn, len(columns))
+	for _, col := range columns {
+		columnsByRelation[col.RelationName] = append(columnsByRelation[col.RelationName], col)
+	}
+
+	targetsByRelation := make(map[string]map[int64][]int64, len(columnsByRelation))
+	modelTargetIDs := make(map[string]map[int64]struct{})
+	modelFields := make(map[string]map[string]struct{})
+
+	for _, rel := range relations {
+		cols, ok := columnsByRelation[rel.RelationName]
+		if !ok {
+			continue
+		}
+
+		var currentID, relatedID int64
+		relatedModelUID := ""
+		if rel.SourceModelUID == modelUID {
+			currentID = rel.SourceResourceID
+			relatedID = rel.TargetResourceID
+			relatedModelUID = rel.TargetModelUID
+		} else if rel.TargetModelUID == modelUID {
+			currentID = rel.TargetResourceID
+			relatedID = rel.SourceResourceID
+			relatedModelUID = rel.SourceModelUID
+		} else {
+			continue
+		}
+
+		if _, ok = resourceIDSet[currentID]; !ok {
+			continue
+		}
+
+		if targetsByRelation[rel.RelationName] == nil {
+			targetsByRelation[rel.RelationName] = make(map[int64][]int64)
+		}
+		targetsByRelation[rel.RelationName][currentID] = append(targetsByRelation[rel.RelationName][currentID], relatedID)
+
+		for _, col := range cols {
+			if col.ModelUID != relatedModelUID {
+				continue
+			}
+			if modelTargetIDs[col.ModelUID] == nil {
+				modelTargetIDs[col.ModelUID] = make(map[int64]struct{})
+			}
+			if modelFields[col.ModelUID] == nil {
+				modelFields[col.ModelUID] = make(map[string]struct{})
+			}
+			modelTargetIDs[col.ModelUID][relatedID] = struct{}{}
+			modelFields[col.ModelUID][col.FieldUID] = struct{}{}
+		}
+	}
+
+	relatedResourcesByModel := make(map[string]map[int64]resource.Resource, len(modelTargetIDs))
+	for relatedModelUID, idSet := range modelTargetIDs {
+		ids := int64SetKeys(idSet)
+		fields := stringSetKeys(modelFields[relatedModelUID])
+		relatedResources, err1 := s.resSvc.ListResourceByIds(ctx, fields, ids)
+		if err1 != nil {
+			return nil, fmt.Errorf("获取关联资源数据失败: %w", err1)
+		}
+
+		relatedResourcesByModel[relatedModelUID] = make(map[int64]resource.Resource, len(relatedResources))
+		for _, relatedResource := range relatedResources {
+			relatedResourcesByModel[relatedModelUID][relatedResource.ID] = relatedResource
+		}
+	}
+
+	for idx := range resources {
+		if resources[idx].Data == nil {
+			resources[idx].Data = make(map[string]interface{})
+		}
+		for _, col := range columns {
+			relatedIDs := targetsByRelation[col.RelationName][resources[idx].ID]
+			values := make([]string, 0, len(relatedIDs))
+			for _, relatedID := range relatedIDs {
+				relatedResource, ok := relatedResourcesByModel[col.ModelUID][relatedID]
+				if !ok {
+					continue
+				}
+				val, ok := relatedResource.Data[col.FieldUID]
+				if !ok || val == nil {
+					continue
+				}
+				strVal := formatExportValue(val)
+				if strVal == "" {
+					continue
+				}
+				values = append(values, strVal)
+			}
+			resources[idx].Data[col.Key] = strings.Join(values, ", ")
+		}
+	}
+
+	return resources, nil
+}
+
+func (s *dataIOService) listAllModelRelations(ctx context.Context, modelUID string) ([]relation.ModelRelation, error) {
+	const limit int64 = 200
+	offset := int64(0)
+	result := make([]relation.ModelRelation, 0)
+
+	for {
+		relations, total, err := s.rmSvc.ListModelUidRelation(ctx, offset, limit, modelUID)
+		if err != nil {
+			return nil, fmt.Errorf("获取模型关联关系失败: %w", err)
+		}
+		result = append(result, relations...)
+		if int64(len(relations)) < limit || int64(len(result)) >= total {
+			break
+		}
+		offset += limit
+	}
+
+	return result, nil
+}
+
+func (s *dataIOService) getModelsByUID(ctx context.Context, uids []string) (map[string]model.Model, error) {
+	if len(uids) == 0 {
+		return map[string]model.Model{}, nil
+	}
+
+	models, err := s.modelSvc.GetByUids(ctx, uids)
+	if err != nil {
+		return nil, fmt.Errorf("获取关联模型信息失败: %w", err)
+	}
+
+	return slice.ToMap(models, func(mdl model.Model) string {
+		return mdl.UID
+	}), nil
+}
+
+func relatedFieldKey(relationName, modelUID, fieldUID string) string {
+	return fmt.Sprintf("__related__%s__%s__%s", relationName, modelUID, fieldUID)
+}
+
+func stringSetKeys(src map[string]struct{}) []string {
+	keys := make([]string, 0, len(src))
+	for key := range src {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	return keys
+}
+
+func int64SetKeys(src map[int64]struct{}) []int64 {
+	keys := make([]int64, 0, len(src))
+	for key := range src {
+		keys = append(keys, key)
+	}
+	sort.Slice(keys, func(i, j int) bool {
+		return keys[i] < keys[j]
+	})
+	return keys
+}
+
+func formatExportValue(val interface{}) string {
+	switch v := val.(type) {
+	case []string:
+		return strings.Join(v, ", ")
+	case []interface{}:
+		parts := make([]string, 0, len(v))
+		for _, item := range v {
+			parts = append(parts, fmt.Sprint(item))
+		}
+		return strings.Join(parts, ", ")
+	default:
+		return fmt.Sprint(v)
+	}
 }
 
 // ExportTemplate 导出空白导入模板

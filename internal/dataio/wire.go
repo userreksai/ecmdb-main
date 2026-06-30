@@ -7,6 +7,7 @@ import (
 	"github.com/Duke1616/ecmdb/internal/dataio/internal/service"
 	"github.com/Duke1616/ecmdb/internal/dataio/internal/web"
 	"github.com/Duke1616/ecmdb/internal/model"
+	"github.com/Duke1616/ecmdb/internal/relation"
 	"github.com/Duke1616/ecmdb/internal/resource"
 	"github.com/Duke1616/ecmdb/pkg/storage"
 	"github.com/google/wire"
@@ -19,12 +20,13 @@ var ProviderSet = wire.NewSet(
 )
 
 func InitModule(attributeModule *attribute.Module, resourceModule *resource.Module, storage *storage.S3Storage,
-	modelModule *model.Module) (*Module, error) {
+	modelModule *model.Module, relationModule *relation.Module) (*Module, error) {
 	wire.Build(
 		ProviderSet,
 		wire.FieldsOf(new(*attribute.Module), "Svc"),
 		wire.FieldsOf(new(*resource.Module), "EncryptedSvc"),
 		wire.FieldsOf(new(*model.Module), "Svc"),
+		wire.FieldsOf(new(*relation.Module), "RMSvc", "RRSvc"),
 		wire.Struct(new(Module), "*"),
 	)
 	return new(Module), nil

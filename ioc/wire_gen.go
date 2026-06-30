@@ -204,7 +204,7 @@ func InitApp() (*App, error) {
 	}
 	handler20 := rotaModule.Hdl
 	handler21 := discoveryModule.Hdl
-	dataioModule, err := dataio.InitModule(attributeModule, resourceModule, s3Storage, modelModule)
+	dataioModule, err := dataio.InitModule(attributeModule, resourceModule, s3Storage, modelModule, relationModule)
 	if err != nil {
 		return nil, err
 	}

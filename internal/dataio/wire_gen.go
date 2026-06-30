@@ -11,6 +11,7 @@ import (
 	"github.com/Duke1616/ecmdb/internal/dataio/internal/service"
 	"github.com/Duke1616/ecmdb/internal/dataio/internal/web"
 	"github.com/Duke1616/ecmdb/internal/model"
+	"github.com/Duke1616/ecmdb/internal/relation"
 	"github.com/Duke1616/ecmdb/internal/resource"
 	"github.com/Duke1616/ecmdb/pkg/storage"
 	"github.com/google/wire"
@@ -18,14 +19,16 @@ import (
 
 // Injectors from wire.go:
 
-func InitModule(attributeModule *attribute.Module, resourceModule *resource.Module, storage2 *storage.S3Storage, modelModule *model.Module) (*Module, error) {
+func InitModule(attributeModule *attribute.Module, resourceModule *resource.Module, storage2 *storage.S3Storage, modelModule *model.Module, relationModule *relation.Module) (*Module, error) {
 	v := attributeModule.Svc
 	v2 := resourceModule.EncryptedSvc
 	v3 := modelModule.Svc
-	iDataIOService := service.NewDataIOService(v, v2, v3)
-	v4 := web.NewHandler(iDataIOService, storage2)
+	v4 := relationModule.RMSvc
+	v5 := relationModule.RRSvc
+	iDataIOService := service.NewDataIOService(v, v2, v3, v4, v5)
+	v6 := web.NewHandler(iDataIOService, storage2)
 	module := &Module{
-		Hdl: v4,
+		Hdl: v6,
 	}
 	return module, nil
 }

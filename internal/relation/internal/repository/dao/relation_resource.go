@@ -17,6 +17,7 @@ type RelationResourceDAO interface {
 
 	ListSrcResources(ctx context.Context, modelUid string, id int64) ([]ResourceRelation, error)
 	ListDstResources(ctx context.Context, modelUid string, id int64) ([]ResourceRelation, error)
+	ListByResourceIDs(ctx context.Context, modelUid string, ids []int64) ([]ResourceRelation, error)
 	CountSrc(ctx context.Context, modelUid string, id int64) (int64, error)
 	CountDst(ctx context.Context, modelUid string, id int64) (int64, error)
 
@@ -122,6 +123,44 @@ func (dao *resourceDAO) ListDstResources(ctx context.Context, modelUid string, i
 	}
 	if err = cursor.Err(); err != nil {
 		return nil, fmt.Errorf("游标遍历错误: %w", err)
+	}
+	return result, nil
+}
+
+func (dao *resourceDAO) ListByResourceIDs(ctx context.Context, modelUid string, ids []int64) ([]ResourceRelation, error) {
+	if len(ids) == 0 {
+		return nil, nil
+	}
+
+	col := dao.db.Collection(ResourceRelationCollection)
+	filter := bson.M{
+		"$or": bson.A{
+			bson.M{
+				"source_model_uid":   modelUid,
+				"source_resource_id": bson.M{"$in": ids},
+			},
+			bson.M{
+				"target_model_uid":   modelUid,
+				"target_resource_id": bson.M{"$in": ids},
+			},
+		},
+	}
+	opts := &options.FindOptions{
+		Sort: bson.D{{Key: "ctime", Value: -1}},
+	}
+
+	cursor, err := col.Find(ctx, filter, opts)
+	if err != nil {
+		return nil, fmt.Errorf("query relation resources error: %w", err)
+	}
+	defer cursor.Close(ctx)
+
+	var result []ResourceRelation
+	if err = cursor.All(ctx, &result); err != nil {
+		return nil, fmt.Errorf("decode relation resources error: %w", err)
+	}
+	if err = cursor.Err(); err != nil {
+		return nil, fmt.Errorf("iterate relation resources cursor error: %w", err)
 	}
 	return result, nil
 }
