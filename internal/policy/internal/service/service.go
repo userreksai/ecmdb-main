@@ -10,6 +10,8 @@ import (
 	"github.com/ecodeclub/ekit/slice"
 )
 
+const adminRoleCode = "admin"
+
 type Service interface {
 	// AddPolicies 批量添加策略，存在的会跳过
 	AddPolicies(ctx context.Context, req domain.Policies) (bool, error)
@@ -75,14 +77,29 @@ func (s *service) GetImplicitPermissionsForUser(ctx context.Context, userId int6
 }
 
 func (s *service) Authorize(ctx context.Context, userId, path, method, resource string) (domain.AuthorizeResult, error) {
-	allowed, matchedPolicies, err := s.enforcer.EnforceEx(userId, path, method, resource)
+	roles, err := s.enforcer.GetRolesForUser(userId)
 	if err != nil {
 		return domain.AuthorizeResult{Allowed: false, Reason: err.Error()}, err
 	}
 
-	roles, err := s.enforcer.GetRolesForUser(userId)
+	if userId == "root" || hasRole(roles, adminRoleCode) {
+		return domain.AuthorizeResult{
+			Allowed: true,
+			Roles:   roles,
+			MatchedPolicies: []string{
+				userId,
+				path,
+				method,
+				resource,
+				domain.ALLOW.ToString(),
+			},
+			Reason: "access allowed by admin role",
+		}, nil
+	}
+
+	allowed, matchedPolicies, err := s.enforcer.EnforceEx(userId, path, method, resource)
 	if err != nil {
-		return domain.AuthorizeResult{Allowed: false, Reason: err.Error()}, err
+		return domain.AuthorizeResult{Allowed: false, Roles: roles, Reason: err.Error()}, err
 	}
 
 	var reason string
@@ -98,6 +115,15 @@ func (s *service) Authorize(ctx context.Context, userId, path, method, resource 
 		MatchedPolicies: matchedPolicies,
 		Reason:          reason,
 	}, nil
+}
+
+func hasRole(roles []string, roleCode string) bool {
+	for _, r := range roles {
+		if r == roleCode {
+			return true
+		}
+	}
+	return false
 }
 
 func (s *service) AddPolicies(ctx context.Context, req domain.Policies) (bool, error) {
