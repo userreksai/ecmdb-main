@@ -93,7 +93,7 @@ func (h *Handler) CheckPolicyForSDK(ctx *gin.Context, req CheckPolicyReq) (ginx.
 	}
 
 	userId := strconv.FormatInt(uid, 10)
-	result, err := h.svc.Authorize(ctx, userId, req.Path, req.Method, policyResource(req.Service, req.Resource))
+	result, err := h.authorizePolicy(ctx, userId, req.Path, req.Method, req.Service, req.Resource)
 	if err != nil {
 		return systemErrorResult, err
 	}
@@ -111,7 +111,7 @@ func (h *Handler) CheckPolicyForEIAM(ctx *gin.Context, req EIAMCheckPolicyReq) (
 	}
 
 	userId := strconv.FormatInt(uid, 10)
-	result, err := h.svc.Authorize(ctx, userId, req.Path, req.Method, policyResource(req.Service, req.Resource))
+	result, err := h.authorizePolicy(ctx, userId, req.Path, req.Method, req.Service, req.Resource)
 	if err != nil {
 		return systemErrorResult, err
 	}
@@ -121,18 +121,70 @@ func (h *Handler) CheckPolicyForEIAM(ctx *gin.Context, req EIAMCheckPolicyReq) (
 	}, nil
 }
 
-func policyResource(service, resource string) string {
-	resource = strings.TrimSpace(resource)
-	if resource != "" {
-		return resource
+func (h *Handler) authorizePolicy(ctx *gin.Context, userId, path, method, service, resource string) (domain.AuthorizeResult, error) {
+	var last domain.AuthorizeResult
+	for _, candidatePath := range policyPathCandidates(path) {
+		for _, candidateResource := range policyResourceCandidates(service, resource) {
+			result, err := h.svc.Authorize(ctx, userId, candidatePath, method, candidateResource)
+			if err != nil {
+				return result, err
+			}
+			if result.Allowed {
+				return result, nil
+			}
+			last = result
+		}
+	}
+	return last, nil
+}
+
+func policyResourceCandidates(service, resource string) []string {
+	candidates := make([]string, 0, 5)
+	add := func(value string) {
+		value = strings.TrimSpace(value)
+		if value == "" {
+			return
+		}
+		for _, existing := range candidates {
+			if existing == value {
+				return
+			}
+		}
+		candidates = append(candidates, value)
 	}
 
-	normalizedService := strings.ToLower(strings.TrimSpace(service))
+	add(resource)
+	add(resourceAlias(resource))
+
+	service = strings.TrimSpace(service)
+	add(service)
+
+	normalizedService := strings.ToLower(service)
 	if idx := strings.Index(normalizedService, ":"); idx >= 0 {
-		normalizedService = normalizedService[:idx]
+		add(normalizedService[:idx])
+	} else {
+		add(normalizedService)
+	}
+	add(resourceAlias(normalizedService))
+
+	if len(candidates) == 0 {
+		return []string{""}
+	}
+	return candidates
+}
+
+func resourceAlias(resource string) string {
+	resource = strings.TrimSpace(resource)
+	if resource == "" {
+		return ""
 	}
 
-	switch normalizedService {
+	base := strings.ToLower(resource)
+	if idx := strings.Index(base, ":"); idx >= 0 {
+		base = base[:idx]
+	}
+
+	switch base {
 	case "task", "etask":
 		return "TASK"
 	case "cmdb":
@@ -140,8 +192,24 @@ func policyResource(service, resource string) string {
 	case "alert":
 		return "ALERT"
 	default:
-		return strings.ToUpper(strings.TrimSpace(service))
+		if resource == strings.ToUpper(resource) {
+			return strings.ToLower(resource)
+		}
+		return strings.ToUpper(resource)
 	}
+}
+
+func policyPathCandidates(path string) []string {
+	path = strings.TrimSpace(path)
+	candidates := []string{path}
+
+	for _, prefix := range []string{"/api/task/", "/api/alert/"} {
+		if strings.HasPrefix(path, prefix) {
+			candidates = append(candidates, "/api/"+strings.TrimPrefix(path, prefix))
+		}
+	}
+
+	return candidates
 }
 
 func (h *Handler) currentSDKIdentity(ctx *gin.Context) (int64, bool, int64, error) {
