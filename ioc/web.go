@@ -135,8 +135,10 @@ func accessLogger() gin.HandlerFunc {
 
 	// SDK 鉴权路由精确匹配，降级为 Debug 避免日志污染
 	sdkPaths := map[string]struct{}{
-		"/api/policy/check_login":  {},
-		"/api/policy/check_policy": {},
+		"/api/policy/check_login":      {},
+		"/api/policy/check_policy":     {},
+		"/api/permission/check_login":  {},
+		"/api/permission/check_policy": {},
 	}
 
 	// NOTE: ego DefaultLogger 针对框架内部做了 caller skip 校准，直接从用户代码调用需减一层

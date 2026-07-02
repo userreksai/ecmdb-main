@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/Duke1616/ecmdb/internal/pkg/servicetoken"
@@ -36,6 +37,10 @@ func (h *Handler) PublicRoutes(server *gin.Engine) {
 	g := server.Group("/api/policy")
 	g.POST("/check_login", ginx.Wrap(h.CheckLoginForSDK))
 	g.POST("/check_policy", ginx.WrapBody[CheckPolicyReq](h.CheckPolicyForSDK))
+
+	compat := server.Group("/api/permission")
+	compat.POST("/check_login", ginx.Wrap(h.CheckLoginForSDK))
+	compat.POST("/check_policy", ginx.WrapBody[EIAMCheckPolicyReq](h.CheckPolicyForEIAM))
 }
 
 func (h *Handler) PrivateRoutes(server *gin.Engine) {
@@ -96,6 +101,42 @@ func (h *Handler) CheckPolicyForSDK(ctx *gin.Context, req CheckPolicyReq) (ginx.
 	return ginx.Result{
 		Data: result,
 	}, nil
+}
+
+func (h *Handler) CheckPolicyForEIAM(ctx *gin.Context, req EIAMCheckPolicyReq) (ginx.Result, error) {
+	uid, _, _, err := h.currentSDKIdentity(ctx)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return ginx.Result{}, fmt.Errorf("login verification failed: %w", err)
+	}
+
+	userId := strconv.FormatInt(uid, 10)
+	result, err := h.svc.Authorize(ctx, userId, req.Path, req.Method, policyResource(req.Service, req.Resource))
+	if err != nil {
+		return systemErrorResult, err
+	}
+
+	return ginx.Result{
+		Data: result,
+	}, nil
+}
+
+func policyResource(service, resource string) string {
+	resource = strings.TrimSpace(resource)
+	if resource != "" {
+		return resource
+	}
+
+	switch strings.ToLower(strings.TrimSpace(service)) {
+	case "task", "etask":
+		return "TASK"
+	case "cmdb":
+		return "CMDB"
+	case "alert":
+		return "ALERT"
+	default:
+		return strings.ToUpper(strings.TrimSpace(service))
+	}
 }
 
 func (h *Handler) currentSDKIdentity(ctx *gin.Context) (int64, bool, int64, error) {
