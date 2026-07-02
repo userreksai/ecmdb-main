@@ -93,7 +93,7 @@ func (h *Handler) CheckPolicyForSDK(ctx *gin.Context, req CheckPolicyReq) (ginx.
 	}
 
 	userId := strconv.FormatInt(uid, 10)
-	result, err := h.svc.Authorize(ctx, userId, req.Path, req.Method, req.Resource)
+	result, err := h.svc.Authorize(ctx, userId, req.Path, req.Method, policyResource(req.Service, req.Resource))
 	if err != nil {
 		return systemErrorResult, err
 	}
@@ -127,7 +127,12 @@ func policyResource(service, resource string) string {
 		return resource
 	}
 
-	switch strings.ToLower(strings.TrimSpace(service)) {
+	normalizedService := strings.ToLower(strings.TrimSpace(service))
+	if idx := strings.Index(normalizedService, ":"); idx >= 0 {
+		normalizedService = normalizedService[:idx]
+	}
+
+	switch normalizedService {
 	case "task", "etask":
 		return "TASK"
 	case "cmdb":
