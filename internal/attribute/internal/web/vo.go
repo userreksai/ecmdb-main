@@ -69,18 +69,19 @@ type SortAttributeGroupReq struct {
 }
 
 type Attribute struct {
-	ID        int64       `json:"id"`
-	ModelUid  string      `json:"model_uid"`
-	FieldUid  string      `json:"field_uid"`
-	FieldName string      `json:"field_name"`
-	FieldType string      `json:"field_type"`
-	Required  bool        `json:"required"`
-	Secure    bool        `json:"secure"`
-	Link      bool        `json:"link"`
-	Display   bool        `json:"display"`
-	Option    interface{} `json:"option"`
-	Index     int64       `json:"sort_key"`
-	Builtin   bool        `json:"builtin"`
+	ID           int64       `json:"id"`
+	ModelUid     string      `json:"model_uid"`
+	FieldUid     string      `json:"field_uid"`
+	FieldName    string      `json:"field_name"`
+	FieldType    string      `json:"field_type"`
+	Required     bool        `json:"required"`
+	Secure       bool        `json:"secure"`
+	Link         bool        `json:"link"`
+	Display      bool        `json:"display"`
+	Option       interface{} `json:"option"`
+	Index        int64       `json:"sort_key"`
+	DisplayIndex int64       `json:"display_index"`
+	Builtin      bool        `json:"builtin"`
 }
 
 type AttributeGroup struct {
@@ -139,17 +140,18 @@ func toDomain(req CreateAttributeReq) domain.Attribute {
 
 func toAttributeVo(attr domain.Attribute) Attribute {
 	return Attribute{
-		ID:        attr.ID,
-		FieldUid:  attr.FieldUid,
-		ModelUid:  attr.ModelUid,
-		FieldName: attr.FieldName,
-		FieldType: attr.FieldType,
-		Required:  attr.Required,
-		Link:      attr.Link,
-		Display:   attr.Display,
-		Option:    attr.Option,
-		Secure:    attr.Secure,
-		Index:     attr.SortKey,
-		Builtin:   attr.Builtin,
+		ID:           attr.ID,
+		FieldUid:     attr.FieldUid,
+		ModelUid:     attr.ModelUid,
+		FieldName:    attr.FieldName,
+		FieldType:    attr.FieldType,
+		Required:     attr.Required,
+		Link:         attr.Link,
+		Display:      attr.Display,
+		Option:       attr.Option,
+		Secure:       attr.Secure,
+		Index:        attr.SortKey,
+		DisplayIndex: attr.Index,
+		Builtin:      attr.Builtin,
 	}
 }
