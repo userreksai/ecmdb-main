@@ -236,6 +236,45 @@ func (c *MockRelationResourceServiceDeleteResourceRelationCall) DoAndReturn(f fu
 	return c
 }
 
+// DeleteRelationsByResourceID mocks base method.
+func (m *MockRelationResourceService) DeleteRelationsByResourceID(ctx context.Context, resourceID int64) (int64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteRelationsByResourceID", ctx, resourceID)
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteRelationsByResourceID indicates an expected call of DeleteRelationsByResourceID.
+func (mr *MockRelationResourceServiceMockRecorder) DeleteRelationsByResourceID(ctx, resourceID any) *MockRelationResourceServiceDeleteRelationsByResourceIDCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteRelationsByResourceID", reflect.TypeOf((*MockRelationResourceService)(nil).DeleteRelationsByResourceID), ctx, resourceID)
+	return &MockRelationResourceServiceDeleteRelationsByResourceIDCall{Call: call}
+}
+
+// MockRelationResourceServiceDeleteRelationsByResourceIDCall wrap *gomock.Call
+type MockRelationResourceServiceDeleteRelationsByResourceIDCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockRelationResourceServiceDeleteRelationsByResourceIDCall) Return(arg0 int64, arg1 error) *MockRelationResourceServiceDeleteRelationsByResourceIDCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockRelationResourceServiceDeleteRelationsByResourceIDCall) Do(f func(context.Context, int64) (int64, error)) *MockRelationResourceServiceDeleteRelationsByResourceIDCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockRelationResourceServiceDeleteRelationsByResourceIDCall) DoAndReturn(f func(context.Context, int64) (int64, error)) *MockRelationResourceServiceDeleteRelationsByResourceIDCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // DeleteSrcRelation mocks base method.
 func (m *MockRelationResourceService) DeleteSrcRelation(ctx context.Context, resourceId int64, modelUid, relationName string) (int64, error) {
 	m.ctrl.T.Helper()

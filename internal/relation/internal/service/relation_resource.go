@@ -28,6 +28,7 @@ type RelationResourceService interface {
 	ListDstRelated(ctx context.Context, modelUid, relationName string, id int64) ([]int64, error)
 
 	DeleteResourceRelation(ctx context.Context, id int64) (int64, error)
+	DeleteRelationsByResourceID(ctx context.Context, resourceID int64) (int64, error)
 
 	DeleteSrcRelation(ctx context.Context, resourceId int64, modelUid, relationName string) (int64, error)
 	DeleteDstRelation(ctx context.Context, resourceId int64, modelUid, relationName string) (int64, error)
@@ -142,6 +143,10 @@ func (s *resourceService) DeleteDstRelation(ctx context.Context, resourceId int6
 
 func (s *resourceService) DeleteResourceRelation(ctx context.Context, id int64) (int64, error) {
 	return s.repo.DeleteResourceRelation(ctx, id)
+}
+
+func (s *resourceService) DeleteRelationsByResourceID(ctx context.Context, resourceID int64) (int64, error) {
+	return s.repo.DeleteRelationsByResourceID(ctx, resourceID)
 }
 
 func (s *resourceService) CountByRelationTypeUID(ctx context.Context, uid string) (int64, error) {

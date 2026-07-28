@@ -28,6 +28,7 @@ type RelationResourceDAO interface {
 	ListDstRelated(ctx context.Context, modelUid, relationName string, id int64) ([]int64, error)
 
 	DeleteResourceRelation(ctx context.Context, id int64) (int64, error)
+	DeleteRelationsByResourceID(ctx context.Context, resourceID int64) (int64, error)
 	DeleteSrcRelation(ctx context.Context, resourceId int64, modelUid, relationName string) (int64, error)
 	DeleteDstRelation(ctx context.Context, resourceId int64, modelUid, relationName string) (int64, error)
 
@@ -47,6 +48,8 @@ func NewRelationResourceDAO(db *mongox.Mongo) RelationResourceDAO {
 type resourceDAO struct {
 	db *mongox.Mongo
 }
+
+const resourceCollection = "c_resources"
 
 func (dao *resourceDAO) CreateResourceRelation(ctx context.Context, rr ResourceRelation) (int64, error) {
 	now := time.Now()
@@ -209,6 +212,13 @@ func (dao *resourceDAO) ListSrcAggregated(ctx context.Context, modelUid string, 
 	}
 	pipeline := mongo.Pipeline{
 		{{"$match", filter}},
+		{{"$lookup", bson.D{
+			{"from", resourceCollection},
+			{"localField", "target_resource_id"},
+			{"foreignField", "id"},
+			{"as", "related_resource"},
+		}}},
+		{{"$match", bson.D{{"related_resource.0", bson.D{{"$exists", true}}}}}},
 		{{"$group", bson.D{
 			{"_id", "$relation_name"},
 			{"total", bson.D{{"$sum", 1}}},                             // 统计每个分组中的文档数量
@@ -218,10 +228,10 @@ func (dao *resourceDAO) ListSrcAggregated(ctx context.Context, modelUid string, 
 	}
 
 	cursor, err := col.Aggregate(ctx, pipeline)
-	defer cursor.Close(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("查询错误, %w", err)
 	}
+	defer cursor.Close(ctx)
 
 	var result []ResourceAggregatedAsset
 	if err = cursor.All(ctx, &result); err != nil {
@@ -244,7 +254,14 @@ func (dao *resourceDAO) ListDstAggregated(ctx context.Context, modelUid string, 
 	}
 
 	pipeline := mongo.Pipeline{
-		{{"$match", filter}}, // 添加筛选条件
+		{{"$match", filter}},
+		{{"$lookup", bson.D{
+			{"from", resourceCollection},
+			{"localField", "source_resource_id"},
+			{"foreignField", "id"},
+			{"as", "related_resource"},
+		}}},
+		{{"$match", bson.D{{"related_resource.0", bson.D{{"$exists", true}}}}}},
 		{{"$group", bson.D{
 			{"_id", "$relation_name"},
 			{"total", bson.D{{"$sum", 1}}},                             // 统计每个分组中的文档数量
@@ -254,10 +271,10 @@ func (dao *resourceDAO) ListDstAggregated(ctx context.Context, modelUid string, 
 	}
 
 	cursor, err := col.Aggregate(ctx, pipeline)
-	defer cursor.Close(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("查询错误, %w", err)
 	}
+	defer cursor.Close(ctx)
 
 	var result []ResourceAggregatedAsset
 	if err = cursor.All(ctx, &result); err != nil {
@@ -340,6 +357,23 @@ func (dao *resourceDAO) DeleteResourceRelation(ctx context.Context, id int64) (i
 	result, err := col.DeleteOne(ctx, filter)
 	if err != nil {
 		return 0, fmt.Errorf("删除文档错误: %w", err)
+	}
+
+	return result.DeletedCount, nil
+}
+
+func (dao *resourceDAO) DeleteRelationsByResourceID(ctx context.Context, resourceID int64) (int64, error) {
+	col := dao.db.Collection(ResourceRelationCollection)
+	filter := bson.M{
+		"$or": bson.A{
+			bson.M{"source_resource_id": resourceID},
+			bson.M{"target_resource_id": resourceID},
+		},
+	}
+
+	result, err := col.DeleteMany(ctx, filter)
+	if err != nil {
+		return 0, fmt.Errorf("delete resource relations error: %w", err)
 	}
 
 	return result.DeletedCount, nil

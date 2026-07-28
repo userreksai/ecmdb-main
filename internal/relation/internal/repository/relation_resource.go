@@ -33,6 +33,7 @@ type RelationResourceRepository interface {
 	CountByRelationName(ctx context.Context, name string) (int64, error)
 
 	DeleteResourceRelation(ctx context.Context, id int64) (int64, error)
+	DeleteRelationsByResourceID(ctx context.Context, resourceID int64) (int64, error)
 	DeleteSrcRelation(ctx context.Context, resourceId int64, modelUid, relationName string) (int64, error)
 	DeleteDstRelation(ctx context.Context, resourceId int64, modelUid, relationName string) (int64, error)
 }
@@ -104,6 +105,10 @@ func (r *resourceRepository) ListDstRelated(ctx context.Context, modelUid, relat
 
 func (r *resourceRepository) DeleteResourceRelation(ctx context.Context, id int64) (int64, error) {
 	return r.dao.DeleteResourceRelation(ctx, id)
+}
+
+func (r *resourceRepository) DeleteRelationsByResourceID(ctx context.Context, resourceID int64) (int64, error) {
+	return r.dao.DeleteRelationsByResourceID(ctx, resourceID)
 }
 
 func (r *resourceRepository) DeleteSrcRelation(ctx context.Context, resourceId int64, modelUid, relationName string) (int64, error) {
