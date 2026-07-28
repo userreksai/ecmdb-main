@@ -14,6 +14,10 @@ func InitIndexes(db *mongox.Mongo) error {
 
 	indexes := []mongo.IndexModel{
 		{
+			Keys:    bson.D{{Key: "id", Value: 1}},
+			Options: options.Index().SetUnique(true),
+		},
+		{
 			Keys: bson.D{
 				{"name", -1},
 				{"model_uid", -1},

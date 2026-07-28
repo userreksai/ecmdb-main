@@ -541,6 +541,11 @@ func (h *Handler) DeleteResource(ctx *gin.Context, req DeleteResourceReq) (ginx.
 	if err != nil {
 		return systemErrorResult, err
 	}
+
+	if _, err = h.RRSvc.DeleteRelationsByResourceID(ctx, req.Id); err != nil {
+		return systemErrorResult, err
+	}
+
 	return ginx.Result{
 		Data: count,
 	}, nil

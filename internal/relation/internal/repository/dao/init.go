@@ -18,6 +18,10 @@ func InitIndexes(db *mongox.Mongo) error {
 		return err
 	}
 
+	if err := initRRIndex(db); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -48,5 +52,27 @@ func initRMIndex(db *mongox.Mongo) error {
 
 	_, err := col.Indexes().CreateMany(context.Background(), indexes)
 
+	return err
+}
+
+func initRRIndex(db *mongox.Mongo) error {
+	col := db.Collection(ResourceRelationCollection)
+
+	indexes := []mongo.IndexModel{
+		{
+			Keys: bson.D{
+				{Key: "source_resource_id", Value: 1},
+				{Key: "source_model_uid", Value: 1},
+			},
+		},
+		{
+			Keys: bson.D{
+				{Key: "target_resource_id", Value: 1},
+				{Key: "target_model_uid", Value: 1},
+			},
+		},
+	}
+
+	_, err := col.Indexes().CreateMany(context.Background(), indexes)
 	return err
 }
