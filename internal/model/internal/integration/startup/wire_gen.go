@@ -9,16 +9,18 @@ package startup
 import (
 	"github.com/Duke1616/ecmdb/internal/attribute"
 	"github.com/Duke1616/ecmdb/internal/model"
+	"github.com/Duke1616/ecmdb/internal/policy"
 	"github.com/Duke1616/ecmdb/internal/relation"
 	"github.com/Duke1616/ecmdb/internal/resource"
+	"github.com/Duke1616/ecmdb/internal/role"
 	"github.com/Duke1616/ecmdb/internal/test/ioc"
 )
 
 // Injectors from wire.go:
 
-func InitHandler(rmModule *relation.Module, attrModule *attribute.Module, resourceModule *resource.Module) (*model.Handler, error) {
+func InitHandler(rmModule *relation.Module, attrModule *attribute.Module, resourceModule *resource.Module, roleModule *role.Module, policyModule *policy.Module) (*model.Handler, error) {
 	mongo := ioc.InitMongoDB()
-	module, err := model.InitModule(mongo, rmModule, attrModule, resourceModule)
+	module, err := model.InitModule(mongo, rmModule, attrModule, resourceModule, roleModule, policyModule)
 	if err != nil {
 		return nil, err
 	}

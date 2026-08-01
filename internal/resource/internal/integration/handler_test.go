@@ -11,10 +11,13 @@ import (
 
 	"github.com/Duke1616/ecmdb/internal/attribute"
 	attributemocks "github.com/Duke1616/ecmdb/internal/attribute/mocks"
+	"github.com/Duke1616/ecmdb/internal/policy"
+	"github.com/Duke1616/ecmdb/internal/relation"
 	"github.com/Duke1616/ecmdb/internal/resource/internal/domain"
 	"github.com/Duke1616/ecmdb/internal/resource/internal/integration/startup"
 	"github.com/Duke1616/ecmdb/internal/resource/internal/repository/dao"
 	"github.com/Duke1616/ecmdb/internal/resource/internal/web"
+	"github.com/Duke1616/ecmdb/internal/role"
 	"github.com/Duke1616/ecmdb/pkg/ginx/test"
 	"github.com/Duke1616/ecmdb/pkg/mongox"
 	"github.com/ecodeclub/ekit/iox"
@@ -57,7 +60,7 @@ func (s *HandlerTestSuite) SetupSuite() {
 	attrSvc.EXPECT().SearchAttributeFieldsByModelUid(gomock.Any(), "mysql").AnyTimes().Return(project, nil)
 	handler, err := startup.InitHandler(&attribute.Module{
 		Svc: attrSvc,
-	})
+	}, &relation.Module{}, &role.Module{}, &policy.Module{})
 
 	require.NoError(s.T(), err)
 

@@ -70,15 +70,7 @@ func InitApp() (*App, error) {
 		return nil, err
 	}
 	v3 := menuModule.Svc
-	permissionModule, err := permission.InitModule(mongo, mq, roleModule, menuModule, module)
-	if err != nil {
-		return nil, err
-	}
-	v4 := permissionModule.Svc
-	v5 := module.Svc
-	dao := version.NewDao(mongo)
-	service := version.NewService(dao)
-	relationModule, err := relation.InitModule(mongo)
+	relationModule, err := relation.InitModule(mongo, roleModule, module)
 	if err != nil {
 		return nil, err
 	}
@@ -86,14 +78,22 @@ func InitApp() (*App, error) {
 	if err != nil {
 		return nil, err
 	}
-	resourceModule, err := resource.InitModule(mongo, attributeModule, relationModule, mq, cryptoRegistry)
+	resourceModule, err := resource.InitModule(mongo, attributeModule, relationModule, mq, cryptoRegistry, roleModule, module)
 	if err != nil {
 		return nil, err
 	}
-	modelModule, err := model.InitModule(mongo, relationModule, attributeModule, resourceModule)
+	modelModule, err := model.InitModule(mongo, relationModule, attributeModule, resourceModule, roleModule, module)
 	if err != nil {
 		return nil, err
 	}
+	permissionModule, err := permission.InitModule(mongo, mq, roleModule, menuModule, module, modelModule)
+	if err != nil {
+		return nil, err
+	}
+	v4 := permissionModule.Svc
+	v5 := module.Svc
+	dao := version.NewDao(mongo)
+	service := version.NewService(dao)
 	bootstrapModule, err := bootstrap.InitModule(modelModule, attributeModule, relationModule)
 	if err != nil {
 		return nil, err

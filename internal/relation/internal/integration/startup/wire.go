@@ -3,11 +3,13 @@
 package startup
 
 import (
+	"github.com/Duke1616/ecmdb/internal/policy"
 	"github.com/Duke1616/ecmdb/internal/relation"
+	"github.com/Duke1616/ecmdb/internal/role"
 	"github.com/google/wire"
 )
 
-func InitRMHandler() (*relation.RMHandler, error) {
+func InitRMHandler(roleModule *role.Module, policyModule *policy.Module) (*relation.RMHandler, error) {
 	wire.Build(InitMongoDB,
 		relation.InitModule,
 		wire.FieldsOf(new(*relation.Module), "RMHdl"),
@@ -15,7 +17,7 @@ func InitRMHandler() (*relation.RMHandler, error) {
 	return new(relation.RMHandler), nil
 }
 
-func InitRRHandler() (*relation.RRHandler, error) {
+func InitRRHandler(roleModule *role.Module, policyModule *policy.Module) (*relation.RRHandler, error) {
 	wire.Build(InitMongoDB,
 		relation.InitModule,
 		wire.FieldsOf(new(*relation.Module), "RRHdl"),
