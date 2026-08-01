@@ -26,8 +26,9 @@ type GetByUidsReq struct {
 }
 
 type Page struct {
-	Offset int64 `json:"offset,omitempty"`
-	Limit  int64 `json:"limit,omitempty"`
+	Offset               int64 `json:"offset,omitempty"`
+	Limit                int64 `json:"limit,omitempty"`
+	ApplyModelPermission bool  `json:"apply_model_permission,omitempty"`
 }
 
 type RetrieveModelsListResp struct {

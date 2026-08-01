@@ -9,6 +9,7 @@ package permission
 import (
 	"context"
 	"github.com/Duke1616/ecmdb/internal/menu"
+	"github.com/Duke1616/ecmdb/internal/model"
 	"github.com/Duke1616/ecmdb/internal/permission/internal/event"
 	"github.com/Duke1616/ecmdb/internal/permission/internal/service"
 	"github.com/Duke1616/ecmdb/internal/permission/internal/web"
@@ -20,15 +21,17 @@ import (
 
 // Injectors from wire.go:
 
-func InitModule(db *mongox.Mongo, q mq.MQ, roleModule *role.Module, menuModule *menu.Module, policyModule *policy.Module) (*Module, error) {
+func InitModule(db *mongox.Mongo, q mq.MQ, roleModule *role.Module, menuModule *menu.Module, policyModule *policy.Module, modelModule *model.Module) (*Module, error) {
 	v := roleModule.Svc
 	v2 := menuModule.Svc
 	v3 := policyModule.Svc
+	v4 := modelModule.Svc
+	v5 := modelModule.MGSvc
 	serviceService := service.NewService(v, v3, v2)
-	v4 := web.NewHandler(v, v2, v3, serviceService)
+	v6 := web.NewHandler(v, v2, v3, v4, v5, serviceService)
 	menuChangeEventConsumer := InitMenuChangeEventConsumer(q, serviceService)
 	module := &Module{
-		Hdl: v4,
+		Hdl: v6,
 		Svc: serviceService,
 		c:   menuChangeEventConsumer,
 	}

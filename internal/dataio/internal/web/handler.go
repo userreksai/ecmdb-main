@@ -1,8 +1,14 @@
 package web
 
 import (
+	"errors"
+	"fmt"
+
 	"github.com/Duke1616/ecmdb/internal/dataio/internal/service"
+	"github.com/Duke1616/ecmdb/internal/pkg/authctx"
+	"github.com/Duke1616/ecmdb/internal/policy"
 	"github.com/Duke1616/ecmdb/internal/resource"
+	"github.com/Duke1616/ecmdb/internal/role"
 	"github.com/Duke1616/ecmdb/pkg/ginx"
 	"github.com/Duke1616/ecmdb/pkg/storage"
 	"github.com/ecodeclub/ekit/slice"
@@ -10,15 +16,50 @@ import (
 )
 
 type Handler struct {
-	svc     service.IDataIOService
-	storage *storage.S3Storage
+	svc       service.IDataIOService
+	storage   *storage.S3Storage
+	roleSvc   role.Service
+	policySvc policy.Service
 }
 
-func NewHandler(svc service.IDataIOService, storage *storage.S3Storage) *Handler {
+func NewHandler(svc service.IDataIOService, storage *storage.S3Storage, roleSvc role.Service, policySvc policy.Service) *Handler {
 	return &Handler{
-		svc:     svc,
-		storage: storage,
+		svc:       svc,
+		storage:   storage,
+		roleSvc:   roleSvc,
+		policySvc: policySvc,
 	}
+}
+
+var errModelAccessDenied = errors.New("model asset access denied")
+
+func (h *Handler) authorizeModel(ctx *gin.Context, modelUID string) error {
+	if h.roleSvc == nil || h.policySvc == nil {
+		return nil
+	}
+	uid, ok := authctx.UID(ctx)
+	if !ok {
+		return fmt.Errorf("get current user failed")
+	}
+	roleCodes, err := h.policySvc.GetRolesForUser(ctx, uid)
+	if err != nil {
+		return err
+	}
+	allowed, err := h.roleSvc.CanAccessModel(ctx, roleCodes, modelUID)
+	if err != nil {
+		return err
+	}
+	if !allowed {
+		return errModelAccessDenied
+	}
+	return nil
+}
+
+func modelAccessError(err error) (ginx.Result, error) {
+	if errors.Is(err, errModelAccessDenied) {
+		return ginx.Result{Code: 403001, Msg: "无权访问该模型资产"}, nil
+	}
+	return systemErrorResult, err
 }
 
 func (h *Handler) PrivateRoutes(server *gin.Engine) {
@@ -33,6 +74,18 @@ func (h *Handler) PrivateRoutes(server *gin.Engine) {
 
 // Export 导出数据
 func (h *Handler) Export(ctx *gin.Context, req ExportReq) (ginx.Result, error) {
+	if err := h.authorizeModel(ctx, req.ModelUID); err != nil {
+		return modelAccessError(err)
+	}
+	for _, field := range req.RelatedFields {
+		if field.ModelUID == "" {
+			continue
+		}
+		if err := h.authorizeModel(ctx, field.ModelUID); err != nil {
+			return modelAccessError(err)
+		}
+	}
+
 	// 转换 FilterGroups
 	groups := slice.Map(req.FilterGroups, func(idx int, src ExportFilterGroup) resource.FilterGroup {
 		return resource.FilterGroup{
@@ -92,6 +145,9 @@ func (h *Handler) Export(ctx *gin.Context, req ExportReq) (ginx.Result, error) {
 func (h *Handler) ExportTemplate(ctx *gin.Context) (ginx.Result, error) {
 	// 根据请求获取模型UID
 	modelUid := ctx.Param("model_uid")
+	if err := h.authorizeModel(ctx, modelUid); err != nil {
+		return modelAccessError(err)
+	}
 
 	// 调用 Service 生成 Excel 模板
 	excelData, err := h.svc.ExportTemplate(ctx.Request.Context(), modelUid)
@@ -114,6 +170,10 @@ func (h *Handler) ExportTemplate(ctx *gin.Context) (ginx.Result, error) {
 // Import 导入数据
 // NOTE: 前端先通过 GenerateUploadURL 上传文件到 S3,然后调用此接口传入 file_key 进行导入
 func (h *Handler) Import(ctx *gin.Context, req ImportReq) (ginx.Result, error) {
+	if err := h.authorizeModel(ctx, req.ModelUID); err != nil {
+		return modelAccessError(err)
+	}
+
 	// 1. 从 S3 下载文件
 	fileData, err := h.storage.GetFile(ctx.Request.Context(), "ecmdb", req.FileKey)
 	if err != nil {

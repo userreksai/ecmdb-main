@@ -43,7 +43,7 @@ func TestHandlerDeleteResource(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			resourceSvc := resourcemocks.NewMockEncryptedSvc(ctrl)
 			relationSvc := relationmocks.NewMockRelationResourceService(ctrl)
-			handler := NewHandler(resourceSvc, nil, relationSvc)
+			handler := NewHandler(resourceSvc, nil, relationSvc, nil, nil)
 			ctx := &gin.Context{}
 			const resourceID int64 = 42
 

@@ -68,6 +68,10 @@ func InitApp() (*App, error) {
 	checkPolicyMiddlewareBuilder := middleware.NewCheckPolicyMiddlewareBuilder(service, provider)
 	v := InitGinMiddlewares()
 	mongo := InitMongoDB()
+	roleModule, err := role.InitModule(mongo)
+	if err != nil {
+		return nil, err
+	}
 	relationModule, err := relation.InitModule(mongo)
 	if err != nil {
 		return nil, err
@@ -78,11 +82,11 @@ func InitApp() (*App, error) {
 		return nil, err
 	}
 	cryptoRegistry := InitModuleCrypto()
-	resourceModule, err := resource.InitModule(mongo, attributeModule, relationModule, mq, cryptoRegistry)
+	resourceModule, err := resource.InitModule(mongo, attributeModule, relationModule, mq, cryptoRegistry, roleModule, module)
 	if err != nil {
 		return nil, err
 	}
-	modelModule, err := model.InitModule(mongo, relationModule, attributeModule, resourceModule)
+	modelModule, err := model.InitModule(mongo, relationModule, attributeModule, resourceModule, roleModule, module)
 	if err != nil {
 		return nil, err
 	}
@@ -177,12 +181,8 @@ func InitApp() (*App, error) {
 		return nil, err
 	}
 	handler14 := endpointModule.Hdl
-	roleModule, err := role.InitModule(mongo)
-	if err != nil {
-		return nil, err
-	}
 	handler15 := roleModule.Hdl
-	permissionModule, err := permission.InitModule(mongo, mq, roleModule, menuModule, module)
+	permissionModule, err := permission.InitModule(mongo, mq, roleModule, menuModule, module, modelModule)
 	if err != nil {
 		return nil, err
 	}
@@ -204,7 +204,7 @@ func InitApp() (*App, error) {
 	}
 	handler20 := rotaModule.Hdl
 	handler21 := discoveryModule.Hdl
-	dataioModule, err := dataio.InitModule(attributeModule, resourceModule, s3Storage, modelModule, relationModule)
+	dataioModule, err := dataio.InitModule(attributeModule, resourceModule, s3Storage, modelModule, relationModule, roleModule, module)
 	if err != nil {
 		return nil, err
 	}
