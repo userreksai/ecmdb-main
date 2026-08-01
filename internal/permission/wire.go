@@ -6,6 +6,7 @@ import (
 	"context"
 
 	"github.com/Duke1616/ecmdb/internal/menu"
+	"github.com/Duke1616/ecmdb/internal/model"
 	"github.com/Duke1616/ecmdb/internal/permission/internal/event"
 	"github.com/Duke1616/ecmdb/internal/permission/internal/service"
 	"github.com/Duke1616/ecmdb/internal/permission/internal/web"
@@ -16,7 +17,8 @@ import (
 	"github.com/google/wire"
 )
 
-func InitModule(db *mongox.Mongo, q mq.MQ, roleModule *role.Module, menuModule *menu.Module, policyModule *policy.Module) (*Module, error) {
+func InitModule(db *mongox.Mongo, q mq.MQ, roleModule *role.Module, menuModule *menu.Module,
+	policyModule *policy.Module, modelModule *model.Module) (*Module, error) {
 	wire.Build(
 		web.NewHandler,
 		service.NewService,
@@ -25,6 +27,7 @@ func InitModule(db *mongox.Mongo, q mq.MQ, roleModule *role.Module, menuModule *
 		wire.FieldsOf(new(*menu.Module), "Svc"),
 		wire.FieldsOf(new(*role.Module), "Svc"),
 		wire.FieldsOf(new(*policy.Module), "Svc"),
+		wire.FieldsOf(new(*model.Module), "Svc", "MGSvc"),
 	)
 	return new(Module), nil
 }

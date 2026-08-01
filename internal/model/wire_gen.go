@@ -12,8 +12,10 @@ import (
 	"github.com/Duke1616/ecmdb/internal/model/internal/repository/dao"
 	"github.com/Duke1616/ecmdb/internal/model/internal/service"
 	"github.com/Duke1616/ecmdb/internal/model/internal/web"
+	"github.com/Duke1616/ecmdb/internal/policy"
 	"github.com/Duke1616/ecmdb/internal/relation"
 	"github.com/Duke1616/ecmdb/internal/resource"
+	"github.com/Duke1616/ecmdb/internal/role"
 	"github.com/Duke1616/ecmdb/pkg/mongox"
 	"github.com/google/wire"
 	"sync"
@@ -21,7 +23,7 @@ import (
 
 // Injectors from wire.go:
 
-func InitModule(db *mongox.Mongo, rmModule *relation.Module, attrModule *attribute.Module, resourceSvc *resource.Module) (*Module, error) {
+func InitModule(db *mongox.Mongo, rmModule *relation.Module, attrModule *attribute.Module, resourceSvc *resource.Module, roleModule *role.Module, policyModule *policy.Module) (*Module, error) {
 	modelDAO := InitModelDAO(db)
 	modelRepository := repository.NewModelRepository(modelDAO)
 	v := service.NewModelService(modelRepository)
@@ -31,11 +33,13 @@ func InitModule(db *mongox.Mongo, rmModule *relation.Module, attrModule *attribu
 	v3 := rmModule.RMSvc
 	v4 := attrModule.Svc
 	v5 := resourceSvc.EncryptedSvc
-	v6 := web.NewHandler(v, v2, v3, v4, v5)
+	v6 := roleModule.Svc
+	v7 := policyModule.Svc
+	v8 := web.NewHandler(v, v2, v3, v4, v5, v6, v7)
 	module := &Module{
 		Svc:   v,
 		MGSvc: v2,
-		Hdl:   v6,
+		Hdl:   v8,
 	}
 	return module, nil
 }

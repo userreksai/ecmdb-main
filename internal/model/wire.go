@@ -10,8 +10,10 @@ import (
 	"github.com/Duke1616/ecmdb/internal/model/internal/repository/dao"
 	"github.com/Duke1616/ecmdb/internal/model/internal/service"
 	"github.com/Duke1616/ecmdb/internal/model/internal/web"
+	"github.com/Duke1616/ecmdb/internal/policy"
 	"github.com/Duke1616/ecmdb/internal/relation"
 	"github.com/Duke1616/ecmdb/internal/resource"
+	"github.com/Duke1616/ecmdb/internal/role"
 	"github.com/Duke1616/ecmdb/pkg/mongox"
 	"github.com/google/wire"
 )
@@ -21,13 +23,16 @@ var ProviderSet = wire.NewSet(
 	initMGProvider,
 	initModelProvider)
 
-func InitModule(db *mongox.Mongo, rmModule *relation.Module, attrModule *attribute.Module, resourceSvc *resource.Module) (*Module, error) {
+func InitModule(db *mongox.Mongo, rmModule *relation.Module, attrModule *attribute.Module, resourceSvc *resource.Module,
+	roleModule *role.Module, policyModule *policy.Module) (*Module, error) {
 	wire.Build(
 		ProviderSet,
 		InitModelDAO,
 		wire.FieldsOf(new(*relation.Module), "RMSvc"),
 		wire.FieldsOf(new(*attribute.Module), "Svc"),
 		wire.FieldsOf(new(*resource.Module), "EncryptedSvc"),
+		wire.FieldsOf(new(*role.Module), "Svc"),
+		wire.FieldsOf(new(*policy.Module), "Svc"),
 		wire.Struct(new(Module), "*"),
 	)
 	return new(Module), nil

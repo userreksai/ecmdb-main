@@ -7,12 +7,14 @@ import (
 	"sync"
 
 	"github.com/Duke1616/ecmdb/internal/attribute"
+	"github.com/Duke1616/ecmdb/internal/policy"
 	"github.com/Duke1616/ecmdb/internal/relation"
 	"github.com/Duke1616/ecmdb/internal/resource/internal/event"
 	"github.com/Duke1616/ecmdb/internal/resource/internal/repository"
 	"github.com/Duke1616/ecmdb/internal/resource/internal/repository/dao"
 	"github.com/Duke1616/ecmdb/internal/resource/internal/service"
 	"github.com/Duke1616/ecmdb/internal/resource/internal/web"
+	"github.com/Duke1616/ecmdb/internal/role"
 	"github.com/Duke1616/ecmdb/pkg/cryptox"
 	"github.com/Duke1616/ecmdb/pkg/mongox"
 	"github.com/ecodeclub/mq-api"
@@ -24,7 +26,7 @@ var ProviderSet = wire.NewSet(
 	repository.NewResourceRepository)
 
 func InitModule(db *mongox.Mongo, attributeModule *attribute.Module, relationModule *relation.Module,
-	q mq.MQ, crypto *cryptox.CryptoRegistry) (*Module, error) {
+	q mq.MQ, crypto *cryptox.CryptoRegistry, roleModule *role.Module, policyModule *policy.Module) (*Module, error) {
 	wire.Build(
 		ProviderSet,
 		NewEncryptedService,
@@ -34,6 +36,8 @@ func InitModule(db *mongox.Mongo, attributeModule *attribute.Module, relationMod
 		initConsumer,
 		wire.FieldsOf(new(*attribute.Module), "Svc"),
 		wire.FieldsOf(new(*relation.Module), "RRSvc"),
+		wire.FieldsOf(new(*role.Module), "Svc"),
+		wire.FieldsOf(new(*policy.Module), "Svc"),
 		wire.Struct(new(Module), "*"),
 	)
 	return new(Module), nil

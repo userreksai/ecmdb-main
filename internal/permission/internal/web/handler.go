@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/Duke1616/ecmdb/internal/menu"
+	"github.com/Duke1616/ecmdb/internal/model"
 	"github.com/Duke1616/ecmdb/internal/permission/internal/service"
 	"github.com/Duke1616/ecmdb/internal/pkg/authctx"
 	"github.com/Duke1616/ecmdb/internal/policy"
@@ -20,14 +21,19 @@ type Handler struct {
 	roleSvc   role.Service
 	menuSvc   menu.Service
 	policySvc policy.Service
+	modelSvc  model.Service
+	mgSvc     model.MGService
 }
 
-func NewHandler(roleSvc role.Service, menuSvc menu.Service, policySvc policy.Service, svc service.Service) *Handler {
+func NewHandler(roleSvc role.Service, menuSvc menu.Service, policySvc policy.Service, modelSvc model.Service,
+	mgSvc model.MGService, svc service.Service) *Handler {
 	return &Handler{
 		svc:       svc,
 		roleSvc:   roleSvc,
 		menuSvc:   menuSvc,
 		policySvc: policySvc,
+		modelSvc:  modelSvc,
+		mgSvc:     mgSvc,
 	}
 }
 
@@ -44,9 +50,11 @@ func (h *Handler) PrivateRoutes(server *gin.Engine) {
 
 func (h *Handler) ListRolePermission(ctx *gin.Context, req RolePermissionReq) (ginx.Result, error) {
 	var (
-		eg errgroup.Group
-		r  role.Role
-		ms []menu.Menu
+		eg          errgroup.Group
+		r           role.Role
+		ms          []menu.Menu
+		models      []model.Model
+		modelGroups []model.ModelGroup
 	)
 	eg.Go(func() error {
 		var err error
@@ -59,6 +67,18 @@ func (h *Handler) ListRolePermission(ctx *gin.Context, req RolePermissionReq) (g
 		ms, err = h.menuSvc.GetAllMenu(ctx)
 		return err
 	})
+
+	eg.Go(func() error {
+		var err error
+		models, err = h.modelSvc.ListAll(ctx)
+		return err
+	})
+
+	eg.Go(func() error {
+		var err error
+		modelGroups, _, err = h.mgSvc.List(ctx, 0, 0)
+		return err
+	})
 	if err := eg.Wait(); err != nil {
 		return systemErrorResult, err
 	}
@@ -68,8 +88,10 @@ func (h *Handler) ListRolePermission(ctx *gin.Context, req RolePermissionReq) (g
 
 	return ginx.Result{
 		Data: RetrieveRolePermission{
-			AuthzIds: menuIds,
-			Menu:     GetMenusTree(ms),
+			AuthzIds:        menuIds,
+			Menu:            GetMenusTree(ms),
+			ModelGroups:     buildModelPermissionGroups(models, modelGroups),
+			DeniedModelUIDs: append([]string{}, r.DeniedModelUIDs...),
 		},
 		Msg: "获取角色权限成功",
 	}, nil
@@ -82,7 +104,11 @@ func (h *Handler) ChangePermissionForRoleReq(ctx *gin.Context, req ChangePermiss
 	}
 
 	// 角色拥有菜单权限
-	_, err = h.roleSvc.CreateOrUpdateRoleMenuIds(ctx, req.RoleCode, menuIds)
+	if req.DeniedModelUIDs == nil {
+		_, err = h.roleSvc.CreateOrUpdateRoleMenuIds(ctx, req.RoleCode, menuIds)
+	} else {
+		_, err = h.roleSvc.CreateOrUpdateRolePermissions(ctx, req.RoleCode, menuIds, *req.DeniedModelUIDs)
+	}
 	if err != nil {
 		return systemErrorResult, err
 	}
@@ -97,6 +123,31 @@ func (h *Handler) ChangePermissionForRoleReq(ctx *gin.Context, req ChangePermiss
 		Msg:  "添加角色权限成功",
 		Data: "ok",
 	}, nil
+}
+
+func buildModelPermissionGroups(models []model.Model, groups []model.ModelGroup) []ModelPermissionGroup {
+	modelsByGroup := make(map[int64][]ModelPermission, len(groups))
+	for _, m := range models {
+		modelsByGroup[m.GroupId] = append(modelsByGroup[m.GroupId], ModelPermission{
+			ID:   m.ID,
+			Name: m.Name,
+			UID:  m.UID,
+		})
+	}
+
+	result := make([]ModelPermissionGroup, 0, len(groups))
+	for _, group := range groups {
+		groupModels := modelsByGroup[group.ID]
+		if groupModels == nil {
+			groupModels = []ModelPermission{}
+		}
+		result = append(result, ModelPermissionGroup{
+			GroupID:   group.ID,
+			GroupName: group.Name,
+			Models:    groupModels,
+		})
+	}
+	return result
 }
 
 func (h *Handler) expandMenuIdsWithParents(ctx context.Context, menuIds []int64) ([]int64, error) {

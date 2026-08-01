@@ -50,8 +50,9 @@ type Meta struct {
 }
 
 type ChangePermissionForRoleReq struct {
-	RoleCode string  `json:"role_code"`
-	MenuIds  []int64 `json:"menu_ids"`
+	RoleCode        string    `json:"role_code"`
+	MenuIds         []int64   `json:"menu_ids"`
+	DeniedModelUIDs *[]string `json:"denied_model_uids"`
 }
 
 type FindUserPermission struct {
@@ -59,8 +60,22 @@ type FindUserPermission struct {
 }
 
 type RetrieveRolePermission struct {
-	AuthzIds []int64 `json:"authz_ids"`
-	Menu     []*Menu `json:"menus"`
+	AuthzIds        []int64                `json:"authz_ids"`
+	Menu            []*Menu                `json:"menus"`
+	ModelGroups     []ModelPermissionGroup `json:"model_groups"`
+	DeniedModelUIDs []string               `json:"denied_model_uids"`
+}
+
+type ModelPermissionGroup struct {
+	GroupID   int64             `json:"group_id"`
+	GroupName string            `json:"group_name"`
+	Models    []ModelPermission `json:"models"`
+}
+
+type ModelPermission struct {
+	ID   int64  `json:"id"`
+	Name string `json:"name"`
+	UID  string `json:"uid"`
 }
 
 type RetrieveUserPermission struct {

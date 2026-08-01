@@ -22,6 +22,7 @@ type RoleDAO interface {
 	FindByExcludeCodes(ctx context.Context, offset, limit int64, codes []string) ([]Role, error)
 	CountByExcludeCodes(ctx context.Context, codes []string) (int64, error)
 	CreateOrUpdateRoleMenuIds(ctx context.Context, code string, menuIds []int64) (int64, error)
+	CreateOrUpdateRolePermissions(ctx context.Context, code string, menuIds []int64, deniedModelUIDs []string) (int64, error)
 	FindByMenuId(ctx context.Context, menuId int64) ([]Role, error)
 	FindByRoleCode(ctx context.Context, code string) (Role, error)
 }
@@ -87,6 +88,23 @@ func (dao *roleDAO) CreateOrUpdateRoleMenuIds(ctx context.Context, code string, 
 	count, err := col.UpdateOne(ctx, filter, updateDoc)
 	if err != nil {
 		return 0, fmt.Errorf("修改文档操作: %w", err)
+	}
+
+	return count.ModifiedCount, nil
+}
+
+func (dao *roleDAO) CreateOrUpdateRolePermissions(ctx context.Context, code string, menuIds []int64, deniedModelUIDs []string) (int64, error) {
+	col := dao.db.Collection(RoleCollection)
+	updateDoc := bson.M{
+		"$set": bson.M{
+			"menu_ids":          menuIds,
+			"denied_model_uids": deniedModelUIDs,
+			"utime":             time.Now().UnixMilli(),
+		},
+	}
+	count, err := col.UpdateOne(ctx, bson.M{"code": code}, updateDoc)
+	if err != nil {
+		return 0, fmt.Errorf("update role permissions: %w", err)
 	}
 
 	return count.ModifiedCount, nil
@@ -240,12 +258,13 @@ func NewRoleDAO(db *mongox.Mongo) RoleDAO {
 }
 
 type Role struct {
-	Id      int64   `bson:"id"`
-	Name    string  `bson:"name"`
-	Code    string  `bson:"code"`
-	Desc    string  `bson:"desc"`
-	Status  bool    `bson:"status"`
-	MenuIds []int64 `bson:"menu_ids"`
-	Ctime   int64   `bson:"ctime"`
-	Utime   int64   `bson:"utime"`
+	Id              int64    `bson:"id"`
+	Name            string   `bson:"name"`
+	Code            string   `bson:"code"`
+	Desc            string   `bson:"desc"`
+	Status          bool     `bson:"status"`
+	MenuIds         []int64  `bson:"menu_ids"`
+	DeniedModelUIDs []string `bson:"denied_model_uids,omitempty"`
+	Ctime           int64    `bson:"ctime"`
+	Utime           int64    `bson:"utime"`
 }

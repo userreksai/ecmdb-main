@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"strings"
 
 	"github.com/Duke1616/ecmdb/internal/role/internal/domain"
 	"github.com/Duke1616/ecmdb/internal/role/internal/repository"
@@ -17,6 +18,12 @@ type Service interface {
 	UpdateRole(ctx context.Context, req domain.Role) (int64, error)
 	// CreateOrUpdateRoleMenuIds 新增角色的菜单权限
 	CreateOrUpdateRoleMenuIds(ctx context.Context, code string, menuIds []int64) (int64, error)
+	// CreateOrUpdateRolePermissions updates menu permissions and model visibility in one database operation.
+	CreateOrUpdateRolePermissions(ctx context.Context, code string, menuIds []int64, deniedModelUIDs []string) (int64, error)
+	// FilterAccessibleModelUIDs applies the union of all role model permissions.
+	FilterAccessibleModelUIDs(ctx context.Context, roleCodes []string, modelUIDs []string) ([]string, error)
+	// CanAccessModel reports whether at least one role grants access to the model.
+	CanAccessModel(ctx context.Context, roleCodes []string, modelUID string) (bool, error)
 	// FindByExcludeCodes 查找排除当前角色编码的数据
 	FindByExcludeCodes(ctx context.Context, offset, limit int64, codes []string) ([]domain.Role, int64, error)
 	// FindByIncludeCodes 查找包含当前角色编码的数据
@@ -47,6 +54,80 @@ func (s *service) FindByMenuId(ctx context.Context, menuId int64) ([]domain.Role
 
 func (s *service) CreateOrUpdateRoleMenuIds(ctx context.Context, code string, menuIds []int64) (int64, error) {
 	return s.repo.CreateOrUpdateRoleMenuIds(ctx, code, menuIds)
+}
+
+func (s *service) CreateOrUpdateRolePermissions(ctx context.Context, code string, menuIds []int64, deniedModelUIDs []string) (int64, error) {
+	return s.repo.CreateOrUpdateRolePermissions(ctx, code, menuIds, normalizeModelUIDs(deniedModelUIDs))
+}
+
+func (s *service) FilterAccessibleModelUIDs(ctx context.Context, roleCodes []string, modelUIDs []string) ([]string, error) {
+	if len(roleCodes) == 0 || len(modelUIDs) == 0 {
+		return []string{}, nil
+	}
+
+	roles, err := s.repo.FindByIncludeCodes(ctx, roleCodes)
+	if err != nil {
+		return nil, err
+	}
+	return filterAccessibleModelUIDs(roles, modelUIDs), nil
+}
+
+func filterAccessibleModelUIDs(roles []domain.Role, modelUIDs []string) []string {
+	deniedByRole := make([]map[string]struct{}, 0, len(roles))
+	for _, r := range roles {
+		denied := make(map[string]struct{}, len(r.DeniedModelUIDs))
+		for _, uid := range r.DeniedModelUIDs {
+			denied[uid] = struct{}{}
+		}
+		deniedByRole = append(deniedByRole, denied)
+	}
+
+	result := make([]string, 0, len(modelUIDs))
+	seen := make(map[string]struct{}, len(modelUIDs))
+	for _, uid := range modelUIDs {
+		uid = strings.TrimSpace(uid)
+		if uid == "" {
+			continue
+		}
+		if _, exists := seen[uid]; exists {
+			continue
+		}
+
+		for _, denied := range deniedByRole {
+			if _, isDenied := denied[uid]; !isDenied {
+				result = append(result, uid)
+				seen[uid] = struct{}{}
+				break
+			}
+		}
+	}
+
+	return result
+}
+
+func (s *service) CanAccessModel(ctx context.Context, roleCodes []string, modelUID string) (bool, error) {
+	allowed, err := s.FilterAccessibleModelUIDs(ctx, roleCodes, []string{modelUID})
+	if err != nil {
+		return false, err
+	}
+	return len(allowed) == 1, nil
+}
+
+func normalizeModelUIDs(modelUIDs []string) []string {
+	result := make([]string, 0, len(modelUIDs))
+	seen := make(map[string]struct{}, len(modelUIDs))
+	for _, uid := range modelUIDs {
+		uid = strings.TrimSpace(uid)
+		if uid == "" {
+			continue
+		}
+		if _, exists := seen[uid]; exists {
+			continue
+		}
+		seen[uid] = struct{}{}
+		result = append(result, uid)
+	}
+	return result
 }
 
 func (s *service) FindByExcludeCodes(ctx context.Context, offset, limit int64, codes []string) ([]domain.Role, int64, error) {

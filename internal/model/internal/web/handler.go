@@ -2,12 +2,16 @@ package web
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/Duke1616/ecmdb/internal/attribute"
 	"github.com/Duke1616/ecmdb/internal/model/internal/domain"
 	"github.com/Duke1616/ecmdb/internal/model/internal/service"
+	"github.com/Duke1616/ecmdb/internal/pkg/authctx"
+	"github.com/Duke1616/ecmdb/internal/policy"
 	"github.com/Duke1616/ecmdb/internal/relation"
 	"github.com/Duke1616/ecmdb/internal/resource"
+	"github.com/Duke1616/ecmdb/internal/role"
 	"github.com/Duke1616/ecmdb/pkg/ginx"
 	"github.com/ecodeclub/ekit/slice"
 	"github.com/ecodeclub/ginx/gctx"
@@ -21,16 +25,20 @@ type Handler struct {
 	resourceSvc resource.EncryptedSvc
 	RMSvc       relation.RMSvc
 	AttrSvc     attribute.Service
+	roleSvc     role.Service
+	policySvc   policy.Service
 }
 
 func NewHandler(svc service.Service, mgSvc service.MGService, rmSvc relation.RMSvc, attrSvc attribute.Service,
-	resourceSvc resource.EncryptedSvc) *Handler {
+	resourceSvc resource.EncryptedSvc, roleSvc role.Service, policySvc policy.Service) *Handler {
 	return &Handler{
 		svc:         svc,
 		mgSvc:       mgSvc,
 		AttrSvc:     attrSvc,
 		RMSvc:       rmSvc,
 		resourceSvc: resourceSvc,
+		roleSvc:     roleSvc,
+		policySvc:   policySvc,
 	}
 }
 
@@ -249,12 +257,60 @@ func (h *Handler) ListModelsByGroup(ctx *gin.Context, req Page) (ginx.Result, er
 		return systemErrorResult, err
 	}
 
+	if req.ApplyModelPermission {
+		filteredModels, err := h.filterAccessibleModels(ctx, models)
+		if err != nil {
+			return systemErrorResult, err
+		}
+		models = filteredModels
+		mgs = filterGroupsWithModels(models, mgs)
+	}
+
 	// 前端展示
 	return ginx.Result{
 		Data: RetrieveModelListByGroupId{
 			Mgs: retrieveModelListByGroupId(models, mgs, resourceCount),
 		},
 	}, nil
+}
+
+func (h *Handler) filterAccessibleModels(ctx *gin.Context, models []domain.Model) ([]domain.Model, error) {
+	uid, ok := authctx.UID(ctx)
+	if !ok {
+		return nil, fmt.Errorf("get current user failed")
+	}
+
+	roleCodes, err := h.policySvc.GetRolesForUser(ctx, uid)
+	if err != nil {
+		return nil, err
+	}
+	modelUIDs := slice.Map(models, func(_ int, item domain.Model) string {
+		return item.UID
+	})
+	allowedUIDs, err := h.roleSvc.FilterAccessibleModelUIDs(ctx, roleCodes, modelUIDs)
+	if err != nil {
+		return nil, err
+	}
+	allowed := make(map[string]struct{}, len(allowedUIDs))
+	for _, modelUID := range allowedUIDs {
+		allowed[modelUID] = struct{}{}
+	}
+
+	return slice.FilterMap(models, func(_ int, item domain.Model) (domain.Model, bool) {
+		_, exists := allowed[item.UID]
+		return item, exists
+	}), nil
+}
+
+func filterGroupsWithModels(models []domain.Model, groups []domain.ModelGroup) []domain.ModelGroup {
+	groupIDs := make(map[int64]struct{}, len(models))
+	for _, item := range models {
+		groupIDs[item.GroupId] = struct{}{}
+	}
+	return slice.FilterMap(groups, func(_ int, group domain.ModelGroup) (domain.ModelGroup, bool) {
+		_, exists := groupIDs[group.ID]
+		return group, exists
+	})
 }
 
 func (h *Handler) ListModels(ctx *gin.Context, req Page) (ginx.Result, error) {

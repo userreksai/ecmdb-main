@@ -18,6 +18,7 @@ type RoleRepository interface {
 	FindByExcludeCodes(ctx context.Context, offset, limit int64, codes []string) ([]domain.Role, error)
 	CountByExcludeCodes(ctx context.Context, codes []string) (int64, error)
 	CreateOrUpdateRoleMenuIds(ctx context.Context, code string, menuIds []int64) (int64, error)
+	CreateOrUpdateRolePermissions(ctx context.Context, code string, menuIds []int64, deniedModelUIDs []string) (int64, error)
 	FindByMenuId(ctx context.Context, menuId int64) ([]domain.Role, error)
 	FindByRoleCode(ctx context.Context, code string) (domain.Role, error)
 }
@@ -44,6 +45,10 @@ func (repo *roleRepository) FindByMenuId(ctx context.Context, menuId int64) ([]d
 
 func (repo *roleRepository) CreateOrUpdateRoleMenuIds(ctx context.Context, code string, menuIds []int64) (int64, error) {
 	return repo.dao.CreateOrUpdateRoleMenuIds(ctx, code, menuIds)
+}
+
+func (repo *roleRepository) CreateOrUpdateRolePermissions(ctx context.Context, code string, menuIds []int64, deniedModelUIDs []string) (int64, error) {
+	return repo.dao.CreateOrUpdateRolePermissions(ctx, code, menuIds, deniedModelUIDs)
 }
 
 func (repo *roleRepository) FindByIncludeCodes(ctx context.Context, codes []string) ([]domain.Role, error) {
@@ -91,21 +96,23 @@ func NewRoleRepository(dao dao.RoleDAO) RoleRepository {
 
 func (repo *roleRepository) toEntity(req domain.Role) dao.Role {
 	return dao.Role{
-		Id:     req.Id,
-		Name:   req.Name,
-		Code:   req.Code,
-		Desc:   req.Desc,
-		Status: req.Status,
+		Id:              req.Id,
+		Name:            req.Name,
+		Code:            req.Code,
+		Desc:            req.Desc,
+		Status:          req.Status,
+		DeniedModelUIDs: req.DeniedModelUIDs,
 	}
 }
 
 func (repo *roleRepository) toDomain(req dao.Role) domain.Role {
 	return domain.Role{
-		Id:      req.Id,
-		Name:    req.Name,
-		Code:    req.Code,
-		Desc:    req.Desc,
-		Status:  req.Status,
-		MenuIds: req.MenuIds,
+		Id:              req.Id,
+		Name:            req.Name,
+		Code:            req.Code,
+		Desc:            req.Desc,
+		Status:          req.Status,
+		MenuIds:         req.MenuIds,
+		DeniedModelUIDs: req.DeniedModelUIDs,
 	}
 }

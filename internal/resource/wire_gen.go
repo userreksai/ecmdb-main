@@ -9,12 +9,14 @@ package resource
 import (
 	"context"
 	"github.com/Duke1616/ecmdb/internal/attribute"
+	"github.com/Duke1616/ecmdb/internal/policy"
 	"github.com/Duke1616/ecmdb/internal/relation"
 	"github.com/Duke1616/ecmdb/internal/resource/internal/event"
 	"github.com/Duke1616/ecmdb/internal/resource/internal/repository"
 	"github.com/Duke1616/ecmdb/internal/resource/internal/repository/dao"
 	"github.com/Duke1616/ecmdb/internal/resource/internal/service"
 	"github.com/Duke1616/ecmdb/internal/resource/internal/web"
+	"github.com/Duke1616/ecmdb/internal/role"
 	"github.com/Duke1616/ecmdb/pkg/cryptox"
 	"github.com/Duke1616/ecmdb/pkg/mongox"
 	"github.com/ecodeclub/mq-api"
@@ -24,7 +26,7 @@ import (
 
 // Injectors from wire.go:
 
-func InitModule(db *mongox.Mongo, attributeModule *attribute.Module, relationModule *relation.Module, q mq.MQ, crypto *cryptox.CryptoRegistry) (*Module, error) {
+func InitModule(db *mongox.Mongo, attributeModule *attribute.Module, relationModule *relation.Module, q mq.MQ, crypto *cryptox.CryptoRegistry, roleModule *role.Module, policyModule *policy.Module) (*Module, error) {
 	resourceDAO := InitResourceDAO(db)
 	resourceRepository := repository.NewResourceRepository(resourceDAO)
 	v := NewService(resourceRepository)
@@ -32,12 +34,14 @@ func InitModule(db *mongox.Mongo, attributeModule *attribute.Module, relationMod
 	cryptoxCrypto := InitCrypto(crypto)
 	v3 := NewEncryptedService(v, v2, cryptoxCrypto)
 	v4 := relationModule.RRSvc
-	v5 := web.NewHandler(v3, v2, v4)
+	v5 := roleModule.Svc
+	v6 := policyModule.Svc
+	v7 := web.NewHandler(v3, v2, v4, v5, v6)
 	fieldSecureAttrChangeConsumer := initConsumer(q, v3, cryptoxCrypto)
 	module := &Module{
 		Svc:          v,
 		EncryptedSvc: v3,
-		Hdl:          v5,
+		Hdl:          v7,
 		c:            fieldSecureAttrChangeConsumer,
 	}
 	return module, nil

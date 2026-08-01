@@ -1,31 +1,138 @@
 package web
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
 
 	"github.com/Duke1616/ecmdb/internal/attribute"
+	"github.com/Duke1616/ecmdb/internal/pkg/authctx"
+	"github.com/Duke1616/ecmdb/internal/policy"
 	"github.com/Duke1616/ecmdb/internal/relation"
 	"github.com/Duke1616/ecmdb/internal/resource/internal/domain"
 	"github.com/Duke1616/ecmdb/internal/resource/internal/service"
+	"github.com/Duke1616/ecmdb/internal/role"
 	"github.com/Duke1616/ecmdb/pkg/ginx"
 	"github.com/ecodeclub/ekit/slice"
 	"github.com/gin-gonic/gin"
 )
 
 type Handler struct {
-	svc     service.EncryptedSvc
-	attrSvc attribute.Service
-	RRSvc   relation.RRSvc
+	svc       service.EncryptedSvc
+	attrSvc   attribute.Service
+	RRSvc     relation.RRSvc
+	roleSvc   role.Service
+	policySvc policy.Service
 }
 
-func NewHandler(service service.EncryptedSvc, attributeSvc attribute.Service, RRSvc relation.RRSvc) *Handler {
+func NewHandler(service service.EncryptedSvc, attributeSvc attribute.Service, RRSvc relation.RRSvc,
+	roleSvc role.Service, policySvc policy.Service) *Handler {
 	return &Handler{
-		svc:     service,
-		attrSvc: attributeSvc,
-		RRSvc:   RRSvc,
+		svc:       service,
+		attrSvc:   attributeSvc,
+		RRSvc:     RRSvc,
+		roleSvc:   roleSvc,
+		policySvc: policySvc,
 	}
+}
+
+var errModelAccessDenied = errors.New("model asset access denied")
+
+func (h *Handler) authorizeModel(ctx *gin.Context, modelUID string) error {
+	allowed, err := h.allowedModelUIDs(ctx, []string{modelUID})
+	if err != nil {
+		return err
+	}
+	if _, exists := allowed[modelUID]; !exists {
+		return errModelAccessDenied
+	}
+	return nil
+}
+
+func (h *Handler) allowedModelUIDs(ctx *gin.Context, modelUIDs []string) (map[string]struct{}, error) {
+	if h.roleSvc == nil || h.policySvc == nil {
+		allowed := make(map[string]struct{}, len(modelUIDs))
+		for _, modelUID := range modelUIDs {
+			allowed[modelUID] = struct{}{}
+		}
+		return allowed, nil
+	}
+	uid, ok := authctx.UID(ctx)
+	if !ok {
+		return nil, fmt.Errorf("get current user failed")
+	}
+	roleCodes, err := h.policySvc.GetRolesForUser(ctx, uid)
+	if err != nil {
+		return nil, err
+	}
+	accessible, err := h.roleSvc.FilterAccessibleModelUIDs(ctx, roleCodes, modelUIDs)
+	if err != nil {
+		return nil, err
+	}
+	allowed := make(map[string]struct{}, len(accessible))
+	for _, modelUID := range accessible {
+		allowed[modelUID] = struct{}{}
+	}
+	return allowed, nil
+}
+
+func (h *Handler) filterAccessibleRelations(ctx *gin.Context, relations []relation.ResourceRelation) ([]relation.ResourceRelation, error) {
+	modelUIDs := make([]string, 0, len(relations)*2)
+	for _, item := range relations {
+		modelUIDs = append(modelUIDs, item.SourceModelUID, item.TargetModelUID)
+	}
+	allowed, err := h.allowedModelUIDs(ctx, modelUIDs)
+	if err != nil {
+		return nil, err
+	}
+
+	result := make([]relation.ResourceRelation, 0, len(relations))
+	for _, item := range relations {
+		_, sourceAllowed := allowed[item.SourceModelUID]
+		_, targetAllowed := allowed[item.TargetModelUID]
+		if sourceAllowed && targetAllowed {
+			result = append(result, item)
+		}
+	}
+	return result, nil
+}
+
+func (h *Handler) filterAccessibleResources(ctx *gin.Context, resources []domain.Resource) ([]domain.Resource, error) {
+	modelUIDs := make([]string, 0, len(resources))
+	for _, item := range resources {
+		modelUIDs = append(modelUIDs, item.ModelUID)
+	}
+	allowed, err := h.allowedModelUIDs(ctx, modelUIDs)
+	if err != nil {
+		return nil, err
+	}
+
+	result := make([]domain.Resource, 0, len(resources))
+	for _, item := range resources {
+		if _, exists := allowed[item.ModelUID]; exists {
+			result = append(result, item)
+		}
+	}
+	return result, nil
+}
+
+func (h *Handler) authorizeResource(ctx *gin.Context, resourceID int64) error {
+	if h.roleSvc == nil || h.policySvc == nil {
+		return nil
+	}
+	resource, err := h.svc.FindResourceById(ctx, nil, resourceID)
+	if err != nil {
+		return err
+	}
+	return h.authorizeModel(ctx, resource.ModelUID)
+}
+
+func modelAccessError(err error) (ginx.Result, error) {
+	if errors.Is(err, errModelAccessDenied) {
+		return ginx.Result{Code: 403001, Msg: "无权访问该模型资产"}, nil
+	}
+	return systemErrorResult, err
 }
 
 func (h *Handler) PrivateRoutes(server *gin.Engine) {
@@ -60,6 +167,9 @@ func (h *Handler) PrivateRoutes(server *gin.Engine) {
 }
 
 func (h *Handler) CreateResource(ctx *gin.Context, req CreateResourceReq) (ginx.Result, error) {
+	if err := h.authorizeModel(ctx, req.ModelUid); err != nil {
+		return modelAccessError(err)
+	}
 	id, err := h.svc.CreateResource(ctx, h.toDomain(req))
 
 	if err != nil {
@@ -73,6 +183,12 @@ func (h *Handler) CreateResource(ctx *gin.Context, req CreateResourceReq) (ginx.
 }
 
 func (h *Handler) DetailResource(ctx *gin.Context, req DetailResourceReq) (ginx.Result, error) {
+	if err := h.authorizeModel(ctx, req.ModelUid); err != nil {
+		return modelAccessError(err)
+	}
+	if err := h.authorizeResource(ctx, req.ID); err != nil {
+		return modelAccessError(err)
+	}
 	fields, err := h.attrSvc.SearchAttributeFieldsByModelUid(ctx, req.ModelUid)
 	if err != nil {
 		return systemErrorResult, err
@@ -90,6 +206,9 @@ func (h *Handler) DetailResource(ctx *gin.Context, req DetailResourceReq) (ginx.
 }
 
 func (h *Handler) SetCustomField(ctx *gin.Context, req SetCustomFieldReq) (ginx.Result, error) {
+	if err := h.authorizeResource(ctx, req.Id); err != nil {
+		return modelAccessError(err)
+	}
 	count, err := h.svc.SetCustomField(ctx, req.Id, req.Field, req.Data)
 	if err != nil {
 		return systemErrorResult, err
@@ -101,6 +220,9 @@ func (h *Handler) SetCustomField(ctx *gin.Context, req SetCustomFieldReq) (ginx.
 }
 
 func (h *Handler) ListResource(ctx *gin.Context, req ListResourceReq) (ginx.Result, error) {
+	if err := h.authorizeModel(ctx, req.ModelUid); err != nil {
+		return modelAccessError(err)
+	}
 	fields, err := h.attrSvc.SearchAttributeFieldsByModelUid(ctx, req.ModelUid)
 	if err != nil {
 		return systemErrorResult, err
@@ -130,6 +252,9 @@ func (h *Handler) ListResource(ctx *gin.Context, req ListResourceReq) (ginx.Resu
 }
 
 func (h *Handler) SearchModelResource(ctx *gin.Context, req SearchModelResourceReq) (ginx.Result, error) {
+	if err := h.authorizeModel(ctx, req.ModelUid); err != nil {
+		return modelAccessError(err)
+	}
 	fields, err := h.attrSvc.SearchAllAttributeFieldsByModelUid(ctx, req.ModelUid)
 	if err != nil {
 		return systemErrorResult, err
@@ -159,6 +284,12 @@ func (h *Handler) SearchModelResource(ctx *gin.Context, req SearchModelResourceR
 }
 
 func (h *Handler) UpdateResource(ctx *gin.Context, req UpdateResourceReq) (ginx.Result, error) {
+	if err := h.authorizeModel(ctx, req.ModelUid); err != nil {
+		return modelAccessError(err)
+	}
+	if err := h.authorizeResource(ctx, req.Id); err != nil {
+		return modelAccessError(err)
+	}
 	resource := h.toDomainUpdate(req)
 	t, err := h.svc.UpdateResource(ctx, resource)
 
@@ -172,6 +303,12 @@ func (h *Handler) UpdateResource(ctx *gin.Context, req UpdateResourceReq) (ginx.
 }
 
 func (h *Handler) ListCanBeFilterRelated(ctx *gin.Context, req ListCanBeRelatedReqByModel) (ginx.Result, error) {
+	if err := h.authorizeModel(ctx, req.ModelUid); err != nil {
+		return modelAccessError(err)
+	}
+	if err := h.authorizeResource(ctx, req.ResourceId); err != nil {
+		return modelAccessError(err)
+	}
 	var (
 		mUid       string
 		err        error
@@ -197,6 +334,9 @@ func (h *Handler) ListCanBeFilterRelated(ctx *gin.Context, req ListCanBeRelatedR
 	}
 	if err != nil {
 		return systemErrorResult, err
+	}
+	if err = h.authorizeModel(ctx, mUid); err != nil {
+		return modelAccessError(err)
 	}
 
 	fields, err := h.attrSvc.SearchAttributeFieldsByModelUid(ctx, mUid)
@@ -234,8 +374,22 @@ func (h *Handler) ListCanBeFilterRelated(ctx *gin.Context, req ListCanBeRelatedR
 }
 
 func (h *Handler) FindAllGraph(ctx *gin.Context, req ListDiagramReq) (ginx.Result, error) {
+	if err := h.authorizeModel(ctx, req.ModelUid); err != nil {
+		return modelAccessError(err)
+	}
+	if err := h.authorizeResource(ctx, req.ResourceId); err != nil {
+		return modelAccessError(err)
+	}
 	// 查询资产关联上下级拓扑
 	graph, _, err := h.RRSvc.ListDiagram(ctx, req.ModelUid, req.ResourceId)
+	if err != nil {
+		return systemErrorResult, err
+	}
+	graph.SRC, err = h.filterAccessibleRelations(ctx, graph.SRC)
+	if err != nil {
+		return systemErrorResult, err
+	}
+	graph.DST, err = h.filterAccessibleRelations(ctx, graph.DST)
 	if err != nil {
 		return systemErrorResult, err
 	}
@@ -312,8 +466,18 @@ func (h *Handler) FindAllGraph(ctx *gin.Context, req ListDiagramReq) (ginx.Resul
 }
 
 func (h *Handler) FindLeftGraph(ctx *gin.Context, req ListDiagramReq) (ginx.Result, error) {
+	if err := h.authorizeModel(ctx, req.ModelUid); err != nil {
+		return modelAccessError(err)
+	}
+	if err := h.authorizeResource(ctx, req.ResourceId); err != nil {
+		return modelAccessError(err)
+	}
 	// 查询资产关联上下级拓扑
 	graphLeft, _, err := h.RRSvc.ListDstResources(ctx, req.ModelUid, req.ResourceId)
+	if err != nil {
+		return systemErrorResult, err
+	}
+	graphLeft, err = h.filterAccessibleRelations(ctx, graphLeft)
 	if err != nil {
 		return systemErrorResult, err
 	}
@@ -363,8 +527,18 @@ func (h *Handler) FindLeftGraph(ctx *gin.Context, req ListDiagramReq) (ginx.Resu
 }
 
 func (h *Handler) FindRightGraph(ctx *gin.Context, req ListDiagramReq) (ginx.Result, error) {
+	if err := h.authorizeModel(ctx, req.ModelUid); err != nil {
+		return modelAccessError(err)
+	}
+	if err := h.authorizeResource(ctx, req.ResourceId); err != nil {
+		return modelAccessError(err)
+	}
 	// 查询资产关联上下级拓扑
 	graphRight, _, err := h.RRSvc.ListSrcResources(ctx, req.ModelUid, req.ResourceId)
+	if err != nil {
+		return systemErrorResult, err
+	}
+	graphRight, err = h.filterAccessibleRelations(ctx, graphRight)
 	if err != nil {
 		return systemErrorResult, err
 	}
@@ -414,8 +588,22 @@ func (h *Handler) FindRightGraph(ctx *gin.Context, req ListDiagramReq) (ginx.Res
 }
 
 func (h *Handler) FindDiagram(ctx *gin.Context, req ListDiagramReq) (ginx.Result, error) {
+	if err := h.authorizeModel(ctx, req.ModelUid); err != nil {
+		return modelAccessError(err)
+	}
+	if err := h.authorizeResource(ctx, req.ResourceId); err != nil {
+		return modelAccessError(err)
+	}
 	// 查询资产关联上下级拓扑
 	diagram, _, err := h.RRSvc.ListDiagram(ctx, req.ModelUid, req.ResourceId)
+	if err != nil {
+		return systemErrorResult, err
+	}
+	diagram.SRC, err = h.filterAccessibleRelations(ctx, diagram.SRC)
+	if err != nil {
+		return systemErrorResult, err
+	}
+	diagram.DST, err = h.filterAccessibleRelations(ctx, diagram.DST)
 	if err != nil {
 		return systemErrorResult, err
 	}
@@ -473,12 +661,19 @@ func (h *Handler) FindDiagram(ctx *gin.Context, req ListDiagramReq) (ginx.Result
 }
 
 func (h *Handler) ListResourceByIds(ctx *gin.Context, req ListResourceByIdsReq) (ginx.Result, error) {
+	if err := h.authorizeModel(ctx, req.ModelUid); err != nil {
+		return modelAccessError(err)
+	}
 	fields, err := h.attrSvc.SearchAttributeFieldsByModelUid(ctx, req.ModelUid)
 	if err != nil {
 		return systemErrorResult, err
 	}
 
 	resp, err := h.svc.ListResourceByIds(ctx, fields, req.ResourceIds)
+	if err != nil {
+		return systemErrorResult, err
+	}
+	resp, err = h.filterAccessibleResources(ctx, resp)
 	if err != nil {
 		return systemErrorResult, err
 	}
@@ -509,6 +704,20 @@ func (h *Handler) Search(ctx *gin.Context, req SearchReq) (ginx.Result, error) {
 	modelUids := slice.Map(search, func(idx int, src domain.SearchResource) string {
 		return src.ModelUid
 	})
+	allowedModelUIDs, err := h.allowedModelUIDs(ctx, modelUids)
+	if err != nil {
+		return systemErrorResult, err
+	}
+	search = slice.FilterMap(search, func(_ int, src domain.SearchResource) (domain.SearchResource, bool) {
+		_, allowed := allowedModelUIDs[src.ModelUid]
+		return src, allowed
+	})
+	if len(search) == 0 {
+		return ginx.Result{Data: []RetrieveSearchResources{}}, nil
+	}
+	modelUids = slice.Map(search, func(_ int, src domain.SearchResource) string {
+		return src.ModelUid
+	})
 
 	fields, err := h.attrSvc.SearchAttributeFieldsBySecure(ctx, modelUids)
 	if err != nil {
@@ -537,6 +746,9 @@ func (h *Handler) Search(ctx *gin.Context, req SearchReq) (ginx.Result, error) {
 }
 
 func (h *Handler) DeleteResource(ctx *gin.Context, req DeleteResourceReq) (ginx.Result, error) {
+	if err := h.authorizeResource(ctx, req.Id); err != nil {
+		return modelAccessError(err)
+	}
 	count, err := h.svc.DeleteResource(ctx, req.Id)
 	if err != nil {
 		return systemErrorResult, err
@@ -552,6 +764,9 @@ func (h *Handler) DeleteResource(ctx *gin.Context, req DeleteResourceReq) (ginx.
 }
 
 func (h *Handler) FindSecureData(ctx *gin.Context, req FindSecureReq) (ginx.Result, error) {
+	if err := h.authorizeResource(ctx, req.ID); err != nil {
+		return modelAccessError(err)
+	}
 	data, err := h.svc.FindSecureData(ctx, req.ID, req.FieldUid)
 	if err != nil {
 		return systemErrorResult, err
