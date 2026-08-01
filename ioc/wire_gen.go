@@ -72,7 +72,7 @@ func InitApp() (*App, error) {
 	if err != nil {
 		return nil, err
 	}
-	relationModule, err := relation.InitModule(mongo)
+	relationModule, err := relation.InitModule(mongo, roleModule, module)
 	if err != nil {
 		return nil, err
 	}
@@ -194,7 +194,7 @@ func InitApp() (*App, error) {
 	if err != nil {
 		return nil, err
 	}
-	handler19, err := terminal.InitModule(relationModule, resourceModule, attributeModule)
+	handler19, err := terminal.InitModule(relationModule, resourceModule, attributeModule, roleModule, module)
 	if err != nil {
 		return nil, err
 	}

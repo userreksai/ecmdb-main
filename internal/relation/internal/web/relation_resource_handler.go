@@ -1,11 +1,16 @@
 package web
 
 import (
+	"errors"
+	"fmt"
 	"sort"
 	"strings"
 
+	"github.com/Duke1616/ecmdb/internal/pkg/authctx"
+	"github.com/Duke1616/ecmdb/internal/policy"
 	"github.com/Duke1616/ecmdb/internal/relation/internal/domain"
 	"github.com/Duke1616/ecmdb/internal/relation/internal/service"
+	"github.com/Duke1616/ecmdb/internal/role"
 	"github.com/Duke1616/ecmdb/pkg/ginx"
 	"github.com/ecodeclub/ekit/slice"
 	"github.com/gin-gonic/gin"
@@ -13,13 +18,128 @@ import (
 )
 
 type RelationResourceHandler struct {
-	svc service.RelationResourceService
+	svc       service.RelationResourceService
+	roleSvc   role.Service
+	policySvc policy.Service
 }
 
-func NewRelationResourceHandler(svc service.RelationResourceService) *RelationResourceHandler {
+func NewRelationResourceHandler(svc service.RelationResourceService, roleSvc role.Service, policySvc policy.Service) *RelationResourceHandler {
 	return &RelationResourceHandler{
-		svc: svc,
+		svc:       svc,
+		roleSvc:   roleSvc,
+		policySvc: policySvc,
 	}
+}
+
+var errModelAccessDenied = errors.New("model asset access denied")
+
+func (h *RelationResourceHandler) allowedModelUIDs(ctx *gin.Context, modelUIDs []string) (map[string]struct{}, error) {
+	if h.roleSvc == nil || h.policySvc == nil {
+		allowed := make(map[string]struct{}, len(modelUIDs))
+		for _, modelUID := range modelUIDs {
+			allowed[modelUID] = struct{}{}
+		}
+		return allowed, nil
+	}
+	uid, ok := authctx.UID(ctx)
+	if !ok {
+		return nil, fmt.Errorf("get current user failed")
+	}
+	roleCodes, err := h.policySvc.GetRolesForUser(ctx, uid)
+	if err != nil {
+		return nil, err
+	}
+	accessible, err := h.roleSvc.FilterAccessibleModelUIDs(ctx, roleCodes, modelUIDs)
+	if err != nil {
+		return nil, err
+	}
+	allowed := make(map[string]struct{}, len(accessible))
+	for _, modelUID := range accessible {
+		allowed[modelUID] = struct{}{}
+	}
+	return allowed, nil
+}
+
+func (h *RelationResourceHandler) authorizeModels(ctx *gin.Context, modelUIDs ...string) error {
+	allowed, err := h.allowedModelUIDs(ctx, modelUIDs)
+	if err != nil {
+		return err
+	}
+	for _, modelUID := range modelUIDs {
+		if _, exists := allowed[modelUID]; !exists {
+			return errModelAccessDenied
+		}
+	}
+	return nil
+}
+
+func relationModelUIDs(relationName string) ([]string, error) {
+	parts := strings.Split(relationName, "_")
+	if len(parts) != 3 || parts[0] == "" || parts[2] == "" {
+		return nil, fmt.Errorf("invalid resource relation name: %s", relationName)
+	}
+	return []string{parts[0], parts[2]}, nil
+}
+
+func (h *RelationResourceHandler) authorizeRelation(ctx *gin.Context, relationName string) error {
+	modelUIDs, err := relationModelUIDs(relationName)
+	if err != nil {
+		return err
+	}
+	return h.authorizeModels(ctx, modelUIDs...)
+}
+
+func (h *RelationResourceHandler) filterRelations(ctx *gin.Context, relations []domain.ResourceRelation) ([]domain.ResourceRelation, error) {
+	modelUIDs := make([]string, 0, len(relations)*2)
+	for _, item := range relations {
+		modelUIDs = append(modelUIDs, item.SourceModelUID, item.TargetModelUID)
+	}
+	allowed, err := h.allowedModelUIDs(ctx, modelUIDs)
+	if err != nil {
+		return nil, err
+	}
+	return filterRelationsByAllowed(relations, allowed), nil
+}
+
+func filterRelationsByAllowed(relations []domain.ResourceRelation, allowed map[string]struct{}) []domain.ResourceRelation {
+	result := make([]domain.ResourceRelation, 0, len(relations))
+	for _, item := range relations {
+		_, sourceAllowed := allowed[item.SourceModelUID]
+		_, targetAllowed := allowed[item.TargetModelUID]
+		if sourceAllowed && targetAllowed {
+			result = append(result, item)
+		}
+	}
+	return result
+}
+
+func (h *RelationResourceHandler) filterAggregated(ctx *gin.Context, items []domain.ResourceAggregatedAssets) ([]domain.ResourceAggregatedAssets, error) {
+	modelUIDs := make([]string, 0, len(items))
+	for _, item := range items {
+		modelUIDs = append(modelUIDs, item.ModelUid)
+	}
+	allowed, err := h.allowedModelUIDs(ctx, modelUIDs)
+	if err != nil {
+		return nil, err
+	}
+	return filterAggregatedByAllowed(items, allowed), nil
+}
+
+func filterAggregatedByAllowed(items []domain.ResourceAggregatedAssets, allowed map[string]struct{}) []domain.ResourceAggregatedAssets {
+	result := make([]domain.ResourceAggregatedAssets, 0, len(items))
+	for _, item := range items {
+		if _, exists := allowed[item.ModelUid]; exists {
+			result = append(result, item)
+		}
+	}
+	return result
+}
+
+func relationModelAccessError(err error) (ginx.Result, error) {
+	if errors.Is(err, errModelAccessDenied) {
+		return ginx.Result{Code: 403001, Msg: "无权访问该模型资产"}, nil
+	}
+	return systemErrorResult, err
 }
 
 func (h *RelationResourceHandler) PrivateRoute(server *gin.Engine) {
@@ -40,6 +160,9 @@ func (h *RelationResourceHandler) PrivateRoute(server *gin.Engine) {
 }
 
 func (h *RelationResourceHandler) CreateResourceRelation(ctx *gin.Context, req CreateResourceRelationReq) (ginx.Result, error) {
+	if err := h.authorizeRelation(ctx, req.RelationName); err != nil {
+		return relationModelAccessError(err)
+	}
 	resp, err := h.svc.CreateResourceRelation(ctx, domain.ResourceRelation{
 		RelationName:     req.RelationName,
 		SourceResourceID: req.SourceResourceID,
@@ -57,10 +180,18 @@ func (h *RelationResourceHandler) CreateResourceRelation(ctx *gin.Context, req C
 }
 
 func (h *RelationResourceHandler) ListSrcResource(ctx *gin.Context, req ListResourceDiagramReq) (ginx.Result, error) {
+	if err := h.authorizeModels(ctx, req.ModelUid); err != nil {
+		return relationModelAccessError(err)
+	}
 	rrs, total, err := h.svc.ListSrcResources(ctx, req.ModelUid, req.ResourceId)
 	if err != nil {
 		return systemErrorResult, err
 	}
+	rrs, err = h.filterRelations(ctx, rrs)
+	if err != nil {
+		return systemErrorResult, err
+	}
+	total = int64(len(rrs))
 
 	return ginx.Result{
 		Data: RetrieveRelationResource{
@@ -73,10 +204,18 @@ func (h *RelationResourceHandler) ListSrcResource(ctx *gin.Context, req ListReso
 }
 
 func (h *RelationResourceHandler) ListDstResource(ctx *gin.Context, req ListResourceDiagramReq) (ginx.Result, error) {
+	if err := h.authorizeModels(ctx, req.ModelUid); err != nil {
+		return relationModelAccessError(err)
+	}
 	rrs, total, err := h.svc.ListDstResources(ctx, req.ModelUid, req.ResourceId)
 	if err != nil {
 		return systemErrorResult, err
 	}
+	rrs, err = h.filterRelations(ctx, rrs)
+	if err != nil {
+		return systemErrorResult, err
+	}
+	total = int64(len(rrs))
 
 	return ginx.Result{
 		Data: RetrieveRelationResource{
@@ -89,9 +228,16 @@ func (h *RelationResourceHandler) ListDstResource(ctx *gin.Context, req ListReso
 }
 
 func (h *RelationResourceHandler) ListSrcAggregated(ctx *gin.Context, req ListResourceDiagramReq) (ginx.Result, error) {
+	if err := h.authorizeModels(ctx, req.ModelUid); err != nil {
+		return relationModelAccessError(err)
+	}
 	agg, err := h.svc.ListSrcAggregated(ctx, req.ModelUid, req.ResourceId)
 	if err != nil {
 		return ginx.Result{}, err
+	}
+	agg, err = h.filterAggregated(ctx, agg)
+	if err != nil {
+		return systemErrorResult, err
 	}
 
 	return ginx.Result{
@@ -102,9 +248,16 @@ func (h *RelationResourceHandler) ListSrcAggregated(ctx *gin.Context, req ListRe
 }
 
 func (h *RelationResourceHandler) ListDstAggregated(ctx *gin.Context, req ListResourceDiagramReq) (ginx.Result, error) {
+	if err := h.authorizeModels(ctx, req.ModelUid); err != nil {
+		return relationModelAccessError(err)
+	}
 	agg, err := h.svc.ListDstAggregated(ctx, req.ModelUid, req.ResourceId)
 	if err != nil {
 		return ginx.Result{}, err
+	}
+	agg, err = h.filterAggregated(ctx, agg)
+	if err != nil {
+		return systemErrorResult, err
 	}
 
 	return ginx.Result{
@@ -115,6 +268,9 @@ func (h *RelationResourceHandler) ListDstAggregated(ctx *gin.Context, req ListRe
 }
 
 func (h *RelationResourceHandler) ListAllAggregated(ctx *gin.Context, req ListResourceDiagramReq) (ginx.Result, error) {
+	if err := h.authorizeModels(ctx, req.ModelUid); err != nil {
+		return relationModelAccessError(err)
+	}
 	var (
 		eg   errgroup.Group
 		srcS []domain.ResourceAggregatedAssets
@@ -136,6 +292,10 @@ func (h *RelationResourceHandler) ListAllAggregated(ctx *gin.Context, req ListRe
 		return systemErrorResult, err
 	}
 	result := append(srcS, dstS...)
+	result, err := h.filterAggregated(ctx, result)
+	if err != nil {
+		return systemErrorResult, err
+	}
 	sort.Slice(result, func(i, j int) bool {
 		// 根据需要的排序逻辑进行排序，这里假设你有一个字段可以用来排序，比如 id
 		return result[i].Total < result[j].Total
@@ -154,6 +314,12 @@ func (h *RelationResourceHandler) ListAllAggregated(ctx *gin.Context, req ListRe
 }
 
 func (h *RelationResourceHandler) DeleteResourceRelation(ctx *gin.Context, req DeleteResourceRelationReq) (ginx.Result, error) {
+	if err := h.authorizeModels(ctx, req.ModelUid); err != nil {
+		return relationModelAccessError(err)
+	}
+	if err := h.authorizeRelation(ctx, req.RelationName); err != nil {
+		return relationModelAccessError(err)
+	}
 	var (
 		id  int64
 		err error

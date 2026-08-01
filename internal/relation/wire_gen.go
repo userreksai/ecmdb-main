@@ -7,10 +7,12 @@
 package relation
 
 import (
+	"github.com/Duke1616/ecmdb/internal/policy"
 	"github.com/Duke1616/ecmdb/internal/relation/internal/repository"
 	"github.com/Duke1616/ecmdb/internal/relation/internal/repository/dao"
 	"github.com/Duke1616/ecmdb/internal/relation/internal/service"
 	"github.com/Duke1616/ecmdb/internal/relation/internal/web"
+	"github.com/Duke1616/ecmdb/internal/role"
 	"github.com/Duke1616/ecmdb/pkg/mongox"
 	"github.com/google/wire"
 	"sync"
@@ -18,7 +20,7 @@ import (
 
 // Injectors from wire.go:
 
-func InitModule(db *mongox.Mongo) (*Module, error) {
+func InitModule(db *mongox.Mongo, roleModule *role.Module, policyModule *policy.Module) (*Module, error) {
 	v := InitRRService(db)
 	v2 := InitRMService(db)
 	relationTypeDAO := InitRelationTypeDAO(db)
@@ -28,16 +30,18 @@ func InitModule(db *mongox.Mongo) (*Module, error) {
 	relationResourceDAO := intRrDAO(db)
 	relationResourceRepository := repository.NewRelationResourceRepository(relationResourceDAO)
 	v3 := service.NewRelationTypeService(relationTypeRepository, relationModelRepository, relationResourceRepository)
-	v4 := web.NewRelationResourceHandler(v)
-	v5 := web.NewRelationModelHandler(v2)
-	v6 := web.NewRelationTypeHandler(v3)
+	v4 := roleModule.Svc
+	v5 := policyModule.Svc
+	v6 := web.NewRelationResourceHandler(v, v4, v5)
+	v7 := web.NewRelationModelHandler(v2)
+	v8 := web.NewRelationTypeHandler(v3)
 	module := &Module{
 		RRSvc: v,
 		RMSvc: v2,
 		RTSvc: v3,
-		RRHdl: v4,
-		RMHdl: v5,
-		RTHdl: v6,
+		RRHdl: v6,
+		RMHdl: v7,
+		RTHdl: v8,
 	}
 	return module, nil
 }

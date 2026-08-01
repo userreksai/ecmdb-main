@@ -15,34 +15,37 @@ func TestFilterAccessibleModelUIDs(t *testing.T) {
 		want      []string
 	}{
 		{
-			name:      "role without exclusions can access every model",
+			name:      "ordinary role without grants cannot access models",
 			roles:     []domain.Role{{Code: "viewer"}},
 			modelUIDs: []string{"host", "database"},
-			want:      []string{"host", "database"},
+			want:      []string{},
 		},
 		{
-			name:      "single role excludes selected models",
-			roles:     []domain.Role{{Code: "viewer", DeniedModelUIDs: []string{"database"}}},
+			name:      "single role can access explicitly granted models",
+			roles:     []domain.Role{{Code: "viewer", AllowedModelUIDs: []string{"host", "network"}}},
 			modelUIDs: []string{"host", "database", "network"},
 			want:      []string{"host", "network"},
 		},
 		{
 			name: "multiple roles combine access with union semantics",
 			roles: []domain.Role{
-				{Code: "role-a", DeniedModelUIDs: []string{"host"}},
-				{Code: "role-b", DeniedModelUIDs: []string{"database"}},
+				{Code: "role-a", AllowedModelUIDs: []string{"host"}},
+				{Code: "role-b", AllowedModelUIDs: []string{"database"}},
 			},
 			modelUIDs: []string{"host", "database", "network"},
-			want:      []string{"host", "database", "network"},
+			want:      []string{"host", "database"},
 		},
 		{
-			name: "model is hidden only when every role excludes it",
-			roles: []domain.Role{
-				{Code: "role-a", DeniedModelUIDs: []string{"host"}},
-				{Code: "role-b", DeniedModelUIDs: []string{"host"}},
-			},
-			modelUIDs: []string{"host", "database"},
-			want:      []string{"database"},
+			name:      "admin role can access every current and future model",
+			roles:     []domain.Role{{Code: domain.AdminRole}},
+			modelUIDs: []string{"host", "database", "new-model"},
+			want:      []string{"host", "database", "new-model"},
+		},
+		{
+			name:      "new model stays hidden until explicitly granted",
+			roles:     []domain.Role{{Code: "viewer", AllowedModelUIDs: []string{"host"}}},
+			modelUIDs: []string{"host", "new-model"},
+			want:      []string{"host"},
 		},
 		{
 			name:      "empty roles grant no model access",
@@ -52,7 +55,7 @@ func TestFilterAccessibleModelUIDs(t *testing.T) {
 		},
 		{
 			name:      "candidate model identifiers are normalized and deduplicated",
-			roles:     []domain.Role{{Code: "viewer"}},
+			roles:     []domain.Role{{Code: "viewer", AllowedModelUIDs: []string{"host", "database"}}},
 			modelUIDs: []string{" host ", "host", "", "database"},
 			want:      []string{"host", "database"},
 		},
