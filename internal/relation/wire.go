@@ -5,10 +5,12 @@ package relation
 import (
 	"sync"
 
+	"github.com/Duke1616/ecmdb/internal/policy"
 	"github.com/Duke1616/ecmdb/internal/relation/internal/repository"
 	"github.com/Duke1616/ecmdb/internal/relation/internal/repository/dao"
 	"github.com/Duke1616/ecmdb/internal/relation/internal/service"
 	"github.com/Duke1616/ecmdb/internal/relation/internal/web"
+	"github.com/Duke1616/ecmdb/internal/role"
 	"github.com/Duke1616/ecmdb/pkg/mongox"
 	"github.com/google/wire"
 )
@@ -25,12 +27,14 @@ var ProviderSet = wire.NewSet(
 	intRrDAO,
 )
 
-func InitModule(db *mongox.Mongo) (*Module, error) {
+func InitModule(db *mongox.Mongo, roleModule *role.Module, policyModule *policy.Module) (*Module, error) {
 	wire.Build(
 		ProviderSet,
 		InitRelationTypeDAO,
 		InitRRService,
 		InitRMService,
+		wire.FieldsOf(new(*role.Module), "Svc"),
+		wire.FieldsOf(new(*policy.Module), "Svc"),
 		wire.Struct(new(Module), "*"),
 	)
 	return new(Module), nil

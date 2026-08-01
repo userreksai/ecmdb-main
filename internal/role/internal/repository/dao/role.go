@@ -22,7 +22,7 @@ type RoleDAO interface {
 	FindByExcludeCodes(ctx context.Context, offset, limit int64, codes []string) ([]Role, error)
 	CountByExcludeCodes(ctx context.Context, codes []string) (int64, error)
 	CreateOrUpdateRoleMenuIds(ctx context.Context, code string, menuIds []int64) (int64, error)
-	CreateOrUpdateRolePermissions(ctx context.Context, code string, menuIds []int64, deniedModelUIDs []string) (int64, error)
+	CreateOrUpdateRolePermissions(ctx context.Context, code string, menuIds []int64, allowedModelUIDs []string) (int64, error)
 	FindByMenuId(ctx context.Context, menuId int64) ([]Role, error)
 	FindByRoleCode(ctx context.Context, code string) (Role, error)
 }
@@ -93,14 +93,15 @@ func (dao *roleDAO) CreateOrUpdateRoleMenuIds(ctx context.Context, code string, 
 	return count.ModifiedCount, nil
 }
 
-func (dao *roleDAO) CreateOrUpdateRolePermissions(ctx context.Context, code string, menuIds []int64, deniedModelUIDs []string) (int64, error) {
+func (dao *roleDAO) CreateOrUpdateRolePermissions(ctx context.Context, code string, menuIds []int64, allowedModelUIDs []string) (int64, error) {
 	col := dao.db.Collection(RoleCollection)
 	updateDoc := bson.M{
 		"$set": bson.M{
-			"menu_ids":          menuIds,
-			"denied_model_uids": deniedModelUIDs,
-			"utime":             time.Now().UnixMilli(),
+			"menu_ids":           menuIds,
+			"allowed_model_uids": allowedModelUIDs,
+			"utime":              time.Now().UnixMilli(),
 		},
+		"$unset": bson.M{"denied_model_uids": ""},
 	}
 	count, err := col.UpdateOne(ctx, bson.M{"code": code}, updateDoc)
 	if err != nil {
@@ -258,13 +259,13 @@ func NewRoleDAO(db *mongox.Mongo) RoleDAO {
 }
 
 type Role struct {
-	Id              int64    `bson:"id"`
-	Name            string   `bson:"name"`
-	Code            string   `bson:"code"`
-	Desc            string   `bson:"desc"`
-	Status          bool     `bson:"status"`
-	MenuIds         []int64  `bson:"menu_ids"`
-	DeniedModelUIDs []string `bson:"denied_model_uids,omitempty"`
-	Ctime           int64    `bson:"ctime"`
-	Utime           int64    `bson:"utime"`
+	Id               int64    `bson:"id"`
+	Name             string   `bson:"name"`
+	Code             string   `bson:"code"`
+	Desc             string   `bson:"desc"`
+	Status           bool     `bson:"status"`
+	MenuIds          []int64  `bson:"menu_ids"`
+	AllowedModelUIDs []string `bson:"allowed_model_uids,omitempty"`
+	Ctime            int64    `bson:"ctime"`
+	Utime            int64    `bson:"utime"`
 }

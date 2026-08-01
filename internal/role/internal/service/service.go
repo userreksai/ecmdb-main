@@ -19,7 +19,7 @@ type Service interface {
 	// CreateOrUpdateRoleMenuIds 新增角色的菜单权限
 	CreateOrUpdateRoleMenuIds(ctx context.Context, code string, menuIds []int64) (int64, error)
 	// CreateOrUpdateRolePermissions updates menu permissions and model visibility in one database operation.
-	CreateOrUpdateRolePermissions(ctx context.Context, code string, menuIds []int64, deniedModelUIDs []string) (int64, error)
+	CreateOrUpdateRolePermissions(ctx context.Context, code string, menuIds []int64, allowedModelUIDs []string) (int64, error)
 	// FilterAccessibleModelUIDs applies the union of all role model permissions.
 	FilterAccessibleModelUIDs(ctx context.Context, roleCodes []string, modelUIDs []string) ([]string, error)
 	// CanAccessModel reports whether at least one role grants access to the model.
@@ -56,13 +56,18 @@ func (s *service) CreateOrUpdateRoleMenuIds(ctx context.Context, code string, me
 	return s.repo.CreateOrUpdateRoleMenuIds(ctx, code, menuIds)
 }
 
-func (s *service) CreateOrUpdateRolePermissions(ctx context.Context, code string, menuIds []int64, deniedModelUIDs []string) (int64, error) {
-	return s.repo.CreateOrUpdateRolePermissions(ctx, code, menuIds, normalizeModelUIDs(deniedModelUIDs))
+func (s *service) CreateOrUpdateRolePermissions(ctx context.Context, code string, menuIds []int64, allowedModelUIDs []string) (int64, error) {
+	return s.repo.CreateOrUpdateRolePermissions(ctx, code, menuIds, normalizeModelUIDs(allowedModelUIDs))
 }
 
 func (s *service) FilterAccessibleModelUIDs(ctx context.Context, roleCodes []string, modelUIDs []string) ([]string, error) {
 	if len(roleCodes) == 0 || len(modelUIDs) == 0 {
 		return []string{}, nil
+	}
+	for _, roleCode := range roleCodes {
+		if strings.TrimSpace(roleCode) == domain.AdminRole {
+			return normalizeModelUIDs(modelUIDs), nil
+		}
 	}
 
 	roles, err := s.repo.FindByIncludeCodes(ctx, roleCodes)
@@ -73,13 +78,17 @@ func (s *service) FilterAccessibleModelUIDs(ctx context.Context, roleCodes []str
 }
 
 func filterAccessibleModelUIDs(roles []domain.Role, modelUIDs []string) []string {
-	deniedByRole := make([]map[string]struct{}, 0, len(roles))
+	allowedByAnyRole := make(map[string]struct{})
 	for _, r := range roles {
-		denied := make(map[string]struct{}, len(r.DeniedModelUIDs))
-		for _, uid := range r.DeniedModelUIDs {
-			denied[uid] = struct{}{}
+		if r.Code == domain.AdminRole {
+			return normalizeModelUIDs(modelUIDs)
 		}
-		deniedByRole = append(deniedByRole, denied)
+		for _, uid := range r.AllowedModelUIDs {
+			uid = strings.TrimSpace(uid)
+			if uid != "" {
+				allowedByAnyRole[uid] = struct{}{}
+			}
+		}
 	}
 
 	result := make([]string, 0, len(modelUIDs))
@@ -93,12 +102,9 @@ func filterAccessibleModelUIDs(roles []domain.Role, modelUIDs []string) []string
 			continue
 		}
 
-		for _, denied := range deniedByRole {
-			if _, isDenied := denied[uid]; !isDenied {
-				result = append(result, uid)
-				seen[uid] = struct{}{}
-				break
-			}
+		if _, isAllowed := allowedByAnyRole[uid]; isAllowed {
+			result = append(result, uid)
+			seen[uid] = struct{}{}
 		}
 	}
 

@@ -85,13 +85,20 @@ func (h *Handler) ListRolePermission(ctx *gin.Context, req RolePermissionReq) (g
 
 	// 返回所有的菜单ids，并去除重复
 	menuIds := h.getMenuIds([]role.Role{r})
+	allowedModelUIDs := append([]string{}, r.AllowedModelUIDs...)
+	if r.Code == role.AdminRole {
+		allowedModelUIDs = make([]string, 0, len(models))
+		for _, item := range models {
+			allowedModelUIDs = append(allowedModelUIDs, item.UID)
+		}
+	}
 
 	return ginx.Result{
 		Data: RetrieveRolePermission{
-			AuthzIds:        menuIds,
-			Menu:            GetMenusTree(ms),
-			ModelGroups:     buildModelPermissionGroups(models, modelGroups),
-			DeniedModelUIDs: append([]string{}, r.DeniedModelUIDs...),
+			AuthzIds:         menuIds,
+			Menu:             GetMenusTree(ms),
+			ModelGroups:      buildModelPermissionGroups(models, modelGroups),
+			AllowedModelUIDs: allowedModelUIDs,
 		},
 		Msg: "获取角色权限成功",
 	}, nil
@@ -104,10 +111,10 @@ func (h *Handler) ChangePermissionForRoleReq(ctx *gin.Context, req ChangePermiss
 	}
 
 	// 角色拥有菜单权限
-	if req.DeniedModelUIDs == nil {
+	if req.AllowedModelUIDs == nil {
 		_, err = h.roleSvc.CreateOrUpdateRoleMenuIds(ctx, req.RoleCode, menuIds)
 	} else {
-		_, err = h.roleSvc.CreateOrUpdateRolePermissions(ctx, req.RoleCode, menuIds, *req.DeniedModelUIDs)
+		_, err = h.roleSvc.CreateOrUpdateRolePermissions(ctx, req.RoleCode, menuIds, *req.AllowedModelUIDs)
 	}
 	if err != nil {
 		return systemErrorResult, err

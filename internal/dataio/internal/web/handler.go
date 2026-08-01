@@ -79,7 +79,7 @@ func (h *Handler) Export(ctx *gin.Context, req ExportReq) (ginx.Result, error) {
 	}
 	for _, field := range req.RelatedFields {
 		if field.ModelUID == "" {
-			continue
+			return systemErrorResult, fmt.Errorf("related model uid is required")
 		}
 		if err := h.authorizeModel(ctx, field.ModelUID); err != nil {
 			return modelAccessError(err)

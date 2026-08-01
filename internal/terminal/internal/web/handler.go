@@ -2,15 +2,20 @@ package web
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/Duke1616/ecmdb/internal/attribute"
+	"github.com/Duke1616/ecmdb/internal/pkg/authctx"
+	"github.com/Duke1616/ecmdb/internal/policy"
 	"github.com/Duke1616/ecmdb/internal/relation"
 	"github.com/Duke1616/ecmdb/internal/resource"
+	"github.com/Duke1616/ecmdb/internal/role"
 	"github.com/Duke1616/ecmdb/pkg/ginx"
 	"github.com/Duke1616/ecmdb/pkg/term"
 	"github.com/Duke1616/ecmdb/pkg/term/guacx"
@@ -27,20 +32,78 @@ type Handler struct {
 	RRSvc        relation.RRSvc
 	resourceSvc  resource.EncryptedSvc
 	attributeSvc attribute.Service
+	roleSvc      role.Service
+	policySvc    policy.Service
 	session      *term.SessionPool
 	timeout      time.Duration
 	finderWeb    *finderWeb.Handler
 }
 
-func NewHandler(RRSvc relation.RRSvc, resourceSvc resource.EncryptedSvc, attributeSvc attribute.Service) *Handler {
+func NewHandler(RRSvc relation.RRSvc, resourceSvc resource.EncryptedSvc, attributeSvc attribute.Service,
+	roleSvc role.Service, policySvc policy.Service) *Handler {
 	return &Handler{
 		RRSvc:        RRSvc,
 		resourceSvc:  resourceSvc,
 		attributeSvc: attributeSvc,
+		roleSvc:      roleSvc,
+		policySvc:    policySvc,
 		session:      term.NewSessionPool(),
 		timeout:      5 * time.Second,
 		finderWeb:    finderWeb.NewHandler(),
 	}
+}
+
+var errModelAccessDenied = errors.New("model asset access denied")
+
+func (h *Handler) authorizeModel(ctx *gin.Context, modelUID string) error {
+	if h.roleSvc == nil || h.policySvc == nil {
+		return nil
+	}
+	uid, ok := authctx.UID(ctx)
+	if !ok {
+		return fmt.Errorf("get current user failed")
+	}
+	roleCodes, err := h.policySvc.GetRolesForUser(ctx, uid)
+	if err != nil {
+		return err
+	}
+	allowed, err := h.roleSvc.CanAccessModel(ctx, roleCodes, modelUID)
+	if err != nil {
+		return err
+	}
+	if !allowed {
+		return errModelAccessDenied
+	}
+	return nil
+}
+
+func (h *Handler) authorizeResource(ctx *gin.Context, resourceID int64) error {
+	asset, err := h.resourceSvc.FindResourceById(ctx, nil, resourceID)
+	if err != nil {
+		return err
+	}
+	return h.authorizeModel(ctx, asset.ModelUID)
+}
+
+func (h *Handler) authorizeConnection(ctx *gin.Context, resourceID int64) error {
+	if err := h.authorizeResource(ctx, resourceID); err != nil {
+		return err
+	}
+	gatewayIDs, err := h.RRSvc.ListDstRelated(ctx, "host", "AuthGateway_default_host", resourceID)
+	if err != nil {
+		return err
+	}
+	if len(gatewayIDs) > 0 {
+		return h.authorizeModel(ctx, "AuthGateway")
+	}
+	return nil
+}
+
+func terminalModelAccessError(err error) (ginx.Result, error) {
+	if errors.Is(err, errModelAccessDenied) {
+		return ginx.Result{Code: 403001, Msg: "无权访问该模型资产"}, nil
+	}
+	return ginx.Result{}, err
 }
 
 var UpGrader = websocket.Upgrader{
@@ -63,11 +126,43 @@ func (h *Handler) PrivateRoutes(server *gin.Engine) {
 	g.POST("/connect", ginx.WrapBody(h.Connect))
 
 	// 注册 FinderWeb 路由，实现 SFTP 能力
+	server.Use(h.finderAuthorizationMiddleware())
 	h.finderWeb.RegisterRoutes(server)
 	h.finderWeb.RegisterUploadRoute(server)
 }
 
+func (h *Handler) finderAuthorizationMiddleware() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		if !strings.HasPrefix(ctx.Request.URL.Path, "/api/finder/") {
+			ctx.Next()
+			return
+		}
+
+		resourceID := ctx.GetHeader("x-finder-id")
+		if resourceID == "" {
+			resourceID = ctx.Query("id")
+		}
+		id, err := strconv.ParseInt(resourceID, 10, 64)
+		if err != nil {
+			ctx.AbortWithStatusJSON(http.StatusBadRequest, ginx.Result{Code: 400001, Msg: "无效的资产ID"})
+			return
+		}
+		if err = h.authorizeConnection(ctx, id); err != nil {
+			if errors.Is(err, errModelAccessDenied) {
+				ctx.AbortWithStatusJSON(http.StatusForbidden, ginx.Result{Code: 403001, Msg: "无权访问该模型资产"})
+			} else {
+				ctx.AbortWithStatusJSON(http.StatusInternalServerError, ginx.Result{Code: 500001, Msg: "校验资产权限失败"})
+			}
+			return
+		}
+		ctx.Next()
+	}
+}
+
 func (h *Handler) Connect(ctx *gin.Context, req ConnectReq) (ginx.Result, error) {
+	if err := h.authorizeConnection(ctx, req.ResourceId); err != nil {
+		return terminalModelAccessError(err)
+	}
 	switch req.Type {
 	case ConnectTypeRDP:
 		return ginx.Result{Msg: "不支持RDP协议"}, fmt.Errorf("暂不支持 RDP 协议")
@@ -167,6 +262,9 @@ func (h *Handler) SshSessionTunnel(ctx *gin.Context) error {
 	resourceId := ctx.Query("resource_id")
 	resourceIdInt, err := strconv.ParseInt(resourceId, 10, 64)
 	if err != nil {
+		return err
+	}
+	if err = h.authorizeConnection(ctx, resourceIdInt); err != nil {
 		return err
 	}
 
