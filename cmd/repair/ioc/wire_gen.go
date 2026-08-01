@@ -9,7 +9,6 @@ package ioc
 import (
 	"github.com/Duke1616/ecmdb/internal/attribute"
 	"github.com/Duke1616/ecmdb/internal/model"
-	"github.com/Duke1616/ecmdb/internal/relation"
 	"github.com/Duke1616/ecmdb/internal/resource"
 	"github.com/Duke1616/ecmdb/ioc"
 	"github.com/google/wire"
@@ -19,27 +18,15 @@ import (
 
 func InitApp() (*App, error) {
 	mongo := ioc.InitMongoDB()
-	module, err := relation.InitModule(mongo)
-	if err != nil {
-		return nil, err
-	}
+	v := model.InitService(mongo)
 	mq := ioc.InitMQ()
-	attributeModule, err := attribute.InitModule(mongo, mq)
+	module, err := attribute.InitModule(mongo, mq)
 	if err != nil {
 		return nil, err
 	}
+	v2 := module.Svc
 	cryptoRegistry := ioc.InitModuleCrypto()
-	resourceModule, err := resource.InitModule(mongo, attributeModule, module, mq, cryptoRegistry)
-	if err != nil {
-		return nil, err
-	}
-	modelModule, err := model.InitModule(mongo, module, attributeModule, resourceModule)
-	if err != nil {
-		return nil, err
-	}
-	v := modelModule.Svc
-	v2 := attributeModule.Svc
-	v3 := resourceModule.EncryptedSvc
+	v3 := resource.InitEncryptedService(mongo, module, cryptoRegistry)
 	app := &App{
 		ModelSvc:    v,
 		AttrSvc:     v2,

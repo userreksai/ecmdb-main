@@ -4,9 +4,11 @@ import (
 	"context"
 	"testing"
 
+	"github.com/Duke1616/ecmdb/internal/policy"
 	"github.com/Duke1616/ecmdb/internal/relation/internal/integration/startup"
 	"github.com/Duke1616/ecmdb/internal/relation/internal/repository/dao"
 	"github.com/Duke1616/ecmdb/internal/relation/internal/web"
+	"github.com/Duke1616/ecmdb/internal/role"
 	"github.com/Duke1616/ecmdb/pkg/ginx/test"
 	"github.com/Duke1616/ecmdb/pkg/mongox"
 	"github.com/gin-gonic/gin"
@@ -38,7 +40,7 @@ func (s *HandlerRMTestSuite) TearDownTest() {
 }
 
 func (s *HandlerRMTestSuite) SetupSuite() {
-	handler, err := startup.InitRMHandler()
+	handler, err := startup.InitRMHandler(&role.Module{}, &policy.Module{})
 	require.NoError(s.T(), err)
 	server := gin.Default()
 	handler.PrivateRoute(server)

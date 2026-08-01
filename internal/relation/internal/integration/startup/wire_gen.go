@@ -7,14 +7,16 @@
 package startup
 
 import (
+	"github.com/Duke1616/ecmdb/internal/policy"
 	"github.com/Duke1616/ecmdb/internal/relation"
+	"github.com/Duke1616/ecmdb/internal/role"
 )
 
 // Injectors from wire.go:
 
-func InitRMHandler() (*relation.RMHandler, error) {
+func InitRMHandler(roleModule *role.Module, policyModule *policy.Module) (*relation.RMHandler, error) {
 	mongo := InitMongoDB()
-	module, err := relation.InitModule(mongo)
+	module, err := relation.InitModule(mongo, roleModule, policyModule)
 	if err != nil {
 		return nil, err
 	}
@@ -22,9 +24,9 @@ func InitRMHandler() (*relation.RMHandler, error) {
 	return v, nil
 }
 
-func InitRRHandler() (*relation.RRHandler, error) {
+func InitRRHandler(roleModule *role.Module, policyModule *policy.Module) (*relation.RRHandler, error) {
 	mongo := InitMongoDB()
-	module, err := relation.InitModule(mongo)
+	module, err := relation.InitModule(mongo, roleModule, policyModule)
 	if err != nil {
 		return nil, err
 	}

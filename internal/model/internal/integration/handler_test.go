@@ -18,6 +18,8 @@ import (
 	"github.com/Duke1616/ecmdb/internal/model/internal/repository/dao"
 	"github.com/Duke1616/ecmdb/internal/model/internal/service"
 	"github.com/Duke1616/ecmdb/internal/model/internal/web"
+	"github.com/Duke1616/ecmdb/internal/policy"
+	"github.com/Duke1616/ecmdb/internal/role"
 	"github.com/Duke1616/ecmdb/pkg/ginx/test"
 	"github.com/ecodeclub/ekit/iox"
 	"github.com/stretchr/testify/assert"
@@ -69,6 +71,8 @@ func (s *HandlerTestSuite) SetupSuite() {
 		&relation.Module{RRSvc: rrSvc, RMSvc: rmSvc},
 		&attribute.Module{Svc: attrSvc},
 		&resource.Module{Svc: resourceSvc},
+		&role.Module{},
+		&policy.Module{},
 	)
 	require.NoError(s.T(), err)
 	server := gin.Default()
