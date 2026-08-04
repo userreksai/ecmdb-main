@@ -1,8 +1,8 @@
 package ioc
 
 import (
-	"github.com/Duke1616/etask/pkg/grpc/registry"
-	"github.com/Duke1616/etask/pkg/grpc/registry/etcd"
+	"github.com/userreksai/ecmdb-task/pkg/grpc/registry"
+	"github.com/userreksai/ecmdb-task/pkg/grpc/registry/etcd"
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
