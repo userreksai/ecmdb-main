@@ -13,7 +13,7 @@ import (
 	"github.com/Duke1616/ecmdb/internal/task/domain"
 	"github.com/Duke1616/ecmdb/internal/task/internal/repository"
 	"github.com/Duke1616/ecmdb/pkg/cryptox"
-	"github.com/Duke1616/etask/pkg/grpc/interceptors/bizid"
+	"github.com/userreksai/ecmdb-task/pkg/grpc/interceptors/bizid"
 	"github.com/ecodeclub/ekit/slice"
 	"github.com/gotomicro/ego/core/elog"
 )

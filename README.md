@@ -102,7 +102,7 @@ sequenceDiagram
 |:------|:------|:----------|
 | **ECMDB** | 提供平台底层处理架构，涵盖自定义资产模型重算、内部审批引擎与整体资源 API 调度服务。 | [ecmdb](https://github.com/Duke1616/ecmdb) |
 | **ECMDB-WEB** | 基于 Vue 3 构建的交互操作层，负责将动态表单与可拖拽审批流程图等可视化投射给终端用户。 | [ecmdb-web](https://github.com/Duke1616/ecmdb-web) |
-| **ETask** | 隔离于核心之外，专门承接主机节点网络穿透，及长效执行脚本（Shell/Python等）指令派发解析的节点引擎。 | [etask](https://github.com/Duke1616/etask) |
+| **ETask** | 隔离于核心之外，专门承接主机节点网络穿透，及长效执行脚本（Shell/Python等）指令派发解析的节点引擎。 | [ecmdb-task](https://github.com/userreksai/ecmdb-task) |
 | **EAlert** | 从多数据源提取监控特征并智能降噪，同时支持通过故障告警直接触发并驱动下游维保工单自动流转的子系统。 | 暂未开源 |
 | **ENotify** | 系统侧全量外围消息的收口分发服务，集中化桥接包括飞书、邮件等下发媒介的最终投递网关。 | [enotify](https://github.com/Duke1616/enotify) |
 
