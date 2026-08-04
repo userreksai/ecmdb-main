@@ -3,6 +3,7 @@ package dao
 import (
 	"context"
 	"fmt"
+	"math"
 	"regexp"
 	"strconv"
 	"strings"
@@ -28,7 +29,7 @@ type ResourceDAO interface {
 	// ListResource 获取指定模型的资产列表
 	ListResource(ctx context.Context, fields []string, modelUid string, offset, limit int64) ([]Resource, error)
 
-	// SearchResourcesInModel 在指定模型内按所有字段搜索资源，精确匹配优先，模糊匹配其次
+	// SearchResourcesInModel 全部字段使用模糊匹配，指定字段使用精确匹配或数字比较
 	SearchResourcesInModel(ctx context.Context, fields []string, modelUid, fieldUid, keyword string, offset, limit int64) (
 		[]Resource, int64, error)
 
@@ -319,57 +320,13 @@ func (dao *resourceDAO) SearchResourcesInModel(ctx context.Context, fields []str
 		return resources, total, err
 	}
 
-	exactConditions := buildExactSearchConditions(searchFields, keyword, fieldUid == "")
-	fuzzyConditions := buildFuzzySearchConditions(searchFields, keyword)
-
-	exactFilter := bson.M{
-		"model_uid": modelUid,
-		"$or":       exactConditions,
-	}
-	fuzzyFilter := bson.M{
-		"$and": bson.A{
-			bson.M{"model_uid": modelUid},
-			bson.M{"$or": fuzzyConditions},
-			bson.M{"$nor": exactConditions},
-		},
-	}
-
-	exactTotal, err := col.CountDocuments(ctx, exactFilter)
+	searchFilter := buildResourceSearchFilter(modelUid, searchFields, fieldUid, keyword)
+	total, err := col.CountDocuments(ctx, searchFilter)
 	if err != nil {
-		return nil, 0, fmt.Errorf("精确匹配计数错误: %w", err)
+		return nil, 0, fmt.Errorf("搜索匹配计数错误: %w", err)
 	}
-	fuzzyTotal, err := col.CountDocuments(ctx, fuzzyFilter)
-	if err != nil {
-		return nil, 0, fmt.Errorf("模糊匹配计数错误: %w", err)
-	}
-	total := exactTotal + fuzzyTotal
-
-	result := make([]Resource, 0, resultCapacity(limit))
-	remaining := limit
-
-	if offset < exactTotal && remaining > 0 {
-		exactLimit := minInt64(remaining, exactTotal-offset)
-		exactResources, err := dao.findResourcesByFilter(ctx, exactFilter, projection, offset, exactLimit)
-		if err != nil {
-			return nil, 0, err
-		}
-		result = append(result, exactResources...)
-		remaining -= int64(len(exactResources))
-	}
-
-	if remaining > 0 {
-		fuzzyOffset := int64(0)
-		if offset > exactTotal {
-			fuzzyOffset = offset - exactTotal
-		}
-		fuzzyResources, err := dao.findResourcesByFilter(ctx, fuzzyFilter, projection, fuzzyOffset, remaining)
-		if err != nil {
-			return nil, 0, err
-		}
-		result = append(result, fuzzyResources...)
-	}
-
-	return result, total, nil
+	resources, err := dao.findResourcesByFilter(ctx, searchFilter, projection, offset, limit)
+	return resources, total, err
 }
 
 func (dao *resourceDAO) findResourcesByFilter(ctx context.Context, filter interface{}, projection bson.M, offset, limit int64) ([]Resource, error) {
@@ -842,22 +799,82 @@ func normalizeSearchFields(fields []string) []string {
 	return result
 }
 
-func buildExactSearchConditions(fields []string, keyword string, includeResourceID bool) []bson.M {
-	conditions := make([]bson.M, 0, len(fields)+1)
+func buildResourceSearchFilter(modelUid string, fields []string, fieldUid, keyword string) bson.M {
+	filter := bson.M{"model_uid": modelUid}
+	if fieldUid == "" {
+		filter["$or"] = buildFuzzySearchConditions(fields, keyword)
+		return filter
+	}
+
+	if operator, value, ok := parseNumericComparison(keyword); ok {
+		filter["$expr"] = buildNumericComparisonExpression(fieldUid, operator, value)
+		return filter
+	}
+
+	filter["$or"] = buildExactSearchConditions([]string{fieldUid}, keyword)
+	return filter
+}
+
+func buildExactSearchConditions(fields []string, keyword string) []bson.M {
+	conditions := make([]bson.M, 0, len(fields)*3)
 	for _, field := range fields {
 		conditions = append(conditions, bson.M{field: keyword})
 	}
 
-	if id, err := strconv.ParseInt(keyword, 10, 64); err == nil {
+	if integer, err := strconv.ParseInt(keyword, 10, 64); err == nil {
 		for _, field := range fields {
-			conditions = append(conditions, bson.M{field: id})
+			conditions = append(conditions, bson.M{field: integer})
 		}
-		if includeResourceID {
-			conditions = append(conditions, bson.M{"id": id})
+	}
+	if decimal, err := strconv.ParseFloat(keyword, 64); err == nil {
+		for _, field := range fields {
+			conditions = append(conditions, bson.M{field: decimal})
 		}
 	}
 
 	return conditions
+}
+
+func parseNumericComparison(keyword string) (string, float64, bool) {
+	keyword = strings.TrimSpace(keyword)
+	operators := []struct {
+		prefix   string
+		mongoKey string
+	}{
+		{prefix: ">=", mongoKey: "$gte"},
+		{prefix: "<=", mongoKey: "$lte"},
+		{prefix: ">", mongoKey: "$gt"},
+		{prefix: "<", mongoKey: "$lt"},
+	}
+
+	for _, operator := range operators {
+		if !strings.HasPrefix(keyword, operator.prefix) {
+			continue
+		}
+		value, err := strconv.ParseFloat(strings.TrimSpace(strings.TrimPrefix(keyword, operator.prefix)), 64)
+		if err != nil || math.IsNaN(value) || math.IsInf(value, 0) {
+			return "", 0, false
+		}
+		return operator.mongoKey, value, true
+	}
+	return "", 0, false
+}
+
+func buildNumericComparisonExpression(field, operator string, value float64) bson.M {
+	convertedValue := bson.M{
+		"$convert": bson.M{
+			"input":   "$" + field,
+			"to":      "double",
+			"onError": nil,
+			"onNull":  nil,
+		},
+	}
+	return bson.M{
+		"$and": bson.A{
+			bson.M{"$ne": bson.A{convertedValue, nil}},
+			bson.M{operator: bson.A{convertedValue, value}},
+		},
+	}
 }
 
 func buildEmptySearchConditions(fields []string) []bson.M {
@@ -874,30 +891,29 @@ func buildEmptySearchConditions(fields []string) []bson.M {
 
 func buildFuzzySearchConditions(fields []string, keyword string) []bson.M {
 	pattern := regexp.QuoteMeta(keyword)
-	conditions := make([]bson.M, 0, len(fields))
+	conditions := make([]bson.M, 0, len(fields)*2)
 	for _, field := range fields {
 		conditions = append(conditions, bson.M{
 			field: bson.M{"$regex": primitive.Regex{Pattern: pattern, Options: "i"}},
 		})
+		conditions = append(conditions, bson.M{
+			"$expr": bson.M{
+				"$regexMatch": bson.M{
+					"input": bson.M{
+						"$convert": bson.M{
+							"input":   "$" + field,
+							"to":      "string",
+							"onError": "",
+							"onNull":  "",
+						},
+					},
+					"regex":   pattern,
+					"options": "i",
+				},
+			},
+		})
 	}
 	return conditions
-}
-
-func minInt64(a, b int64) int64 {
-	if a < b {
-		return a
-	}
-	return b
-}
-
-func resultCapacity(limit int64) int {
-	if limit <= 0 {
-		return 0
-	}
-	if limit > 1000 {
-		return 1000
-	}
-	return int(limit)
 }
 
 func (dao *resourceDAO) TotalResourcesWithFilters(ctx context.Context, modelUid string, ids []int64, filterGroups []domain.FilterGroup) (int64, error) {

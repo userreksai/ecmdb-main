@@ -19,7 +19,7 @@ type ResourceRepository interface {
 	// ListResource 获取指定模型的资产列表
 	ListResource(ctx context.Context, fields []string, modelUid string, offset, limit int64) ([]domain.Resource, error)
 
-	// SearchResourcesInModel 在指定模型内按所有字段搜索资源，精确匹配优先，模糊匹配其次
+	// SearchResourcesInModel 全部字段使用模糊匹配，指定字段使用精确匹配或数字比较
 	SearchResourcesInModel(ctx context.Context, fields []string, modelUid, fieldUid, keyword string, offset, limit int64) (
 		[]domain.Resource, int64, error)
 
