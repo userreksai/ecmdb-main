@@ -40,6 +40,7 @@ type SearchModelResourceReq struct {
 	Page
 	ModelUid string `json:"model_uid"`
 	Keyword  string `json:"keyword"`
+	FieldUid string `json:"field_uid,omitempty"`
 }
 
 type ListResourceByIdsReq struct {

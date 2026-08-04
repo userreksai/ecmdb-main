@@ -221,9 +221,9 @@ func (mr *MockResourceRepositoryMockRecorder) ListResourcesWithFilters(ctx, fiel
 }
 
 // SearchResourcesInModel mocks base method.
-func (m *MockResourceRepository) SearchResourcesInModel(ctx context.Context, fields []string, modelUid, keyword string, offset, limit int64) ([]domain.Resource, int64, error) {
+func (m *MockResourceRepository) SearchResourcesInModel(ctx context.Context, fields []string, modelUid, fieldUid, keyword string, offset, limit int64) ([]domain.Resource, int64, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SearchResourcesInModel", ctx, fields, modelUid, keyword, offset, limit)
+	ret := m.ctrl.Call(m, "SearchResourcesInModel", ctx, fields, modelUid, fieldUid, keyword, offset, limit)
 	ret0, _ := ret[0].([]domain.Resource)
 	ret1, _ := ret[1].(int64)
 	ret2, _ := ret[2].(error)
@@ -231,9 +231,9 @@ func (m *MockResourceRepository) SearchResourcesInModel(ctx context.Context, fie
 }
 
 // SearchResourcesInModel indicates an expected call of SearchResourcesInModel.
-func (mr *MockResourceRepositoryMockRecorder) SearchResourcesInModel(ctx, fields, modelUid, keyword, offset, limit any) *gomock.Call {
+func (mr *MockResourceRepositoryMockRecorder) SearchResourcesInModel(ctx, fields, modelUid, fieldUid, keyword, offset, limit any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchResourcesInModel", reflect.TypeOf((*MockResourceRepository)(nil).SearchResourcesInModel), ctx, fields, modelUid, keyword, offset, limit)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchResourcesInModel", reflect.TypeOf((*MockResourceRepository)(nil).SearchResourcesInModel), ctx, fields, modelUid, fieldUid, keyword, offset, limit)
 }
 
 // Search mocks base method.

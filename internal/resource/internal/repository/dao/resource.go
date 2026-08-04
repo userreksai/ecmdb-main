@@ -29,7 +29,7 @@ type ResourceDAO interface {
 	ListResource(ctx context.Context, fields []string, modelUid string, offset, limit int64) ([]Resource, error)
 
 	// SearchResourcesInModel 在指定模型内按所有字段搜索资源，精确匹配优先，模糊匹配其次
-	SearchResourcesInModel(ctx context.Context, fields []string, modelUid, keyword string, offset, limit int64) (
+	SearchResourcesInModel(ctx context.Context, fields []string, modelUid, fieldUid, keyword string, offset, limit int64) (
 		[]Resource, int64, error)
 
 	// CountByModelUid 统计指定模型的资产数量
@@ -287,10 +287,10 @@ func (dao *resourceDAO) ListResource(ctx context.Context, fields []string, model
 	return result, nil
 }
 
-func (dao *resourceDAO) SearchResourcesInModel(ctx context.Context, fields []string, modelUid, keyword string, offset, limit int64) (
+func (dao *resourceDAO) SearchResourcesInModel(ctx context.Context, fields []string, modelUid, fieldUid, keyword string, offset, limit int64) (
 	[]Resource, int64, error) {
 	keyword = strings.TrimSpace(keyword)
-	if keyword == "" {
+	if keyword == "" && fieldUid == "" {
 		resources, err := dao.ListResource(ctx, fields, modelUid, offset, limit)
 		if err != nil {
 			return nil, 0, err
@@ -301,7 +301,25 @@ func (dao *resourceDAO) SearchResourcesInModel(ctx context.Context, fields []str
 
 	col := dao.db.Collection(ResourceCollection)
 	searchFields := normalizeSearchFields(fields)
-	exactConditions := buildExactSearchConditions(searchFields, keyword)
+	if fieldUid != "" {
+		searchFields = []string{fieldUid}
+	}
+	projection := buildProjection(fields)
+
+	if keyword == "" {
+		emptyFilter := bson.M{
+			"model_uid": modelUid,
+			"$or":       buildEmptySearchConditions(searchFields),
+		}
+		total, err := col.CountDocuments(ctx, emptyFilter)
+		if err != nil {
+			return nil, 0, fmt.Errorf("空值匹配计数错误: %w", err)
+		}
+		resources, err := dao.findResourcesByFilter(ctx, emptyFilter, projection, offset, limit)
+		return resources, total, err
+	}
+
+	exactConditions := buildExactSearchConditions(searchFields, keyword, fieldUid == "")
 	fuzzyConditions := buildFuzzySearchConditions(searchFields, keyword)
 
 	exactFilter := bson.M{
@@ -326,7 +344,6 @@ func (dao *resourceDAO) SearchResourcesInModel(ctx context.Context, fields []str
 	}
 	total := exactTotal + fuzzyTotal
 
-	projection := buildProjection(fields)
 	result := make([]Resource, 0, resultCapacity(limit))
 	remaining := limit
 
@@ -825,7 +842,7 @@ func normalizeSearchFields(fields []string) []string {
 	return result
 }
 
-func buildExactSearchConditions(fields []string, keyword string) []bson.M {
+func buildExactSearchConditions(fields []string, keyword string, includeResourceID bool) []bson.M {
 	conditions := make([]bson.M, 0, len(fields)+1)
 	for _, field := range fields {
 		conditions = append(conditions, bson.M{field: keyword})
@@ -835,9 +852,23 @@ func buildExactSearchConditions(fields []string, keyword string) []bson.M {
 		for _, field := range fields {
 			conditions = append(conditions, bson.M{field: id})
 		}
-		conditions = append(conditions, bson.M{"id": id})
+		if includeResourceID {
+			conditions = append(conditions, bson.M{"id": id})
+		}
 	}
 
+	return conditions
+}
+
+func buildEmptySearchConditions(fields []string) []bson.M {
+	conditions := make([]bson.M, 0, len(fields)*3)
+	for _, field := range fields {
+		conditions = append(conditions,
+			bson.M{field: ""},
+			bson.M{field: nil},
+			bson.M{field: bson.M{"$size": 0}},
+		)
+	}
 	return conditions
 }
 

@@ -590,9 +590,9 @@ func (c *MockEncryptedSvcListResourcesWithFiltersCall) DoAndReturn(f func(contex
 }
 
 // SearchResourcesInModel mocks base method.
-func (m *MockEncryptedSvc) SearchResourcesInModel(ctx context.Context, fields []string, modelUid, keyword string, offset, limit int64) ([]domain.Resource, int64, error) {
+func (m *MockEncryptedSvc) SearchResourcesInModel(ctx context.Context, fields []string, modelUid, fieldUid, keyword string, offset, limit int64) ([]domain.Resource, int64, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SearchResourcesInModel", ctx, fields, modelUid, keyword, offset, limit)
+	ret := m.ctrl.Call(m, "SearchResourcesInModel", ctx, fields, modelUid, fieldUid, keyword, offset, limit)
 	ret0, _ := ret[0].([]domain.Resource)
 	ret1, _ := ret[1].(int64)
 	ret2, _ := ret[2].(error)
@@ -600,9 +600,9 @@ func (m *MockEncryptedSvc) SearchResourcesInModel(ctx context.Context, fields []
 }
 
 // SearchResourcesInModel indicates an expected call of SearchResourcesInModel.
-func (mr *MockEncryptedSvcMockRecorder) SearchResourcesInModel(ctx, fields, modelUid, keyword, offset, limit any) *MockEncryptedSvcSearchResourcesInModelCall {
+func (mr *MockEncryptedSvcMockRecorder) SearchResourcesInModel(ctx, fields, modelUid, fieldUid, keyword, offset, limit any) *MockEncryptedSvcSearchResourcesInModelCall {
 	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchResourcesInModel", reflect.TypeOf((*MockEncryptedSvc)(nil).SearchResourcesInModel), ctx, fields, modelUid, keyword, offset, limit)
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchResourcesInModel", reflect.TypeOf((*MockEncryptedSvc)(nil).SearchResourcesInModel), ctx, fields, modelUid, fieldUid, keyword, offset, limit)
 	return &MockEncryptedSvcSearchResourcesInModelCall{Call: call}
 }
 
@@ -618,13 +618,13 @@ func (c *MockEncryptedSvcSearchResourcesInModelCall) Return(arg0 []domain.Resour
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockEncryptedSvcSearchResourcesInModelCall) Do(f func(context.Context, []string, string, string, int64, int64) ([]domain.Resource, int64, error)) *MockEncryptedSvcSearchResourcesInModelCall {
+func (c *MockEncryptedSvcSearchResourcesInModelCall) Do(f func(context.Context, []string, string, string, string, int64, int64) ([]domain.Resource, int64, error)) *MockEncryptedSvcSearchResourcesInModelCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockEncryptedSvcSearchResourcesInModelCall) DoAndReturn(f func(context.Context, []string, string, string, int64, int64) ([]domain.Resource, int64, error)) *MockEncryptedSvcSearchResourcesInModelCall {
+func (c *MockEncryptedSvcSearchResourcesInModelCall) DoAndReturn(f func(context.Context, []string, string, string, string, int64, int64) ([]domain.Resource, int64, error)) *MockEncryptedSvcSearchResourcesInModelCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

@@ -26,7 +26,7 @@ type Service interface {
 		int64, error)
 
 	// SearchResourcesInModel 在指定模型的所有字段中搜索资源，精确命中优先，其次返回模糊命中
-	SearchResourcesInModel(ctx context.Context, fields []string, modelUid, keyword string, offset, limit int64) (
+	SearchResourcesInModel(ctx context.Context, fields []string, modelUid, fieldUid, keyword string, offset, limit int64) (
 		[]domain.Resource, int64, error)
 
 	CountByModelUid(ctx context.Context, modelUid string) (int64, error)
@@ -141,7 +141,7 @@ func (s *service) ListResource(ctx context.Context, fields []string, modelUid st
 	return resources, total, nil
 }
 
-func (s *service) SearchResourcesInModel(ctx context.Context, fields []string, modelUid, keyword string, offset, limit int64) (
+func (s *service) SearchResourcesInModel(ctx context.Context, fields []string, modelUid, fieldUid, keyword string, offset, limit int64) (
 	[]domain.Resource, int64, error) {
 	if fields == nil {
 		return nil, 0, fmt.Errorf("传递字段信息不能为空")
@@ -151,11 +151,11 @@ func (s *service) SearchResourcesInModel(ctx context.Context, fields []string, m
 		return nil, 0, fmt.Errorf("模型唯一标识不能为空")
 	}
 
-	if keyword == "" {
+	if keyword == "" && fieldUid == "" {
 		return s.ListResource(ctx, fields, modelUid, offset, limit)
 	}
 
-	return s.repo.SearchResourcesInModel(ctx, fields, modelUid, keyword, offset, limit)
+	return s.repo.SearchResourcesInModel(ctx, fields, modelUid, fieldUid, keyword, offset, limit)
 }
 
 func (s *service) ListResourceByIds(ctx context.Context, fields []string, ids []int64) ([]domain.Resource, error) {
