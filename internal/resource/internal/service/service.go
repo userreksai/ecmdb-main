@@ -25,7 +25,7 @@ type Service interface {
 	ListResource(ctx context.Context, fields []string, modelUid string, offset, limit int64) ([]domain.Resource,
 		int64, error)
 
-	// SearchResourcesInModel 在指定模型的所有字段中搜索资源，精确命中优先，其次返回模糊命中
+	// SearchResourcesInModel 全部字段使用模糊匹配，指定字段使用精确匹配或数字比较
 	SearchResourcesInModel(ctx context.Context, fields []string, modelUid, fieldUid, keyword string, offset, limit int64) (
 		[]domain.Resource, int64, error)
 
