@@ -58,7 +58,7 @@
     "path": "codebook",
     "pid": "8",
     "redirect": "",
-    "sort": "1",
+    "sort": "3",
     "status": "1",
     "type": "2",
     "utime": "1758897424032"
@@ -74,7 +74,7 @@
     "path": "/task/executor",
     "pid": "8",
     "redirect": "",
-    "sort": "2",
+    "sort": "4",
     "status": "1",
     "type": "2",
     "utime": "1774925238123"
@@ -314,7 +314,7 @@
     "path": "runner",
     "pid": "8",
     "redirect": "",
-    "sort": "3",
+    "sort": "5",
     "status": "1",
     "type": "2",
     "utime": "1774925289728"
@@ -4458,10 +4458,40 @@
     "path": "/task/manager",
     "pid": "8",
     "redirect": "",
-    "sort": "0",
+    "sort": "1",
     "status": "1",
     "type": "2",
     "utime": "1774840148443"
+  },
+  {
+    "component": "/views/task/category/index.vue",
+    "ctime": "1786093200000",
+    "endpoints": "[ ]",
+    "id": "325",
+    "meta": "{ \"title\" : \"任务分类\", \"is_hidden\" : false, \"is_affix\" : false, \"platforms\" : [ \"automation\" ], \"is_keepalive\" : false, \"icon\" : \"task-manager\" }",
+    "name": "task-category",
+    "path": "/task/categories",
+    "pid": "8",
+    "redirect": "",
+    "sort": "2",
+    "status": "1",
+    "type": "2",
+    "utime": "1786093200000"
+  },
+  {
+    "component": "",
+    "ctime": "1786093200000",
+    "endpoints": "[ { \"path\" : \"/api/manager/categories/create\", \"method\" : \"POST\", \"resource\" : \"TASK\", \"desc\" : \"\" }, { \"path\" : \"/api/manager/categories/list\", \"method\" : \"POST\", \"resource\" : \"TASK\", \"desc\" : \"\" }, { \"path\" : \"/api/manager/categories/update\", \"method\" : \"POST\", \"resource\" : \"TASK\", \"desc\" : \"\" }, { \"path\" : \"/api/manager/categories/:id\", \"method\" : \"DELETE\", \"resource\" : \"TASK\", \"desc\" : \"\" }, { \"path\" : \"/api/manager/categories/:id/tasks\", \"method\" : \"POST\", \"resource\" : \"TASK\", \"desc\" : \"\" }, { \"path\" : \"/api/manager/list\", \"method\" : \"POST\", \"resource\" : \"TASK\", \"desc\" : \"\" } ]",
+    "id": "326",
+    "meta": "{ \"title\" : \"任务分类管理\", \"is_hidden\" : false, \"is_affix\" : false, \"platforms\" : [ \"automation\" ], \"is_keepalive\" : false, \"icon\" : \"\" }",
+    "name": "",
+    "path": "",
+    "pid": "325",
+    "redirect": "",
+    "sort": "1000",
+    "status": "1",
+    "type": "3",
+    "utime": "1786093200000"
   },
   {
     "_id": "69c0f185c48ccc6e36346735",
