@@ -29,8 +29,8 @@ type ResourceDAO interface {
 	// ListResource 获取指定模型的资产列表
 	ListResource(ctx context.Context, fields []string, modelUid string, offset, limit int64) ([]Resource, error)
 
-	// SearchResourcesInModel 全部字段使用模糊匹配，指定字段使用精确匹配或数字比较
-	SearchResourcesInModel(ctx context.Context, fields []string, modelUid, fieldUid, keyword string, offset, limit int64) (
+	// SearchResourcesInModel 多个搜索条件使用 AND 组合；全部字段模糊匹配，指定字段精确匹配或数字比较
+	SearchResourcesInModel(ctx context.Context, fields []string, modelUid string, conditions []domain.SearchCondition, offset, limit int64) (
 		[]Resource, int64, error)
 
 	// CountByModelUid 统计指定模型的资产数量
@@ -288,39 +288,12 @@ func (dao *resourceDAO) ListResource(ctx context.Context, fields []string, model
 	return result, nil
 }
 
-func (dao *resourceDAO) SearchResourcesInModel(ctx context.Context, fields []string, modelUid, fieldUid, keyword string, offset, limit int64) (
+func (dao *resourceDAO) SearchResourcesInModel(ctx context.Context, fields []string, modelUid string, conditions []domain.SearchCondition, offset, limit int64) (
 	[]Resource, int64, error) {
-	keyword = strings.TrimSpace(keyword)
-	if keyword == "" && fieldUid == "" {
-		resources, err := dao.ListResource(ctx, fields, modelUid, offset, limit)
-		if err != nil {
-			return nil, 0, err
-		}
-		total, err := dao.CountByModelUid(ctx, modelUid)
-		return resources, total, err
-	}
-
 	col := dao.db.Collection(ResourceCollection)
 	searchFields := normalizeSearchFields(fields)
-	if fieldUid != "" {
-		searchFields = []string{fieldUid}
-	}
 	projection := buildProjection(fields)
-
-	if keyword == "" {
-		emptyFilter := bson.M{
-			"model_uid": modelUid,
-			"$or":       buildEmptySearchConditions(searchFields),
-		}
-		total, err := col.CountDocuments(ctx, emptyFilter)
-		if err != nil {
-			return nil, 0, fmt.Errorf("空值匹配计数错误: %w", err)
-		}
-		resources, err := dao.findResourcesByFilter(ctx, emptyFilter, projection, offset, limit)
-		return resources, total, err
-	}
-
-	searchFilter := buildResourceSearchFilter(modelUid, searchFields, fieldUid, keyword)
+	searchFilter := buildResourceSearchFilter(modelUid, searchFields, conditions)
 	total, err := col.CountDocuments(ctx, searchFilter)
 	if err != nil {
 		return nil, 0, fmt.Errorf("搜索匹配计数错误: %w", err)
@@ -799,19 +772,33 @@ func normalizeSearchFields(fields []string) []string {
 	return result
 }
 
-func buildResourceSearchFilter(modelUid string, fields []string, fieldUid, keyword string) bson.M {
+func buildResourceSearchFilter(modelUid string, fields []string, conditions []domain.SearchCondition) bson.M {
 	filter := bson.M{"model_uid": modelUid}
-	if fieldUid == "" {
-		filter["$or"] = buildFuzzySearchConditions(fields, keyword)
-		return filter
-	}
+	andConditions := make(bson.A, 0, len(conditions))
+	for _, condition := range conditions {
+		fieldUID := strings.TrimSpace(condition.FieldUID)
+		keyword := strings.TrimSpace(condition.Keyword)
+		if fieldUID == "" && keyword == "" {
+			continue
+		}
 
-	if operator, value, ok := parseNumericComparison(keyword); ok {
-		filter["$expr"] = buildNumericComparisonExpression(fieldUid, operator, value)
-		return filter
+		if fieldUID == "" {
+			andConditions = append(andConditions, bson.M{"$or": buildFuzzySearchConditions(fields, keyword)})
+			continue
+		}
+		if keyword == "" {
+			andConditions = append(andConditions, bson.M{"$or": buildEmptySearchConditions([]string{fieldUID})})
+			continue
+		}
+		if operator, value, ok := parseNumericComparison(keyword); ok {
+			andConditions = append(andConditions, bson.M{"$expr": buildNumericComparisonExpression(fieldUID, operator, value)})
+			continue
+		}
+		andConditions = append(andConditions, bson.M{"$or": buildExactSearchConditions([]string{fieldUID}, keyword)})
 	}
-
-	filter["$or"] = buildExactSearchConditions([]string{fieldUid}, keyword)
+	if len(andConditions) > 0 {
+		filter["$and"] = andConditions
+	}
 	return filter
 }
 

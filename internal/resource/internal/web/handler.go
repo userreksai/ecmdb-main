@@ -259,12 +259,26 @@ func (h *Handler) SearchModelResource(ctx *gin.Context, req SearchModelResourceR
 	if err != nil {
 		return systemErrorResult, err
 	}
-	if req.FieldUid != "" && !contains(fields, req.FieldUid) {
-		return ginx.Result{Code: 400001, Msg: "搜索字段不属于当前模型"}, nil
+	conditions := make([]domain.SearchCondition, 0, len(req.Conditions))
+	if len(req.Conditions) == 0 {
+		conditions = append(conditions, domain.SearchCondition{FieldUID: req.FieldUid, Keyword: req.Keyword})
+	} else {
+		for _, condition := range req.Conditions {
+			conditions = append(conditions, domain.SearchCondition{
+				FieldUID: condition.FieldUid,
+				Keyword:  condition.Keyword,
+			})
+		}
+	}
+	for _, condition := range conditions {
+		fieldUID := strings.TrimSpace(condition.FieldUID)
+		if fieldUID != "" && !contains(fields, fieldUID) {
+			return ginx.Result{Code: 400001, Msg: "搜索字段不属于当前模型"}, nil
+		}
 	}
 
 	resp, total, err := h.svc.SearchResourcesInModel(
-		ctx, fields, req.ModelUid, req.FieldUid, req.Keyword, req.Offset, req.Limit,
+		ctx, fields, req.ModelUid, conditions, req.Offset, req.Limit,
 	)
 	if err != nil {
 		return systemErrorResult, err

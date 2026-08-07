@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/Duke1616/ecmdb/internal/resource/internal/domain"
 	"github.com/Duke1616/ecmdb/internal/resource/internal/repository"
@@ -25,8 +26,8 @@ type Service interface {
 	ListResource(ctx context.Context, fields []string, modelUid string, offset, limit int64) ([]domain.Resource,
 		int64, error)
 
-	// SearchResourcesInModel 全部字段使用模糊匹配，指定字段使用精确匹配或数字比较
-	SearchResourcesInModel(ctx context.Context, fields []string, modelUid, fieldUid, keyword string, offset, limit int64) (
+	// SearchResourcesInModel 多个搜索条件使用 AND 组合；全部字段模糊匹配，指定字段精确匹配或数字比较
+	SearchResourcesInModel(ctx context.Context, fields []string, modelUid string, conditions []domain.SearchCondition, offset, limit int64) (
 		[]domain.Resource, int64, error)
 
 	CountByModelUid(ctx context.Context, modelUid string) (int64, error)
@@ -141,7 +142,7 @@ func (s *service) ListResource(ctx context.Context, fields []string, modelUid st
 	return resources, total, nil
 }
 
-func (s *service) SearchResourcesInModel(ctx context.Context, fields []string, modelUid, fieldUid, keyword string, offset, limit int64) (
+func (s *service) SearchResourcesInModel(ctx context.Context, fields []string, modelUid string, conditions []domain.SearchCondition, offset, limit int64) (
 	[]domain.Resource, int64, error) {
 	if fields == nil {
 		return nil, 0, fmt.Errorf("传递字段信息不能为空")
@@ -151,11 +152,20 @@ func (s *service) SearchResourcesInModel(ctx context.Context, fields []string, m
 		return nil, 0, fmt.Errorf("模型唯一标识不能为空")
 	}
 
-	if keyword == "" && fieldUid == "" {
+	normalizedConditions := make([]domain.SearchCondition, 0, len(conditions))
+	for _, condition := range conditions {
+		condition.FieldUID = strings.TrimSpace(condition.FieldUID)
+		condition.Keyword = strings.TrimSpace(condition.Keyword)
+		if condition.FieldUID == "" && condition.Keyword == "" {
+			continue
+		}
+		normalizedConditions = append(normalizedConditions, condition)
+	}
+	if len(normalizedConditions) == 0 {
 		return s.ListResource(ctx, fields, modelUid, offset, limit)
 	}
 
-	return s.repo.SearchResourcesInModel(ctx, fields, modelUid, fieldUid, keyword, offset, limit)
+	return s.repo.SearchResourcesInModel(ctx, fields, modelUid, normalizedConditions, offset, limit)
 }
 
 func (s *service) ListResourceByIds(ctx context.Context, fields []string, ids []int64) ([]domain.Resource, error) {

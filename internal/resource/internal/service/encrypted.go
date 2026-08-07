@@ -81,9 +81,9 @@ func (s *EncryptedResourceService) ListResource(ctx context.Context, fields []st
 	return decodeRs, total, err
 }
 
-func (s *EncryptedResourceService) SearchResourcesInModel(ctx context.Context, fields []string, modelUid, fieldUid, keyword string, offset, limit int64) (
+func (s *EncryptedResourceService) SearchResourcesInModel(ctx context.Context, fields []string, modelUid string, conditions []domain.SearchCondition, offset, limit int64) (
 	[]domain.Resource, int64, error) {
-	rs, total, err := s.Service.SearchResourcesInModel(ctx, fields, modelUid, fieldUid, keyword, offset, limit)
+	rs, total, err := s.Service.SearchResourcesInModel(ctx, fields, modelUid, conditions, offset, limit)
 	if err != nil {
 		return nil, 0, err
 	}
