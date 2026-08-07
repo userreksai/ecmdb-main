@@ -31,10 +31,18 @@ type SearchResource struct {
 	Data     []mongox.MapStr
 }
 
+type SearchMatchType string
+
+const (
+	SearchMatchTypeExact SearchMatchType = "exact"
+	SearchMatchTypeFuzzy SearchMatchType = "fuzzy"
+)
+
 // SearchCondition 描述模型内的一条搜索条件；FieldUID 为空时搜索全部字段。
 type SearchCondition struct {
-	FieldUID string `json:"field_uid,omitempty"`
-	Keyword  string `json:"keyword"`
+	FieldUID  string          `json:"field_uid,omitempty"`
+	Keyword   string          `json:"keyword"`
+	MatchType SearchMatchType `json:"match_type,omitempty"`
 }
 
 type Condition struct {

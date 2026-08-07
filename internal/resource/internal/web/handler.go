@@ -261,12 +261,17 @@ func (h *Handler) SearchModelResource(ctx *gin.Context, req SearchModelResourceR
 	}
 	conditions := make([]domain.SearchCondition, 0, len(req.Conditions))
 	if len(req.Conditions) == 0 {
-		conditions = append(conditions, domain.SearchCondition{FieldUID: req.FieldUid, Keyword: req.Keyword})
+		conditions = append(conditions, domain.SearchCondition{
+			FieldUID:  req.FieldUid,
+			Keyword:   req.Keyword,
+			MatchType: domain.SearchMatchType(req.MatchType),
+		})
 	} else {
 		for _, condition := range req.Conditions {
 			conditions = append(conditions, domain.SearchCondition{
-				FieldUID: condition.FieldUid,
-				Keyword:  condition.Keyword,
+				FieldUID:  condition.FieldUid,
+				Keyword:   condition.Keyword,
+				MatchType: domain.SearchMatchType(condition.MatchType),
 			})
 		}
 	}
@@ -274,6 +279,10 @@ func (h *Handler) SearchModelResource(ctx *gin.Context, req SearchModelResourceR
 		fieldUID := strings.TrimSpace(condition.FieldUID)
 		if fieldUID != "" && !contains(fields, fieldUID) {
 			return ginx.Result{Code: 400001, Msg: "搜索字段不属于当前模型"}, nil
+		}
+		matchType := domain.SearchMatchType(strings.ToLower(strings.TrimSpace(string(condition.MatchType))))
+		if matchType != "" && matchType != domain.SearchMatchTypeExact && matchType != domain.SearchMatchTypeFuzzy {
+			return ginx.Result{Code: 400001, Msg: "匹配方式仅支持 exact 或 fuzzy"}, nil
 		}
 	}
 

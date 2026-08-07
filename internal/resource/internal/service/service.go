@@ -26,7 +26,7 @@ type Service interface {
 	ListResource(ctx context.Context, fields []string, modelUid string, offset, limit int64) ([]domain.Resource,
 		int64, error)
 
-	// SearchResourcesInModel 多个搜索条件使用 AND 组合；全部字段模糊匹配，指定字段精确匹配或数字比较
+	// SearchResourcesInModel 多个搜索条件使用 AND 组合，每个条件可选择精准或模糊匹配
 	SearchResourcesInModel(ctx context.Context, fields []string, modelUid string, conditions []domain.SearchCondition, offset, limit int64) (
 		[]domain.Resource, int64, error)
 
@@ -156,8 +156,16 @@ func (s *service) SearchResourcesInModel(ctx context.Context, fields []string, m
 	for _, condition := range conditions {
 		condition.FieldUID = strings.TrimSpace(condition.FieldUID)
 		condition.Keyword = strings.TrimSpace(condition.Keyword)
+		condition.MatchType = domain.SearchMatchType(strings.ToLower(strings.TrimSpace(string(condition.MatchType))))
 		if condition.FieldUID == "" && condition.Keyword == "" {
 			continue
+		}
+		if condition.MatchType == "" {
+			if condition.FieldUID == "" {
+				condition.MatchType = domain.SearchMatchTypeFuzzy
+			} else {
+				condition.MatchType = domain.SearchMatchTypeExact
+			}
 		}
 		normalizedConditions = append(normalizedConditions, condition)
 	}

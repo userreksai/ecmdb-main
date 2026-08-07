@@ -41,12 +41,14 @@ type SearchModelResourceReq struct {
 	ModelUid   string                         `json:"model_uid"`
 	Keyword    string                         `json:"keyword"`
 	FieldUid   string                         `json:"field_uid,omitempty"`
+	MatchType  string                         `json:"match_type,omitempty"`
 	Conditions []SearchModelResourceCondition `json:"conditions,omitempty"`
 }
 
 type SearchModelResourceCondition struct {
-	Keyword  string `json:"keyword"`
-	FieldUid string `json:"field_uid,omitempty"`
+	Keyword   string `json:"keyword"`
+	FieldUid  string `json:"field_uid,omitempty"`
+	MatchType string `json:"match_type,omitempty"`
 }
 
 type ListResourceByIdsReq struct {

@@ -44,6 +44,41 @@ func TestBuildResourceSearchFilterUsesExactMatchingForSelectedField(t *testing.T
 	}
 }
 
+func TestBuildResourceSearchFilterSupportsExactMatchingForAllFields(t *testing.T) {
+	filter := buildResourceSearchFilter("domain", []string{"platform", "status"}, []domain.SearchCondition{{
+		Keyword:   "godaddy",
+		MatchType: domain.SearchMatchTypeExact,
+	}})
+	andConditions := filter["$and"].(bson.A)
+	conditions, ok := andConditions[0].(bson.M)["$or"].([]bson.M)
+	if !ok || len(conditions) != 2 {
+		t.Fatalf("expected one exact condition per field, got %#v", filter)
+	}
+	if conditions[0]["platform"] != "godaddy" || conditions[1]["status"] != "godaddy" {
+		t.Fatalf("unexpected all-field exact conditions: %#v", conditions)
+	}
+}
+
+func TestBuildResourceSearchFilterSupportsFuzzyMatchingForSelectedField(t *testing.T) {
+	filter := buildResourceSearchFilter("domain", []string{"platform", "status"}, []domain.SearchCondition{{
+		FieldUID:  "status",
+		Keyword:   "正常",
+		MatchType: domain.SearchMatchTypeFuzzy,
+	}})
+	andConditions := filter["$and"].(bson.A)
+	conditions, ok := andConditions[0].(bson.M)["$or"].([]bson.M)
+	if !ok || len(conditions) != 2 {
+		t.Fatalf("expected fuzzy string and converted-value conditions, got %#v", filter)
+	}
+	fieldCondition, ok := conditions[0]["status"].(bson.M)
+	if !ok {
+		t.Fatalf("fuzzy condition targets an unexpected field: %#v", conditions[0])
+	}
+	if _, ok = fieldCondition["$regex"]; !ok {
+		t.Fatalf("expected selected-field regex matching, got %#v", fieldCondition)
+	}
+}
+
 func TestParseNumericComparison(t *testing.T) {
 	testCases := []struct {
 		keyword  string
@@ -89,24 +124,27 @@ func TestNumericComparisonConvertsStoredStringsAndNumbers(t *testing.T) {
 	}
 }
 
-func TestBuildResourceSearchFilterCombinesMultipleConditionsWithAnd(t *testing.T) {
+func TestBuildResourceSearchFilterCombinesMixedMatchTypesWithAnd(t *testing.T) {
 	filter := buildResourceSearchFilter("domain", []string{"platform", "status"}, []domain.SearchCondition{
-		{FieldUID: "platform", Keyword: "godaddy"},
-		{FieldUID: "status", Keyword: "已注册且正常"},
+		{FieldUID: "platform", Keyword: "godaddy", MatchType: domain.SearchMatchTypeExact},
+		{FieldUID: "status", Keyword: "正常", MatchType: domain.SearchMatchTypeFuzzy},
 	})
 
 	conditions, ok := filter["$and"].(bson.A)
 	if !ok || len(conditions) != 2 {
 		t.Fatalf("expected two AND conditions, got %#v", filter)
 	}
-	for index, field := range []string{"platform", "status"} {
-		exactConditions, ok := conditions[index].(bson.M)["$or"].([]bson.M)
-		if !ok || len(exactConditions) == 0 {
-			t.Fatalf("expected exact matching for %s, got %#v", field, conditions[index])
-		}
-		if _, ok = exactConditions[0][field]; !ok {
-			t.Fatalf("condition %d targets an unexpected field: %#v", index, exactConditions[0])
-		}
+	exactConditions := conditions[0].(bson.M)["$or"].([]bson.M)
+	if exactConditions[0]["platform"] != "godaddy" {
+		t.Fatalf("expected exact platform matching, got %#v", conditions[0])
+	}
+	fuzzyConditions := conditions[1].(bson.M)["$or"].([]bson.M)
+	statusCondition, ok := fuzzyConditions[0]["status"].(bson.M)
+	if !ok {
+		t.Fatalf("expected fuzzy status matching, got %#v", conditions[1])
+	}
+	if _, ok = statusCondition["$regex"]; !ok {
+		t.Fatalf("expected a status regex, got %#v", statusCondition)
 	}
 }
 
