@@ -19,8 +19,8 @@ type ResourceRepository interface {
 	// ListResource 获取指定模型的资产列表
 	ListResource(ctx context.Context, fields []string, modelUid string, offset, limit int64) ([]domain.Resource, error)
 
-	// SearchResourcesInModel 全部字段使用模糊匹配，指定字段使用精确匹配或数字比较
-	SearchResourcesInModel(ctx context.Context, fields []string, modelUid, fieldUid, keyword string, offset, limit int64) (
+	// SearchResourcesInModel 多个搜索条件使用 AND 组合；全部字段模糊匹配，指定字段精确匹配或数字比较
+	SearchResourcesInModel(ctx context.Context, fields []string, modelUid string, conditions []domain.SearchCondition, offset, limit int64) (
 		[]domain.Resource, int64, error)
 
 	// TotalByModelUid 获取指定模型的资产总数
@@ -136,9 +136,9 @@ func (repo *resourceRepository) ListResource(ctx context.Context, fields []strin
 	}), err
 }
 
-func (repo *resourceRepository) SearchResourcesInModel(ctx context.Context, fields []string, modelUid, fieldUid, keyword string, offset, limit int64) (
+func (repo *resourceRepository) SearchResourcesInModel(ctx context.Context, fields []string, modelUid string, conditions []domain.SearchCondition, offset, limit int64) (
 	[]domain.Resource, int64, error) {
-	rrs, total, err := repo.dao.SearchResourcesInModel(ctx, fields, modelUid, fieldUid, keyword, offset, limit)
+	rrs, total, err := repo.dao.SearchResourcesInModel(ctx, fields, modelUid, conditions, offset, limit)
 
 	return slice.Map(rrs, func(idx int, src dao.Resource) domain.Resource {
 		return repo.toDomain(src)

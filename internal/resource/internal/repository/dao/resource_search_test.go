@@ -4,12 +4,17 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/Duke1616/ecmdb/internal/resource/internal/domain"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
 func TestBuildResourceSearchFilterUsesFuzzyMatchingForAllFields(t *testing.T) {
-	filter := buildResourceSearchFilter("certificate", []string{"name", "remaining_days"}, "", "2")
-	conditions, ok := filter["$or"].([]bson.M)
+	filter := buildResourceSearchFilter("certificate", []string{"name", "remaining_days"}, []domain.SearchCondition{{Keyword: "2"}})
+	andConditions, ok := filter["$and"].(bson.A)
+	if !ok || len(andConditions) != 1 {
+		t.Fatalf("expected one search condition, got %#v", filter)
+	}
+	conditions, ok := andConditions[0].(bson.M)["$or"].([]bson.M)
 	if !ok || len(conditions) == 0 {
 		t.Fatalf("expected all-field fuzzy conditions, got %#v", filter)
 	}
@@ -23,8 +28,12 @@ func TestBuildResourceSearchFilterUsesFuzzyMatchingForAllFields(t *testing.T) {
 }
 
 func TestBuildResourceSearchFilterUsesExactMatchingForSelectedField(t *testing.T) {
-	filter := buildResourceSearchFilter("certificate", []string{"remaining_days"}, "remaining_days", "2")
-	conditions, ok := filter["$or"].([]bson.M)
+	filter := buildResourceSearchFilter("certificate", []string{"remaining_days"}, []domain.SearchCondition{{FieldUID: "remaining_days", Keyword: "2"}})
+	andConditions, ok := filter["$and"].(bson.A)
+	if !ok || len(andConditions) != 1 {
+		t.Fatalf("expected one search condition, got %#v", filter)
+	}
+	conditions, ok := andConditions[0].(bson.M)["$or"].([]bson.M)
 	if !ok || len(conditions) != 3 {
 		t.Fatalf("expected string and numeric exact conditions, got %#v", filter)
 	}
@@ -59,8 +68,12 @@ func TestParseNumericComparison(t *testing.T) {
 }
 
 func TestNumericComparisonConvertsStoredStringsAndNumbers(t *testing.T) {
-	filter := buildResourceSearchFilter("certificate", []string{"remaining_days"}, "remaining_days", ">2")
-	expression, ok := filter["$expr"].(bson.M)
+	filter := buildResourceSearchFilter("certificate", []string{"remaining_days"}, []domain.SearchCondition{{FieldUID: "remaining_days", Keyword: ">2"}})
+	searchConditions, ok := filter["$and"].(bson.A)
+	if !ok || len(searchConditions) != 1 {
+		t.Fatalf("expected one search condition, got %#v", filter)
+	}
+	expression, ok := searchConditions[0].(bson.M)["$expr"].(bson.M)
 	if !ok {
 		t.Fatalf("expected a numeric comparison expression, got %#v", filter)
 	}
@@ -73,6 +86,27 @@ func TestNumericComparisonConvertsStoredStringsAndNumbers(t *testing.T) {
 	conversion := operands[0].(bson.M)["$convert"].(bson.M)
 	if conversion["to"] != "double" || conversion["input"] != "$remaining_days" {
 		t.Fatalf("unexpected numeric conversion: %#v", conversion)
+	}
+}
+
+func TestBuildResourceSearchFilterCombinesMultipleConditionsWithAnd(t *testing.T) {
+	filter := buildResourceSearchFilter("domain", []string{"platform", "status"}, []domain.SearchCondition{
+		{FieldUID: "platform", Keyword: "godaddy"},
+		{FieldUID: "status", Keyword: "已注册且正常"},
+	})
+
+	conditions, ok := filter["$and"].(bson.A)
+	if !ok || len(conditions) != 2 {
+		t.Fatalf("expected two AND conditions, got %#v", filter)
+	}
+	for index, field := range []string{"platform", "status"} {
+		exactConditions, ok := conditions[index].(bson.M)["$or"].([]bson.M)
+		if !ok || len(exactConditions) == 0 {
+			t.Fatalf("expected exact matching for %s, got %#v", field, conditions[index])
+		}
+		if _, ok = exactConditions[0][field]; !ok {
+			t.Fatalf("condition %d targets an unexpected field: %#v", index, exactConditions[0])
+		}
 	}
 }
 

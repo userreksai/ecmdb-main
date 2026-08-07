@@ -38,7 +38,13 @@ type ListResourceReq struct {
 
 type SearchModelResourceReq struct {
 	Page
-	ModelUid string `json:"model_uid"`
+	ModelUid   string                         `json:"model_uid"`
+	Keyword    string                         `json:"keyword"`
+	FieldUid   string                         `json:"field_uid,omitempty"`
+	Conditions []SearchModelResourceCondition `json:"conditions,omitempty"`
+}
+
+type SearchModelResourceCondition struct {
 	Keyword  string `json:"keyword"`
 	FieldUid string `json:"field_uid,omitempty"`
 }

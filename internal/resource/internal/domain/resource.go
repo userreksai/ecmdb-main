@@ -31,6 +31,12 @@ type SearchResource struct {
 	Data     []mongox.MapStr
 }
 
+// SearchCondition 描述模型内的一条搜索条件；FieldUID 为空时搜索全部字段。
+type SearchCondition struct {
+	FieldUID string `json:"field_uid,omitempty"`
+	Keyword  string `json:"keyword"`
+}
+
 type Condition struct {
 	Name      string `json:"name"`      // 过滤名称
 	Condition string `json:"condition"` // 过滤条件
