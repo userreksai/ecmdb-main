@@ -29,7 +29,7 @@ type ResourceDAO interface {
 	// ListResource 获取指定模型的资产列表
 	ListResource(ctx context.Context, fields []string, modelUid string, offset, limit int64) ([]Resource, error)
 
-	// SearchResourcesInModel 多个搜索条件使用 AND 组合；全部字段模糊匹配，指定字段精确匹配或数字比较
+	// SearchResourcesInModel 多个搜索条件使用 AND 组合，每个条件可选择精准或模糊匹配
 	SearchResourcesInModel(ctx context.Context, fields []string, modelUid string, conditions []domain.SearchCondition, offset, limit int64) (
 		[]Resource, int64, error)
 
@@ -782,24 +782,45 @@ func buildResourceSearchFilter(modelUid string, fields []string, conditions []do
 			continue
 		}
 
-		if fieldUID == "" {
-			andConditions = append(andConditions, bson.M{"$or": buildFuzzySearchConditions(fields, keyword)})
-			continue
-		}
 		if keyword == "" {
 			andConditions = append(andConditions, bson.M{"$or": buildEmptySearchConditions([]string{fieldUID})})
+			continue
+		}
+
+		searchFields := fields
+		if fieldUID != "" {
+			searchFields = []string{fieldUID}
+		}
+		matchType := resolveSearchMatchType(fieldUID, condition.MatchType)
+		if matchType == domain.SearchMatchTypeFuzzy {
+			andConditions = append(andConditions, bson.M{"$or": buildFuzzySearchConditions(searchFields, keyword)})
+			continue
+		}
+		if fieldUID == "" {
+			andConditions = append(andConditions, bson.M{"$or": buildExactSearchConditions(searchFields, keyword)})
 			continue
 		}
 		if operator, value, ok := parseNumericComparison(keyword); ok {
 			andConditions = append(andConditions, bson.M{"$expr": buildNumericComparisonExpression(fieldUID, operator, value)})
 			continue
 		}
-		andConditions = append(andConditions, bson.M{"$or": buildExactSearchConditions([]string{fieldUID}, keyword)})
+		andConditions = append(andConditions, bson.M{"$or": buildExactSearchConditions(searchFields, keyword)})
 	}
 	if len(andConditions) > 0 {
 		filter["$and"] = andConditions
 	}
 	return filter
+}
+
+func resolveSearchMatchType(fieldUID string, matchType domain.SearchMatchType) domain.SearchMatchType {
+	matchType = domain.SearchMatchType(strings.ToLower(strings.TrimSpace(string(matchType))))
+	if matchType == domain.SearchMatchTypeExact || matchType == domain.SearchMatchTypeFuzzy {
+		return matchType
+	}
+	if fieldUID == "" {
+		return domain.SearchMatchTypeFuzzy
+	}
+	return domain.SearchMatchTypeExact
 }
 
 func buildExactSearchConditions(fields []string, keyword string) []bson.M {
