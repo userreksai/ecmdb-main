@@ -6,6 +6,7 @@ import (
 
 	"github.com/Duke1616/ecmdb/internal/resource/internal/domain"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func TestBuildResourceSearchFilterUsesFuzzyMatchingForAllFields(t *testing.T) {
@@ -145,6 +146,31 @@ func TestBuildResourceSearchFilterCombinesMixedMatchTypesWithAnd(t *testing.T) {
 	}
 	if _, ok = statusCondition["$regex"]; !ok {
 		t.Fatalf("expected a status regex, got %#v", statusCondition)
+	}
+}
+
+func TestBuildResourceSearchFilterCombinesCommaSeparatedKeywordsWithOr(t *testing.T) {
+	filter := buildResourceSearchFilter("domain", []string{"platform", "status"}, []domain.SearchCondition{
+		{FieldUID: "platform", Keyword: "腾讯云国际, 华纳云", MatchType: domain.SearchMatchTypeFuzzy},
+		{FieldUID: "status", Keyword: "正常", MatchType: domain.SearchMatchTypeFuzzy},
+	})
+
+	conditions, ok := filter["$and"].(bson.A)
+	if !ok || len(conditions) != 2 {
+		t.Fatalf("expected two AND condition groups, got %#v", filter)
+	}
+	platformConditions := conditions[0].(bson.M)["$or"].([]bson.M)
+	if len(platformConditions) != 4 {
+		t.Fatalf("expected comma-separated platform values to use OR, got %#v", conditions[0])
+	}
+	firstRegex := platformConditions[0]["platform"].(bson.M)["$regex"].(primitive.Regex)
+	secondRegex := platformConditions[2]["platform"].(bson.M)["$regex"].(primitive.Regex)
+	if firstRegex.Pattern != "腾讯云国际" || secondRegex.Pattern != "华纳云" {
+		t.Fatalf("unexpected fuzzy platform values: %#v", platformConditions)
+	}
+	statusConditions := conditions[1].(bson.M)["$or"].([]bson.M)
+	if len(statusConditions) == 0 {
+		t.Fatalf("expected the second row to remain an AND condition group, got %#v", conditions[1])
 	}
 }
 
