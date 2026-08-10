@@ -787,29 +787,60 @@ func buildResourceSearchFilter(modelUid string, fields []string, conditions []do
 			continue
 		}
 
+		keywords := splitSearchKeywords(keyword)
+		if len(keywords) == 0 {
+			continue
+		}
+
 		searchFields := fields
 		if fieldUID != "" {
 			searchFields = []string{fieldUID}
 		}
 		matchType := resolveSearchMatchType(fieldUID, condition.MatchType)
-		if matchType == domain.SearchMatchTypeFuzzy {
-			andConditions = append(andConditions, bson.M{"$or": buildFuzzySearchConditions(searchFields, keyword)})
-			continue
+		orConditions := make([]bson.M, 0, len(keywords))
+		for _, searchKeyword := range keywords {
+			if matchType == domain.SearchMatchTypeFuzzy {
+				orConditions = append(orConditions, buildFuzzySearchConditions(searchFields, searchKeyword)...)
+				continue
+			}
+			if fieldUID == "" {
+				orConditions = append(orConditions, buildExactSearchConditions(searchFields, searchKeyword)...)
+				continue
+			}
+			if operator, value, ok := parseNumericComparison(searchKeyword); ok {
+				orConditions = append(orConditions, bson.M{
+					"$expr": buildNumericComparisonExpression(fieldUID, operator, value),
+				})
+				continue
+			}
+			orConditions = append(orConditions, buildExactSearchConditions(searchFields, searchKeyword)...)
 		}
-		if fieldUID == "" {
-			andConditions = append(andConditions, bson.M{"$or": buildExactSearchConditions(searchFields, keyword)})
-			continue
+		if len(orConditions) > 0 {
+			if len(keywords) == 1 && len(orConditions) == 1 {
+				if expression, ok := orConditions[0]["$expr"]; ok {
+					andConditions = append(andConditions, bson.M{"$expr": expression})
+					continue
+				}
+			}
+			andConditions = append(andConditions, bson.M{"$or": orConditions})
 		}
-		if operator, value, ok := parseNumericComparison(keyword); ok {
-			andConditions = append(andConditions, bson.M{"$expr": buildNumericComparisonExpression(fieldUID, operator, value)})
-			continue
-		}
-		andConditions = append(andConditions, bson.M{"$or": buildExactSearchConditions(searchFields, keyword)})
 	}
 	if len(andConditions) > 0 {
 		filter["$and"] = andConditions
 	}
 	return filter
+}
+
+func splitSearchKeywords(keyword string) []string {
+	parts := strings.Split(keyword, ",")
+	keywords := make([]string, 0, len(parts))
+	for _, part := range parts {
+		part = strings.TrimSpace(part)
+		if part != "" {
+			keywords = append(keywords, part)
+		}
+	}
+	return keywords
 }
 
 func resolveSearchMatchType(fieldUID string, matchType domain.SearchMatchType) domain.SearchMatchType {
