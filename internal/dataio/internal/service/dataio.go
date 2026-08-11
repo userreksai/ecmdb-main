@@ -149,7 +149,10 @@ func (s *dataIOService) Import(ctx context.Context, modelUID string, fileData []
 func (s *dataIOService) parseImportSheet(ctx context.Context, modelUID string, fileData []byte) (parsedImportSheet, error) {
 	f, err := excelize.OpenReader(bytes.NewReader(fileData))
 	if err != nil {
-		return parsedImportSheet{}, fmt.Errorf("解析 Excel 文件失败: %w", err)
+		return parsedImportSheet{}, newImportValidationError(
+			"Excel 文件格式错误，仅支持由本系统导出或下载模板生成的 .xlsx 文件",
+			err,
+		)
 	}
 	defer f.Close()
 
@@ -166,10 +169,10 @@ func (s *dataIOService) parseImportSheet(ctx context.Context, modelUID string, f
 	sheetName := f.GetSheetName(0)
 	rows, err := f.GetRows(sheetName)
 	if err != nil {
-		return parsedImportSheet{}, fmt.Errorf("读取 Excel 数据失败: %w", err)
+		return parsedImportSheet{}, newImportValidationError("读取 Excel 数据失败，请重新下载模板后填写", err)
 	}
 	if len(rows) < 3 {
-		return parsedImportSheet{}, fmt.Errorf("excel 文件格式错误，至少需要导出文件中的 3 行表头")
+		return parsedImportSheet{}, newImportValidationError("Excel 文件格式错误，至少需要保留导出文件中的 3 行表头", nil)
 	}
 
 	fieldUIDRow := rows[1]
@@ -181,10 +184,13 @@ func (s *dataIOService) parseImportSheet(ctx context.Context, modelUID string, f
 		fieldUID = strings.TrimSpace(fieldUID)
 		if fieldUID != "" {
 			if _, ok := attributeMap[fieldUID]; !ok {
-				return parsedImportSheet{}, fmt.Errorf("表格包含模型中不存在的字段: %s", fieldUID)
+				return parsedImportSheet{}, newImportValidationError(
+					fmt.Sprintf("表格包含模型中不存在的字段: %s", fieldUID),
+					nil,
+				)
 			}
 			if _, exists := seenColumns[fieldUID]; exists {
-				return parsedImportSheet{}, fmt.Errorf("表格字段重复: %s", fieldUID)
+				return parsedImportSheet{}, newImportValidationError(fmt.Sprintf("表格字段重复: %s", fieldUID), nil)
 			}
 			seenColumns[fieldUID] = struct{}{}
 			colIndexMap[colIdx] = fieldUID
@@ -195,7 +201,7 @@ func (s *dataIOService) parseImportSheet(ctx context.Context, modelUID string, f
 		}
 	}
 	if !hasNameField {
-		return parsedImportSheet{}, fmt.Errorf("表格缺少唯一索引字段: name")
+		return parsedImportSheet{}, newImportValidationError("表格缺少唯一索引字段: name", nil)
 	}
 
 	resources := make([]resource.Resource, 0, len(rows)-3)
@@ -222,10 +228,16 @@ func (s *dataIOService) parseImportSheet(ctx context.Context, modelUID string, f
 		name, ok := data["name"]
 		nameStr := strings.TrimSpace(fmt.Sprint(name))
 		if !ok || nameStr == "" {
-			return parsedImportSheet{}, fmt.Errorf("excel 第 %d 行缺少唯一索引字段 name", rowIdx+4)
+			return parsedImportSheet{}, newImportValidationError(
+				fmt.Sprintf("Excel 第 %d 行缺少唯一索引字段 name", rowIdx+4),
+				nil,
+			)
 		}
 		if firstRow, exists := seenNames[nameStr]; exists {
-			return parsedImportSheet{}, fmt.Errorf("excel 第 %d 行唯一索引 %q 重复，首次出现在第 %d 行", rowIdx+4, nameStr, firstRow)
+			return parsedImportSheet{}, newImportValidationError(
+				fmt.Sprintf("Excel 第 %d 行唯一索引 %q 重复，首次出现在第 %d 行", rowIdx+4, nameStr, firstRow),
+				nil,
+			)
 		}
 		seenNames[nameStr] = rowIdx + 4
 		resources = append(resources, resource.Resource{

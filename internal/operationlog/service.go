@@ -17,8 +17,8 @@ type logEntity struct {
 	Account        string    `gorm:"column:account;type:varchar(128);not null;index:idx_operation_log_account"`
 	OperationModel string    `gorm:"column:operation_model;type:varchar(128);not null;index:idx_operation_log_model"`
 	OperationType  string    `gorm:"column:operation_type;type:varchar(16);not null;index:idx_operation_log_type"`
-	OriginalData   []byte    `gorm:"column:original_data;type:json"`
-	ModifiedData   []byte    `gorm:"column:modified_data;type:json"`
+	OriginalData   string    `gorm:"column:original_data;type:json"`
+	ModifiedData   string    `gorm:"column:modified_data;type:json"`
 	OperationTime  time.Time `gorm:"column:operation_time;type:datetime(3);not null;index:idx_operation_log_time"`
 	ModifiedCount  int64     `gorm:"column:modified_count;not null;default:0"`
 }
@@ -48,8 +48,8 @@ func (s *service) Record(ctx context.Context, record Record) error {
 		Account:        strings.TrimSpace(record.Account),
 		OperationModel: strings.TrimSpace(record.OperationModel),
 		OperationType:  strings.ToUpper(strings.TrimSpace(record.OperationType)),
-		OriginalData:   original,
-		ModifiedData:   modified,
+		OriginalData:   string(original),
+		ModifiedData:   string(modified),
 		OperationTime:  time.Now(),
 		ModifiedCount:  record.ModifiedCount,
 	}
@@ -107,8 +107,8 @@ func (s *service) List(ctx context.Context, query Query) ([]Log, int64, error) {
 			Account:        entity.Account,
 			OperationModel: entity.OperationModel,
 			OperationType:  entity.OperationType,
-			OriginalData:   json.RawMessage(entity.OriginalData),
-			ModifiedData:   json.RawMessage(entity.ModifiedData),
+			OriginalData:   json.RawMessage([]byte(entity.OriginalData)),
+			ModifiedData:   json.RawMessage([]byte(entity.ModifiedData)),
 			OperationTime:  entity.OperationTime,
 			ModifiedCount:  entity.ModifiedCount,
 		})
