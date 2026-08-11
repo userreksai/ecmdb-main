@@ -13,7 +13,7 @@ func init() {
 	}
 
 	DefaultMenus = append(DefaultMenus, menu.Menu{
-		Id:        325,
+		Id:        327,
 		Pid:       15,
 		Path:      "operation-log",
 		Name:      "system-operation-log",

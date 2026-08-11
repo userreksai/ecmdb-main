@@ -21,6 +21,9 @@ func WrapBody[Req any](fn func(ctx *gin.Context, req Req) (Result, error)) gin.H
 			ctx.PureJSON(http.StatusInternalServerError, res)
 			return
 		}
+		if ctx.Writer.Written() {
+			return
+		}
 
 		ctx.JSON(http.StatusOK, res)
 	}
@@ -32,6 +35,9 @@ func Wrap(fn func(ctx *gin.Context) (Result, error)) gin.HandlerFunc {
 		if err != nil {
 			slog.Error("执行业务逻辑失败", slog.Any("err", err))
 			ctx.PureJSON(http.StatusInternalServerError, res)
+			return
+		}
+		if ctx.Writer.Written() {
 			return
 		}
 		ctx.PureJSON(http.StatusOK, res)

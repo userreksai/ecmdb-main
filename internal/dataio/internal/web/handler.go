@@ -71,6 +71,14 @@ func modelAccessError(err error) (ginx.Result, error) {
 	return systemErrorResult, err
 }
 
+func importError(err error) (ginx.Result, error) {
+	var validationErr *service.ImportValidationError
+	if errors.As(err, &validationErr) {
+		return ginx.Result{Code: 400001, Msg: validationErr.Error()}, nil
+	}
+	return systemErrorResult, err
+}
+
 func (h *Handler) PrivateRoutes(server *gin.Engine) {
 	g := server.Group("/api/dataio")
 	// 导出模板
@@ -93,7 +101,7 @@ func (h *Handler) PreviewImport(ctx *gin.Context, req ImportPreviewReq) (ginx.Re
 	}
 	preview, err := h.svc.PreviewImport(ctx.Request.Context(), req.ModelUID, fileData)
 	if err != nil {
-		return systemErrorResult, err
+		return importError(err)
 	}
 	return ginx.Result{Msg: "数据对比完成", Data: preview}, nil
 }
@@ -209,7 +217,7 @@ func (h *Handler) Import(ctx *gin.Context, req ImportReq) (ginx.Result, error) {
 	// 2. 调用 Service 导入数据
 	result, err := h.svc.Import(ctx.Request.Context(), req.ModelUID, fileData, req.ConfirmEmpty)
 	if err != nil {
-		return systemErrorResult, err
+		return importError(err)
 	}
 	h.recordImport(ctx, req.ModelUID, result)
 
