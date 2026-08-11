@@ -3,8 +3,11 @@ package web
 import (
 	"errors"
 	"fmt"
+	"strconv"
 
+	"github.com/Duke1616/ecmdb/internal/attribute"
 	"github.com/Duke1616/ecmdb/internal/dataio/internal/service"
+	"github.com/Duke1616/ecmdb/internal/operationlog"
 	"github.com/Duke1616/ecmdb/internal/pkg/authctx"
 	"github.com/Duke1616/ecmdb/internal/policy"
 	"github.com/Duke1616/ecmdb/internal/resource"
@@ -13,6 +16,7 @@ import (
 	"github.com/Duke1616/ecmdb/pkg/storage"
 	"github.com/ecodeclub/ekit/slice"
 	"github.com/gin-gonic/gin"
+	"github.com/gotomicro/ego/core/elog"
 )
 
 type Handler struct {
@@ -20,14 +24,19 @@ type Handler struct {
 	storage   *storage.S3Storage
 	roleSvc   role.Service
 	policySvc policy.Service
+	auditSvc  operationlog.Service
+	attrSvc   attribute.Service
 }
 
-func NewHandler(svc service.IDataIOService, storage *storage.S3Storage, roleSvc role.Service, policySvc policy.Service) *Handler {
+func NewHandler(svc service.IDataIOService, storage *storage.S3Storage, roleSvc role.Service, policySvc policy.Service,
+	auditSvc operationlog.Service, attrSvc attribute.Service) *Handler {
 	return &Handler{
 		svc:       svc,
 		storage:   storage,
 		roleSvc:   roleSvc,
 		policySvc: policySvc,
+		auditSvc:  auditSvc,
+		attrSvc:   attrSvc,
 	}
 }
 
@@ -68,8 +77,25 @@ func (h *Handler) PrivateRoutes(server *gin.Engine) {
 	g.GET("/template/export/:model_uid", ginx.Wrap(h.ExportTemplate))
 	// 导入数据 (S3 模式)
 	g.POST("/import", ginx.WrapBody[ImportReq](h.Import))
+	// 预览导入差异
+	g.POST("/import/preview", ginx.WrapBody[ImportPreviewReq](h.PreviewImport))
 	// 导出数据
 	g.POST("/export", ginx.WrapBody[ExportReq](h.Export))
+}
+
+func (h *Handler) PreviewImport(ctx *gin.Context, req ImportPreviewReq) (ginx.Result, error) {
+	if err := h.authorizeModel(ctx, req.ModelUID); err != nil {
+		return modelAccessError(err)
+	}
+	fileData, err := h.storage.GetFile(ctx.Request.Context(), "ecmdb", req.FileKey)
+	if err != nil {
+		return systemErrorResult, err
+	}
+	preview, err := h.svc.PreviewImport(ctx.Request.Context(), req.ModelUID, fileData)
+	if err != nil {
+		return systemErrorResult, err
+	}
+	return ginx.Result{Msg: "数据对比完成", Data: preview}, nil
 }
 
 // Export 导出数据
@@ -181,15 +207,87 @@ func (h *Handler) Import(ctx *gin.Context, req ImportReq) (ginx.Result, error) {
 	}
 
 	// 2. 调用 Service 导入数据
-	importedCount, err := h.svc.Import(ctx.Request.Context(), req.ModelUID, fileData)
+	result, err := h.svc.Import(ctx.Request.Context(), req.ModelUID, fileData, req.ConfirmEmpty)
 	if err != nil {
 		return systemErrorResult, err
 	}
+	h.recordImport(ctx, req.ModelUID, result)
 
 	return ginx.Result{
-		Msg: "导入成功",
-		Data: map[string]interface{}{
-			"imported_count": importedCount,
-		},
+		Msg:  "导入成功",
+		Data: result,
 	}, nil
+}
+
+func (h *Handler) recordImport(ctx *gin.Context, modelUID string, result service.ImportResult) {
+	if h.auditSvc == nil {
+		return
+	}
+	var secureFields []string
+	secureLookupFailed := false
+	if h.attrSvc != nil {
+		fieldsByModel, err := h.attrSvc.SearchAttributeFieldsBySecure(ctx, []string{modelUID})
+		if err != nil {
+			secureLookupFailed = true
+		} else {
+			secureFields = fieldsByModel[modelUID]
+		}
+	}
+	original := make([]map[string]interface{}, 0, len(result.Changes))
+	modified := make([]map[string]interface{}, 0, len(result.Changes))
+	for _, change := range result.Changes {
+		if change.Action == service.ImportActionUnchanged {
+			continue
+		}
+		original = append(original, map[string]interface{}{
+			"unique_id": change.UniqueID,
+			"action":    change.Action,
+			"data":      maskImportData(change.OriginalData, secureFields, secureLookupFailed),
+		})
+		modified = append(modified, map[string]interface{}{
+			"unique_id": change.UniqueID,
+			"action":    change.Action,
+			"data":      maskImportData(change.ModifiedData, secureFields, secureLookupFailed),
+		})
+	}
+	if len(modified) == 0 {
+		return
+	}
+	identity, ok := authctx.Get(ctx)
+	account := "unknown"
+	if ok {
+		account = identity.Username
+		if account == "" {
+			account = strconv.FormatInt(identity.UID, 10)
+		}
+	}
+	if err := h.auditSvc.Record(ctx, operationlog.Record{
+		Account:        account,
+		OperationModel: modelUID,
+		OperationType:  operationlog.OperationImport,
+		OriginalData:   original,
+		ModifiedData:   modified,
+		ModifiedCount:  int64(result.CreatedCount + result.UpdatedCount + result.DeletedCount),
+	}); err != nil {
+		elog.DefaultLogger.Error("record import operation log failed", elog.FieldErr(err))
+	}
+}
+
+func maskImportData(src map[string]interface{}, secureFields []string, secureLookupFailed bool) map[string]interface{} {
+	if src == nil {
+		return nil
+	}
+	if secureLookupFailed {
+		return map[string]interface{}{"_redacted": "secure field metadata unavailable"}
+	}
+	dst := make(map[string]interface{}, len(src))
+	for field, value := range src {
+		dst[field] = value
+	}
+	for _, field := range secureFields {
+		if _, exists := dst[field]; exists {
+			dst[field] = "[已脱敏]"
+		}
+	}
+	return dst
 }

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"reflect"
 	"sort"
 	"strings"
 
@@ -80,98 +81,271 @@ func NewDataIOService(
 	}
 }
 
-// Import 批量导入资源实例 (Resource)
-func (s *dataIOService) Import(ctx context.Context, modelUID string, fileData []byte) (importedCount int, err error) {
-	// 1. 解析 Excel 文件
+type parsedImportSheet struct {
+	Columns   []string
+	Fields    []string
+	Resources []resource.Resource
+}
+
+// PreviewImport 计算表格与当前模型的差异，不执行写入。
+func (s *dataIOService) PreviewImport(ctx context.Context, modelUID string, fileData []byte) (ImportPreview, error) {
+	sheet, err := s.parseImportSheet(ctx, modelUID, fileData)
+	if err != nil {
+		return ImportPreview{}, err
+	}
+
+	current, err := s.listAllResources(ctx, modelUID, sheet.Fields)
+	if err != nil {
+		return ImportPreview{}, err
+	}
+	return buildImportPreview(modelUID, sheet, current), nil
+}
+
+// Import 按唯一索引 name 同步表格与模型数据。
+func (s *dataIOService) Import(ctx context.Context, modelUID string, fileData []byte, confirmEmpty bool) (ImportResult, error) {
+	preview, err := s.PreviewImport(ctx, modelUID, fileData)
+	if err != nil {
+		return ImportResult{}, err
+	}
+	if preview.IsEmpty && !confirmEmpty {
+		return ImportResult{}, fmt.Errorf("表格数据为空，继续导入将删除当前模型全部数据，请确认后重试")
+	}
+
+	upserts := make([]resource.Resource, 0, preview.CreatedCount+preview.UpdatedCount)
+	deletes := make([]resource.Resource, 0, preview.DeletedCount)
+	for _, change := range preview.Rows {
+		switch change.Action {
+		case ImportActionCreate, ImportActionUpdate:
+			upserts = append(upserts, change.Resource)
+		case ImportActionDelete:
+			deletes = append(deletes, change.Resource)
+		}
+	}
+
+	if err = s.resSvc.BatchCreateOrUpdate(ctx, upserts); err != nil {
+		return ImportResult{}, fmt.Errorf("批量创建或更新资源失败: %w", err)
+	}
+	for _, item := range deletes {
+		if _, err = s.resSvc.DeleteResource(ctx, item.ID); err != nil {
+			return ImportResult{}, fmt.Errorf("删除表格外资源 %d 失败: %w", item.ID, err)
+		}
+		if s.rrSvc != nil {
+			if _, err = s.rrSvc.DeleteRelationsByResourceID(ctx, item.ID); err != nil {
+				return ImportResult{}, fmt.Errorf("删除资源 %d 关联关系失败: %w", item.ID, err)
+			}
+		}
+	}
+
+	return ImportResult{
+		ImportedCount:  preview.CreatedCount + preview.UpdatedCount,
+		CreatedCount:   preview.CreatedCount,
+		UpdatedCount:   preview.UpdatedCount,
+		DeletedCount:   preview.DeletedCount,
+		UnchangedCount: preview.UnchangedCount,
+		Changes:        preview.Rows,
+	}, nil
+}
+
+func (s *dataIOService) parseImportSheet(ctx context.Context, modelUID string, fileData []byte) (parsedImportSheet, error) {
 	f, err := excelize.OpenReader(bytes.NewReader(fileData))
 	if err != nil {
-		return 0, fmt.Errorf("解析 Excel 文件失败: %w", err)
+		return parsedImportSheet{}, fmt.Errorf("解析 Excel 文件失败: %w", err)
 	}
 	defer f.Close()
 
-	// 2. 获取 Attribute 定义
 	attrs, _, err := s.attrSvc.ListAttributes(ctx, modelUID)
 	if err != nil {
-		return 0, fmt.Errorf("获取模型字段定义失败: %w", err)
+		return parsedImportSheet{}, fmt.Errorf("获取模型字段定义失败: %w", err)
 	}
 	if len(attrs) == 0 {
-		return 0, fmt.Errorf("模型 %s 没有定义字段", modelUID)
+		return parsedImportSheet{}, fmt.Errorf("模型 %s 没有定义字段", modelUID)
 	}
+	attributeMap := slice.ToMap(attrs, func(attr attribute.Attribute) string { return attr.FieldUid })
+	fields := slice.Map(attrs, func(_ int, attr attribute.Attribute) string { return attr.FieldUid })
 
-	// 3. 读取第一个 sheet 的数据
 	sheetName := f.GetSheetName(0)
 	rows, err := f.GetRows(sheetName)
 	if err != nil {
-		return 0, fmt.Errorf("读取 Excel 数据失败: %w", err)
+		return parsedImportSheet{}, fmt.Errorf("读取 Excel 数据失败: %w", err)
 	}
-	if len(rows) < 4 {
-		return 0, fmt.Errorf("excel 文件格式错误,至少需要 3 行表头 + 1 行数据")
+	if len(rows) < 3 {
+		return parsedImportSheet{}, fmt.Errorf("excel 文件格式错误，至少需要导出文件中的 3 行表头")
 	}
 
-	// 4. 解析第二行表头(FieldUid),建立列索引映射
-	fieldUidRow := rows[1]              // 第二行是 FieldUid
-	colIndexMap := make(map[int]string) // 列索引 → FieldUid
+	fieldUIDRow := rows[1]
+	colIndexMap := make(map[int]string)
+	columns := make([]string, 0, len(fieldUIDRow))
 	hasNameField := false
-
-	for colIdx, fieldUid := range fieldUidRow {
-		if fieldUid != "" {
-			colIndexMap[colIdx] = fieldUid
-			if fieldUid == "name" {
+	seenColumns := make(map[string]struct{}, len(fieldUIDRow))
+	for colIdx, fieldUID := range fieldUIDRow {
+		fieldUID = strings.TrimSpace(fieldUID)
+		if fieldUID != "" {
+			if _, ok := attributeMap[fieldUID]; !ok {
+				return parsedImportSheet{}, fmt.Errorf("表格包含模型中不存在的字段: %s", fieldUID)
+			}
+			if _, exists := seenColumns[fieldUID]; exists {
+				return parsedImportSheet{}, fmt.Errorf("表格字段重复: %s", fieldUID)
+			}
+			seenColumns[fieldUID] = struct{}{}
+			colIndexMap[colIdx] = fieldUID
+			columns = append(columns, fieldUID)
+			if fieldUID == "name" {
 				hasNameField = true
 			}
 		}
 	}
 	if !hasNameField {
-		return 0, fmt.Errorf("excel template missing required field uid: name")
+		return parsedImportSheet{}, fmt.Errorf("表格缺少唯一索引字段: name")
 	}
 
-	// 5. 逐行读取并构建 Resource (从第 4 行开始,跳过 3 行表头)
 	resources := make([]resource.Resource, 0, len(rows)-3)
 	seenNames := make(map[string]int, len(rows)-3)
 	for rowIdx, row := range rows[3:] {
-		// 构建 Resource Data
-		data := make(map[string]interface{})
-		for colIdx, cellValue := range row {
-			if fieldUid, ok := colIndexMap[colIdx]; ok {
-				// 跳过空值
-				if cellValue == "" {
-					continue
-				}
-				data[fieldUid] = cellValue
+		rowHasValue := false
+		for _, value := range row {
+			if strings.TrimSpace(value) != "" {
+				rowHasValue = true
+				break
 			}
 		}
-
-		// 跳过空行
-		if len(data) == 0 {
+		if !rowHasValue {
 			continue
+		}
+		data := make(map[string]interface{})
+		for colIdx, fieldUID := range colIndexMap {
+			cellValue := ""
+			if colIdx < len(row) {
+				cellValue = strings.TrimSpace(row[colIdx])
+			}
+			data[fieldUID] = cellValue
 		}
 		name, ok := data["name"]
 		nameStr := strings.TrimSpace(fmt.Sprint(name))
 		if !ok || nameStr == "" {
-			return 0, fmt.Errorf("excel row %d missing required field: name", rowIdx+4)
+			return parsedImportSheet{}, fmt.Errorf("excel 第 %d 行缺少唯一索引字段 name", rowIdx+4)
 		}
 		if firstRow, exists := seenNames[nameStr]; exists {
-			return 0, fmt.Errorf("excel row %d duplicate name %q, first appeared at row %d", rowIdx+4, nameStr, firstRow)
+			return parsedImportSheet{}, fmt.Errorf("excel 第 %d 行唯一索引 %q 重复，首次出现在第 %d 行", rowIdx+4, nameStr, firstRow)
 		}
 		seenNames[nameStr] = rowIdx + 4
-
 		resources = append(resources, resource.Resource{
 			ModelUID: modelUID,
 			Data:     data,
 		})
 	}
+	return parsedImportSheet{Columns: columns, Fields: fields, Resources: resources}, nil
+}
 
-	if len(resources) == 0 {
-		return 0, fmt.Errorf("没有有效的数据行")
+func (s *dataIOService) listAllResources(ctx context.Context, modelUID string, fields []string) ([]resource.Resource, error) {
+	const limit int64 = 500
+	all := make([]resource.Resource, 0)
+	for offset := int64(0); ; offset += limit {
+		items, total, err := s.resSvc.ListResourcesWithFilters(ctx, fields, modelUID, nil, offset, limit, nil)
+		if err != nil {
+			return nil, fmt.Errorf("获取模型现有数据失败: %w", err)
+		}
+		all = append(all, items...)
+		if int64(len(all)) >= total || len(items) == 0 {
+			break
+		}
+	}
+	return all, nil
+}
+
+func buildImportPreview(modelUID string, sheet parsedImportSheet, current []resource.Resource) ImportPreview {
+	preview := ImportPreview{
+		ModelUID:     modelUID,
+		UniqueField:  "name",
+		SheetCount:   len(sheet.Resources),
+		CurrentCount: len(current),
+		IsEmpty:      len(sheet.Resources) == 0,
+		Columns:      sheet.Columns,
+		Rows:         make([]ImportChange, 0, len(sheet.Resources)+len(current)),
+	}
+	currentByName := make(map[string]resource.Resource, len(current))
+	for _, item := range current {
+		currentByName[strings.TrimSpace(fmt.Sprint(item.Data["name"]))] = item
+	}
+	seen := make(map[string]struct{}, len(sheet.Resources))
+
+	for _, incoming := range sheet.Resources {
+		name := strings.TrimSpace(fmt.Sprint(incoming.Data["name"]))
+		seen[name] = struct{}{}
+		existing, exists := currentByName[name]
+		if !exists {
+			preview.CreatedCount++
+			preview.Rows = append(preview.Rows, ImportChange{
+				UniqueID:      name,
+				Action:        ImportActionCreate,
+				ChangedFields: sortedMapKeys(incoming.Data),
+				ModifiedData:  cloneData(incoming.Data),
+				Resource:      incoming,
+			})
+			continue
+		}
+
+		merged := cloneData(existing.Data)
+		changedFields := make([]string, 0, len(incoming.Data))
+		for field, value := range incoming.Data {
+			if old, ok := existing.Data[field]; !ok || !reflect.DeepEqual(old, value) {
+				changedFields = append(changedFields, field)
+			}
+			merged[field] = value
+		}
+		sort.Strings(changedFields)
+		action := ImportActionUnchanged
+		if len(changedFields) > 0 {
+			action = ImportActionUpdate
+			preview.UpdatedCount++
+		} else {
+			preview.UnchangedCount++
+		}
+		incoming.ID = existing.ID
+		preview.Rows = append(preview.Rows, ImportChange{
+			UniqueID:      name,
+			Action:        action,
+			ChangedFields: changedFields,
+			OriginalData:  cloneData(existing.Data),
+			ModifiedData:  merged,
+			Resource:      incoming,
+		})
 	}
 
-	// 6. 批量创建或更新 Resource
-	err = s.resSvc.BatchCreateOrUpdate(ctx, resources)
-	if err != nil {
-		return 0, fmt.Errorf("批量创建或更新资源失败: %w", err)
+	for _, existing := range current {
+		name := strings.TrimSpace(fmt.Sprint(existing.Data["name"]))
+		if _, ok := seen[name]; ok {
+			continue
+		}
+		preview.DeletedCount++
+		preview.Rows = append(preview.Rows, ImportChange{
+			UniqueID:      name,
+			Action:        ImportActionDelete,
+			ChangedFields: sortedMapKeys(existing.Data),
+			OriginalData:  cloneData(existing.Data),
+			Resource:      existing,
+		})
 	}
+	return preview
+}
 
-	return len(resources), nil
+func cloneData(src map[string]interface{}) map[string]interface{} {
+	if src == nil {
+		return nil
+	}
+	dst := make(map[string]interface{}, len(src))
+	for key, value := range src {
+		dst[key] = value
+	}
+	return dst
+}
+
+func sortedMapKeys(src map[string]interface{}) []string {
+	keys := make([]string, 0, len(src))
+	for key := range src {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	return keys
 }
 
 // Export 导出资源实例数据 (Resource)

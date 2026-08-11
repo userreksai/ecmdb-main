@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/Duke1616/ecmdb/internal/attribute"
+	"github.com/Duke1616/ecmdb/internal/operationlog"
 	"github.com/Duke1616/ecmdb/internal/pkg/authctx"
 	"github.com/Duke1616/ecmdb/internal/policy"
 	"github.com/Duke1616/ecmdb/internal/relation"
@@ -16,6 +17,7 @@ import (
 	"github.com/Duke1616/ecmdb/pkg/ginx"
 	"github.com/ecodeclub/ekit/slice"
 	"github.com/gin-gonic/gin"
+	"github.com/gotomicro/ego/core/elog"
 )
 
 type Handler struct {
@@ -24,16 +26,18 @@ type Handler struct {
 	RRSvc     relation.RRSvc
 	roleSvc   role.Service
 	policySvc policy.Service
+	auditSvc  operationlog.Service
 }
 
 func NewHandler(service service.EncryptedSvc, attributeSvc attribute.Service, RRSvc relation.RRSvc,
-	roleSvc role.Service, policySvc policy.Service) *Handler {
+	roleSvc role.Service, policySvc policy.Service, auditSvc operationlog.Service) *Handler {
 	return &Handler{
 		svc:       service,
 		attrSvc:   attributeSvc,
 		RRSvc:     RRSvc,
 		roleSvc:   roleSvc,
 		policySvc: policySvc,
+		auditSvc:  auditSvc,
 	}
 }
 
@@ -175,6 +179,15 @@ func (h *Handler) CreateResource(ctx *gin.Context, req CreateResourceReq) (ginx.
 	if err != nil {
 		return systemErrorResult, err
 	}
+	h.recordOperation(ctx, operationlog.Record{
+		Account:        actorAccount(ctx),
+		OperationModel: req.ModelUid,
+		OperationType:  operationlog.OperationCreate,
+		ModifiedData: map[string]interface{}{
+			"id": id, "model_uid": req.ModelUid, "data": h.maskResourceData(ctx, req.ModelUid, req.Data),
+		},
+		ModifiedCount: 1,
+	})
 
 	return ginx.Result{
 		Data: id,
@@ -209,9 +222,31 @@ func (h *Handler) SetCustomField(ctx *gin.Context, req SetCustomFieldReq) (ginx.
 	if err := h.authorizeResource(ctx, req.Id); err != nil {
 		return modelAccessError(err)
 	}
+	var original domain.Resource
+	var err error
+	if h.auditSvc != nil {
+		original, err = h.svc.FindResourceById(ctx, nil, req.Id)
+		if err != nil {
+			return systemErrorResult, err
+		}
+	}
 	count, err := h.svc.SetCustomField(ctx, req.Id, req.Field, req.Data)
 	if err != nil {
 		return systemErrorResult, err
+	}
+	if h.auditSvc != nil {
+		modified := cloneResourceData(original.Data)
+		modified[req.Field] = req.Data
+		h.recordOperation(ctx, operationlog.Record{
+			Account:        actorAccount(ctx),
+			OperationModel: original.ModelUID,
+			OperationType:  operationlog.OperationUpdate,
+			OriginalData:   h.resourceSnapshot(ctx, original),
+			ModifiedData: map[string]interface{}{
+				"id": original.ID, "model_uid": original.ModelUID, "data": h.maskResourceData(ctx, original.ModelUID, modified),
+			},
+			ModifiedCount: count,
+		})
 	}
 
 	return ginx.Result{
@@ -318,11 +353,35 @@ func (h *Handler) UpdateResource(ctx *gin.Context, req UpdateResourceReq) (ginx.
 	if err := h.authorizeResource(ctx, req.Id); err != nil {
 		return modelAccessError(err)
 	}
+	var original domain.Resource
+	var err error
+	if h.auditSvc != nil {
+		original, err = h.svc.FindResourceById(ctx, nil, req.Id)
+		if err != nil {
+			return systemErrorResult, err
+		}
+	}
 	resource := h.toDomainUpdate(req)
 	t, err := h.svc.UpdateResource(ctx, resource)
 
 	if err != nil {
 		return systemErrorResult, err
+	}
+	if h.auditSvc != nil {
+		modified := cloneResourceData(original.Data)
+		for field, value := range req.Data {
+			modified[field] = value
+		}
+		h.recordOperation(ctx, operationlog.Record{
+			Account:        actorAccount(ctx),
+			OperationModel: req.ModelUid,
+			OperationType:  operationlog.OperationUpdate,
+			OriginalData:   h.resourceSnapshot(ctx, original),
+			ModifiedData: map[string]interface{}{
+				"id": req.Id, "model_uid": req.ModelUid, "data": h.maskResourceData(ctx, req.ModelUid, modified),
+			},
+			ModifiedCount: t,
+		})
 	}
 
 	return ginx.Result{
@@ -777,6 +836,14 @@ func (h *Handler) DeleteResource(ctx *gin.Context, req DeleteResourceReq) (ginx.
 	if err := h.authorizeResource(ctx, req.Id); err != nil {
 		return modelAccessError(err)
 	}
+	var original domain.Resource
+	var err error
+	if h.auditSvc != nil {
+		original, err = h.svc.FindResourceById(ctx, nil, req.Id)
+		if err != nil {
+			return systemErrorResult, err
+		}
+	}
 	count, err := h.svc.DeleteResource(ctx, req.Id)
 	if err != nil {
 		return systemErrorResult, err
@@ -784,6 +851,15 @@ func (h *Handler) DeleteResource(ctx *gin.Context, req DeleteResourceReq) (ginx.
 
 	if _, err = h.RRSvc.DeleteRelationsByResourceID(ctx, req.Id); err != nil {
 		return systemErrorResult, err
+	}
+	if h.auditSvc != nil {
+		h.recordOperation(ctx, operationlog.Record{
+			Account:        actorAccount(ctx),
+			OperationModel: original.ModelUID,
+			OperationType:  operationlog.OperationDelete,
+			OriginalData:   h.resourceSnapshot(ctx, original),
+			ModifiedCount:  count,
+		})
 	}
 
 	return ginx.Result{
@@ -840,4 +916,54 @@ func contains(slice []string, elem string) bool {
 		}
 	}
 	return false
+}
+
+func actorAccount(ctx *gin.Context) string {
+	identity, ok := authctx.Get(ctx)
+	if !ok {
+		return "unknown"
+	}
+	if identity.Username != "" {
+		return identity.Username
+	}
+	return strconv.FormatInt(identity.UID, 10)
+}
+
+func (h *Handler) resourceSnapshot(ctx *gin.Context, item domain.Resource) map[string]interface{} {
+	return map[string]interface{}{
+		"id": item.ID, "model_uid": item.ModelUID, "data": h.maskResourceData(ctx, item.ModelUID, item.Data),
+	}
+}
+
+func (h *Handler) maskResourceData(ctx *gin.Context, modelUID string, src map[string]interface{}) map[string]interface{} {
+	dst := cloneResourceData(src)
+	if h.attrSvc == nil {
+		return dst
+	}
+	secureFields, err := h.attrSvc.SearchAttributeFieldsBySecure(ctx, []string{modelUID})
+	if err != nil {
+		return map[string]interface{}{"_redacted": "secure field metadata unavailable"}
+	}
+	for _, field := range secureFields[modelUID] {
+		if _, exists := dst[field]; exists {
+			dst[field] = "[已脱敏]"
+		}
+	}
+	return dst
+}
+
+func cloneResourceData(src map[string]interface{}) map[string]interface{} {
+	dst := make(map[string]interface{}, len(src))
+	for key, value := range src {
+		dst[key] = value
+	}
+	return dst
+}
+
+func (h *Handler) recordOperation(ctx *gin.Context, record operationlog.Record) {
+	if h.auditSvc != nil {
+		if err := h.auditSvc.Record(ctx, record); err != nil {
+			elog.DefaultLogger.Error("record resource operation log failed", elog.FieldErr(err))
+		}
+	}
 }

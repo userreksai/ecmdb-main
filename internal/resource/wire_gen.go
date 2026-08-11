@@ -9,6 +9,7 @@ package resource
 import (
 	"context"
 	"github.com/Duke1616/ecmdb/internal/attribute"
+	"github.com/Duke1616/ecmdb/internal/operationlog"
 	"github.com/Duke1616/ecmdb/internal/policy"
 	"github.com/Duke1616/ecmdb/internal/relation"
 	"github.com/Duke1616/ecmdb/internal/resource/internal/event"
@@ -26,7 +27,7 @@ import (
 
 // Injectors from wire.go:
 
-func InitModule(db *mongox.Mongo, attributeModule *attribute.Module, relationModule *relation.Module, q mq.MQ, crypto *cryptox.CryptoRegistry, roleModule *role.Module, policyModule *policy.Module) (*Module, error) {
+func InitModule(db *mongox.Mongo, attributeModule *attribute.Module, relationModule *relation.Module, q mq.MQ, crypto *cryptox.CryptoRegistry, roleModule *role.Module, policyModule *policy.Module, operationLogModule *operationlog.Module) (*Module, error) {
 	resourceDAO := InitResourceDAO(db)
 	resourceRepository := repository.NewResourceRepository(resourceDAO)
 	v := NewService(resourceRepository)
@@ -36,7 +37,8 @@ func InitModule(db *mongox.Mongo, attributeModule *attribute.Module, relationMod
 	v4 := relationModule.RRSvc
 	v5 := roleModule.Svc
 	v6 := policyModule.Svc
-	v7 := web.NewHandler(v3, v2, v4, v5, v6)
+	service := operationLogModule.Svc
+	v7 := web.NewHandler(v3, v2, v4, v5, v6, service)
 	fieldSecureAttrChangeConsumer := initConsumer(q, v3, cryptoxCrypto)
 	module := &Module{
 		Svc:          v,

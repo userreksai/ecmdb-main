@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	"github.com/Duke1616/ecmdb/internal/attribute"
+	"github.com/Duke1616/ecmdb/internal/operationlog"
 	"github.com/Duke1616/ecmdb/internal/policy"
 	"github.com/Duke1616/ecmdb/internal/relation"
 	"github.com/Duke1616/ecmdb/internal/resource/internal/event"
@@ -26,7 +27,8 @@ var ProviderSet = wire.NewSet(
 	repository.NewResourceRepository)
 
 func InitModule(db *mongox.Mongo, attributeModule *attribute.Module, relationModule *relation.Module,
-	q mq.MQ, crypto *cryptox.CryptoRegistry, roleModule *role.Module, policyModule *policy.Module) (*Module, error) {
+	q mq.MQ, crypto *cryptox.CryptoRegistry, roleModule *role.Module, policyModule *policy.Module,
+	operationLogModule *operationlog.Module) (*Module, error) {
 	wire.Build(
 		ProviderSet,
 		NewEncryptedService,
@@ -38,6 +40,7 @@ func InitModule(db *mongox.Mongo, attributeModule *attribute.Module, relationMod
 		wire.FieldsOf(new(*relation.Module), "RRSvc"),
 		wire.FieldsOf(new(*role.Module), "Svc"),
 		wire.FieldsOf(new(*policy.Module), "Svc"),
+		wire.FieldsOf(new(*operationlog.Module), "Svc"),
 		wire.Struct(new(Module), "*"),
 	)
 	return new(Module), nil
