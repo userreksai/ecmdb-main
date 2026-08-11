@@ -15,6 +15,7 @@ import (
 	"github.com/Duke1616/ecmdb/internal/engine"
 	"github.com/Duke1616/ecmdb/internal/menu"
 	"github.com/Duke1616/ecmdb/internal/model"
+	"github.com/Duke1616/ecmdb/internal/operationlog"
 	"github.com/Duke1616/ecmdb/internal/permission"
 	"github.com/Duke1616/ecmdb/internal/pkg/servicetoken"
 	"github.com/Duke1616/ecmdb/internal/policy"
@@ -24,11 +25,11 @@ import (
 	"github.com/Duke1616/ecmdb/internal/user"
 	"github.com/Duke1616/ecmdb/internal/workflow"
 	"github.com/Duke1616/ecmdb/ioc"
+	"github.com/google/wire"
+	"github.com/spf13/viper"
 	grpc2 "github.com/userreksai/ecmdb-task/pkg/grpc"
 	"github.com/userreksai/ecmdb-task/pkg/grpc/registry"
 	"github.com/userreksai/ecmdb-task/pkg/grpc/registry/etcd"
-	"github.com/google/wire"
-	"github.com/spf13/viper"
 	"go.etcd.io/etcd/client/v3"
 	"google.golang.org/grpc"
 	"time"
@@ -78,7 +79,11 @@ func InitApp() (*App, error) {
 	if err != nil {
 		return nil, err
 	}
-	resourceModule, err := resource.InitModule(mongo, attributeModule, relationModule, mq, cryptoRegistry, roleModule, module)
+	operationlogModule, err := operationlog.InitModule(db)
+	if err != nil {
+		return nil, err
+	}
+	resourceModule, err := resource.InitModule(mongo, attributeModule, relationModule, mq, cryptoRegistry, roleModule, module, operationlogModule)
 	if err != nil {
 		return nil, err
 	}

@@ -13,6 +13,7 @@ import (
 	"github.com/Duke1616/ecmdb/internal/engine"
 	"github.com/Duke1616/ecmdb/internal/menu"
 	"github.com/Duke1616/ecmdb/internal/model"
+	"github.com/Duke1616/ecmdb/internal/operationlog"
 	"github.com/Duke1616/ecmdb/internal/permission"
 	"github.com/Duke1616/ecmdb/internal/pkg/servicetoken"
 	"github.com/Duke1616/ecmdb/internal/policy"
@@ -22,11 +23,11 @@ import (
 	"github.com/Duke1616/ecmdb/internal/user"
 	"github.com/Duke1616/ecmdb/internal/workflow"
 	"github.com/Duke1616/ecmdb/ioc"
+	"github.com/google/wire"
+	"github.com/spf13/viper"
 	grpcpkg "github.com/userreksai/ecmdb-task/pkg/grpc"
 	"github.com/userreksai/ecmdb-task/pkg/grpc/registry"
 	"github.com/userreksai/ecmdb-task/pkg/grpc/registry/etcd"
-	"github.com/google/wire"
-	"github.com/spf13/viper"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"google.golang.org/grpc"
 )
@@ -53,6 +54,8 @@ func InitApp() (*App, error) {
 		wire.FieldsOf(new(*permission.Module), "Svc"),
 		policy.InitModule,
 		wire.FieldsOf(new(*policy.Module), "Svc"),
+		// 操作日志模块（初始化 MySQL 表，并供资源模块记录审计日志）
+		operationlog.InitModule,
 		// 关联关系模块（无依赖，最先初始化）
 		relation.InitModule,
 		// 字段模块（依赖 MQ）

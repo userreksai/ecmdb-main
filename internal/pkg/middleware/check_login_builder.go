@@ -61,10 +61,33 @@ func (b *CheckLoginMiddlewareBuilder) Build() gin.HandlerFunc {
 		}
 
 		ctx.Set(session.CtxSessionKey, sess)
+		uid := sess.Claims().Uid
+		username := ""
+		if b.userSvc != nil && shouldResolveAuditUsername(ctx) {
+			if currentUser, findErr := b.userSvc.FindById(ctx, uid); findErr == nil {
+				username = currentUser.Username
+			} else {
+				b.logger.Warn("resolve current username failed", elog.Int64("uid", uid), elog.FieldErr(findErr))
+			}
+		}
 		authctx.Set(ctx, authctx.Identity{
-			UID:      sess.Claims().Uid,
+			UID:      uid,
+			Username: username,
 			AuthType: authctx.AuthTypeSession,
 		})
+	}
+}
+
+func shouldResolveAuditUsername(ctx *gin.Context) bool {
+	if ctx.Request.Method != http.MethodPost {
+		return false
+	}
+	switch ctx.Request.URL.Path {
+	case "/api/resource/create", "/api/resource/update", "/api/resource/set_custom_field",
+		"/api/resource/delete", "/api/dataio/import":
+		return true
+	default:
+		return false
 	}
 }
 

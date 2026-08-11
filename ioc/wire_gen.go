@@ -20,6 +20,7 @@ import (
 	"github.com/Duke1616/ecmdb/internal/event"
 	"github.com/Duke1616/ecmdb/internal/menu"
 	"github.com/Duke1616/ecmdb/internal/model"
+	"github.com/Duke1616/ecmdb/internal/operationlog"
 	"github.com/Duke1616/ecmdb/internal/order"
 	"github.com/Duke1616/ecmdb/internal/permission"
 	"github.com/Duke1616/ecmdb/internal/pkg/middleware"
@@ -40,10 +41,10 @@ import (
 	"github.com/Duke1616/ecmdb/internal/worker"
 	"github.com/Duke1616/ecmdb/internal/workflow"
 	"github.com/Duke1616/ecmdb/pkg/storage"
-	grpc2 "github.com/userreksai/ecmdb-task/pkg/grpc"
-	"github.com/userreksai/ecmdb-task/pkg/grpc/registry"
 	"github.com/google/wire"
 	"github.com/spf13/viper"
+	grpc2 "github.com/userreksai/ecmdb-task/pkg/grpc"
+	"github.com/userreksai/ecmdb-task/pkg/grpc/registry"
 	"google.golang.org/grpc"
 	"time"
 )
@@ -57,16 +58,16 @@ import (
 func InitApp() (*App, error) {
 	cmdable := InitRedis()
 	provider := InitSession(cmdable)
-	manager := servicetoken.NewManager()
 	db := InitMySQLDB()
 	syncedEnforcer := InitCasbin(db)
+	manager := servicetoken.NewManager()
 	module, err := policy.InitModule(syncedEnforcer, provider, manager)
 	if err != nil {
 		return nil, err
 	}
-	service := module.Svc
-	checkPolicyMiddlewareBuilder := middleware.NewCheckPolicyMiddlewareBuilder(service, provider)
-	v := InitGinMiddlewares()
+	v := module.Svc
+	checkPolicyMiddlewareBuilder := middleware.NewCheckPolicyMiddlewareBuilder(v, provider)
+	v2 := InitGinMiddlewares()
 	mongo := InitMongoDB()
 	roleModule, err := role.InitModule(mongo)
 	if err != nil {
@@ -82,7 +83,11 @@ func InitApp() (*App, error) {
 		return nil, err
 	}
 	cryptoRegistry := InitModuleCrypto()
-	resourceModule, err := resource.InitModule(mongo, attributeModule, relationModule, mq, cryptoRegistry, roleModule, module)
+	operationlogModule, err := operationlog.InitModule(db)
+	if err != nil {
+		return nil, err
+	}
+	resourceModule, err := resource.InitModule(mongo, attributeModule, relationModule, mq, cryptoRegistry, roleModule, module, operationlogModule)
 	if err != nil {
 		return nil, err
 	}
@@ -90,12 +95,12 @@ func InitApp() (*App, error) {
 	if err != nil {
 		return nil, err
 	}
-	handler := modelModule.Hdl
-	webHandler := attributeModule.Hdl
-	handler2 := resourceModule.Hdl
-	relationModelHandler := relationModule.RMHdl
-	relationResourceHandler := relationModule.RRHdl
-	relationTypeHandler := relationModule.RTHdl
+	v3 := modelModule.Hdl
+	v4 := attributeModule.Hdl
+	v5 := resourceModule.Hdl
+	v6 := relationModule.RMHdl
+	v7 := relationModule.RRHdl
+	v8 := relationModule.RTHdl
 	client := InitRedisSearch()
 	config := InitLdapConfig()
 	departmentModule, err := department.InitModule(mongo)
@@ -106,23 +111,23 @@ func InitApp() (*App, error) {
 	if err != nil {
 		return nil, err
 	}
-	handler3 := userModule.Hdl
+	v9 := userModule.Hdl
 	workwxApp := InitWorkWx()
 	templateModule, err := template.InitModule(mq, mongo, workwxApp)
 	if err != nil {
 		return nil, err
 	}
-	handler4 := templateModule.Hdl
+	v10 := templateModule.Hdl
 	strategyModule, err := strategy.InitModule(templateModule)
 	if err != nil {
 		return nil, err
 	}
-	handler5 := strategyModule.Hdl
+	v11 := strategyModule.Hdl
 	codebookModule, err := codebook.InitModule(mongo)
 	if err != nil {
 		return nil, err
 	}
-	handler6 := codebookModule.Hdl
+	v12 := codebookModule.Hdl
 	engineModule, err := engine.InitModule(db)
 	if err != nil {
 		return nil, err
@@ -135,14 +140,14 @@ func InitApp() (*App, error) {
 	if err != nil {
 		return nil, err
 	}
-	handler7 := runnerModule.Hdl
+	v13 := runnerModule.Hdl
 	larkClient := InitLarkClient()
 	clientv3Client := InitEtcdClient()
 	registry := InitRegistry(clientv3Client)
 	clientConnInterface := InitEALERTGrpcClient(registry)
 	notificationServiceClient := InitNotificationServiceClient(clientConnInterface)
-	serviceService := workflowModule.Svc
-	cardSelectorBuilder := newCardSelectorBuilder(larkClient, notificationServiceClient, serviceService)
+	v14 := workflowModule.Svc
+	cardSelectorBuilder := newCardSelectorBuilder(larkClient, notificationServiceClient, v14)
 	textSelectorBuilder := newTextSelectorBuilder(larkClient)
 	channel := newChannel(cardSelectorBuilder, textSelectorBuilder)
 	notificationSender := sender.NewSender(channel)
@@ -150,10 +155,10 @@ func InitApp() (*App, error) {
 	if err != nil {
 		return nil, err
 	}
-	handler8 := orderModule.Hdl
-	handler9 := workflowModule.Hdl
-	groupHandler := templateModule.GroupHdl
-	handler10 := engineModule.Hdl
+	v15 := orderModule.Hdl
+	v16 := workflowModule.Hdl
+	v17 := templateModule.GroupHdl
+	v18 := engineModule.Hdl
 	workerModule, err := worker.InitModule(mq, clientv3Client)
 	if err != nil {
 		return nil, err
@@ -169,32 +174,32 @@ func InitApp() (*App, error) {
 	if err != nil {
 		return nil, err
 	}
-	handler11 := taskModule.Hdl
-	handler12 := module.Hdl
+	v19 := taskModule.Hdl
+	v20 := module.Hdl
 	menuModule, err := menu.InitModule(mq, mongo)
 	if err != nil {
 		return nil, err
 	}
-	handler13 := menuModule.Hdl
+	v21 := menuModule.Hdl
 	endpointModule, err := endpoint.InitModule(mongo)
 	if err != nil {
 		return nil, err
 	}
-	handler14 := endpointModule.Hdl
-	handler15 := roleModule.Hdl
+	v22 := endpointModule.Hdl
+	v23 := roleModule.Hdl
 	permissionModule, err := permission.InitModule(mongo, mq, roleModule, menuModule, module, modelModule)
 	if err != nil {
 		return nil, err
 	}
-	handler16 := permissionModule.Hdl
-	handler17 := departmentModule.Hdl
+	v24 := permissionModule.Hdl
+	v25 := departmentModule.Hdl
 	minioClient := InitMinioClient()
 	s3Storage := storage.NewS3Storage(minioClient)
-	handler18, err := tools.InitModule(s3Storage)
+	v26, err := tools.InitModule(s3Storage)
 	if err != nil {
 		return nil, err
 	}
-	handler19, err := terminal.InitModule(relationModule, resourceModule, attributeModule, roleModule, module)
+	v27, err := terminal.InitModule(relationModule, resourceModule, attributeModule, roleModule, module)
 	if err != nil {
 		return nil, err
 	}
@@ -202,40 +207,42 @@ func InitApp() (*App, error) {
 	if err != nil {
 		return nil, err
 	}
-	handler20 := rotaModule.Hdl
-	handler21 := discoveryModule.Hdl
-	dataioModule, err := dataio.InitModule(attributeModule, resourceModule, s3Storage, modelModule, relationModule, roleModule, module)
+	v28 := rotaModule.Hdl
+	v29 := discoveryModule.Hdl
+	dataioModule, err := dataio.InitModule(attributeModule, resourceModule, s3Storage, modelModule, relationModule, roleModule, module, operationlogModule)
 	if err != nil {
 		return nil, err
 	}
-	handler22 := dataioModule.Hdl
-	checkLoginMiddlewareBuilder := middleware.NewCheckLoginMiddlewareBuilder(provider, userModule.Svc, manager)
+	v30 := dataioModule.Hdl
+	v31 := userModule.Svc
+	checkLoginMiddlewareBuilder := middleware.NewCheckLoginMiddlewareBuilder(provider, v31, manager)
+	handler := operationlogModule.Hdl
 	listener := InitListener()
-	component := InitWebServer(provider, checkPolicyMiddlewareBuilder, v, handler, webHandler, handler2, relationModelHandler, relationResourceHandler, relationTypeHandler, handler3, handler4, handler5, handler6, handler7, handler8, handler9, groupHandler, handler10, handler11, handler12, handler13, handler14, handler15, handler16, handler17, handler18, handler19, handler20, handler21, handler22, checkLoginMiddlewareBuilder, listener)
-	workOrderServer := orderModule.RpcServer
-	policyServer := module.RpcServer
-	endpointServer := endpointModule.RpcServer
-	userServer := userModule.RpcServer
-	rotaServer := rotaModule.RpcServer
-	server := InitGrpcServer(registry, workOrderServer, policyServer, endpointServer, userServer, rotaServer)
+	component := InitWebServer(provider, checkPolicyMiddlewareBuilder, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v15, v16, v17, v18, v19, v20, v21, v22, v23, v24, v25, v26, v27, v28, v29, v30, checkLoginMiddlewareBuilder, handler, listener)
+	v32 := orderModule.RpcServer
+	v33 := module.RpcServer
+	v34 := endpointModule.RpcServer
+	v35 := userModule.RpcServer
+	v36 := rotaModule.RpcServer
+	server := InitGrpcServer(registry, v32, v33, v34, v35, v36)
 	teamServiceClient := InitTeamServiceClient(clientConnInterface)
 	eventModule, err := event.InitModule(mq, db, engineModule, taskModule, orderModule, templateModule, userModule, workflowModule, notificationSender, departmentModule, rotaModule, larkClient, notificationServiceClient, teamServiceClient)
 	if err != nil {
 		return nil, err
 	}
 	processEvent := eventModule.Event
-	startTaskJob := taskModule.StartTaskJob
-	passProcessTaskJob := taskModule.PassProcessTaskJob
-	taskExecutionSyncJob := taskModule.TaskExecutionSyncJob
-	taskRecoveryJob := taskModule.TaskRecoveryJob
-	v2 := initCronJobs(startTaskJob, passProcessTaskJob, taskExecutionSyncJob, taskRecoveryJob)
-	service2 := endpointModule.Svc
+	v37 := taskModule.StartTaskJob
+	v38 := taskModule.PassProcessTaskJob
+	v39 := taskModule.TaskExecutionSyncJob
+	v40 := taskModule.TaskRecoveryJob
+	v41 := initCronJobs(v37, v38, v39, v40)
+	v42 := endpointModule.Svc
 	app := &App{
 		Web:    component,
 		Server: server,
 		Event:  processEvent,
-		Jobs:   v2,
-		Svc:    service2,
+		Jobs:   v41,
+		Svc:    v42,
 	}
 	return app, nil
 }

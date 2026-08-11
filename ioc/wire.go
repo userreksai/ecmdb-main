@@ -18,6 +18,7 @@ import (
 	"github.com/Duke1616/ecmdb/internal/event"
 	"github.com/Duke1616/ecmdb/internal/menu"
 	"github.com/Duke1616/ecmdb/internal/model"
+	"github.com/Duke1616/ecmdb/internal/operationlog"
 	"github.com/Duke1616/ecmdb/internal/order"
 	"github.com/Duke1616/ecmdb/internal/permission"
 	"github.com/Duke1616/ecmdb/internal/pkg/middleware"
@@ -37,10 +38,10 @@ import (
 	"github.com/Duke1616/ecmdb/internal/worker"
 	"github.com/Duke1616/ecmdb/internal/workflow"
 	"github.com/Duke1616/ecmdb/pkg/storage"
-	grpcpkg "github.com/userreksai/ecmdb-task/pkg/grpc"
-	"github.com/userreksai/ecmdb-task/pkg/grpc/registry"
 	"github.com/google/wire"
 	"github.com/spf13/viper"
+	grpcpkg "github.com/userreksai/ecmdb-task/pkg/grpc"
+	"github.com/userreksai/ecmdb-task/pkg/grpc/registry"
 	"google.golang.org/grpc"
 )
 
@@ -67,7 +68,7 @@ func InitApp() (*App, error) {
 		relation.InitModule,
 		wire.FieldsOf(new(*relation.Module), "RRHdl", "RMHdl", "RTHdl"),
 		user.InitModule,
-		wire.FieldsOf(new(*user.Module), "Hdl", "RpcServer"),
+		wire.FieldsOf(new(*user.Module), "Hdl", "Svc", "RpcServer"),
 		template.InitModule,
 		wire.FieldsOf(new(*template.Module), "Hdl", "GroupHdl"),
 		codebook.InitModule,
@@ -89,6 +90,8 @@ func InitApp() (*App, error) {
 		wire.FieldsOf(new(*task.Module), "Hdl", "StartTaskJob", "PassProcessTaskJob", "TaskExecutionSyncJob", "TaskRecoveryJob"),
 		policy.InitModule,
 		wire.FieldsOf(new(*policy.Module), "Hdl", "Svc", "RpcServer"),
+		operationlog.InitModule,
+		wire.FieldsOf(new(*operationlog.Module), "Hdl"),
 		menu.InitModule,
 		wire.FieldsOf(new(*menu.Module), "Hdl"),
 		endpoint.InitModule,

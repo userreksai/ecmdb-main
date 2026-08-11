@@ -8,6 +8,7 @@ package startup
 
 import (
 	"github.com/Duke1616/ecmdb/internal/attribute"
+	"github.com/Duke1616/ecmdb/internal/operationlog"
 	"github.com/Duke1616/ecmdb/internal/policy"
 	"github.com/Duke1616/ecmdb/internal/relation"
 	"github.com/Duke1616/ecmdb/internal/resource"
@@ -20,10 +21,15 @@ func InitHandler(attributeModule *attribute.Module, relationModule *relation.Mod
 	mongo := InitMongoDB()
 	mq := InitMQ()
 	cryptoRegistry := InitCryptoRegistry()
-	module, err := resource.InitModule(mongo, attributeModule, relationModule, mq, cryptoRegistry, roleModule, policyModule)
+	module := InitOperationLogModule()
+	resourceModule, err := resource.InitModule(mongo, attributeModule, relationModule, mq, cryptoRegistry, roleModule, policyModule, module)
 	if err != nil {
 		return nil, err
 	}
-	v := module.Hdl
+	v := resourceModule.Hdl
 	return v, nil
 }
+
+// wire.go:
+
+func InitOperationLogModule() *operationlog.Module { return &operationlog.Module{} }

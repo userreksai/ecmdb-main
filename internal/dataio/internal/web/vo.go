@@ -12,8 +12,14 @@ type ExportTemplateReq struct {
 
 // ImportReq 导入数据请求
 type ImportReq struct {
-	ModelUID string `json:"model_uid" binding:"required"` // 模型 UID
-	FileKey  string `json:"file_key" binding:"required"`  // S3 文件 key
+	ModelUID     string `json:"model_uid" binding:"required"` // 模型 UID
+	FileKey      string `json:"file_key" binding:"required"`  // S3 文件 key
+	ConfirmEmpty bool   `json:"confirm_empty"`                // 空表清空确认
+}
+
+type ImportPreviewReq struct {
+	ModelUID string `json:"model_uid" binding:"required"`
+	FileKey  string `json:"file_key" binding:"required"`
 }
 
 // ImportV2Req 导入数据请求 V2 (直接上传文件)
@@ -54,10 +60,10 @@ type ExportRelatedField struct {
 }
 
 type ExportReq struct {
-	ModelUID     string              `json:"model_uid" binding:"required"`
-	Scope        ExportScope         `json:"scope" binding:"required"`
-	ResourceIDs  []int64             `json:"resource_ids"`  // string or number
-	FilterGroups []ExportFilterGroup `json:"filter_groups"` // scope='all' 或 'current' 时可选
+	ModelUID      string               `json:"model_uid" binding:"required"`
+	Scope         ExportScope          `json:"scope" binding:"required"`
+	ResourceIDs   []int64              `json:"resource_ids"`  // string or number
+	FilterGroups  []ExportFilterGroup  `json:"filter_groups"` // scope='all' 或 'current' 时可选
 	Fields        []string             `json:"fields"`        // 导出字段列表 (可选)
 	RelatedFields []ExportRelatedField `json:"related_fields"`
 	FileName      string               `json:"file_name"` // 文件名 (可选)
