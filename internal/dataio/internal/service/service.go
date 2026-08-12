@@ -15,7 +15,7 @@ type IDataIOService interface {
 	// Import 按预览结果同步资源实例
 	// modelUID: 模型唯一标识 (对应 Model.UID)
 	// fileData: Excel 文件的字节数据
-	Import(ctx context.Context, modelUID string, fileData []byte, confirmEmpty bool) (ImportResult, error)
+	Import(ctx context.Context, modelUID string, fileData []byte) (ImportResult, error)
 
 	// Export 导出资源实例数据 (Resource)
 	// req: 导出请求参数
@@ -31,7 +31,6 @@ type ImportAction string
 const (
 	ImportActionCreate    ImportAction = "create"
 	ImportActionUpdate    ImportAction = "update"
-	ImportActionDelete    ImportAction = "delete"
 	ImportActionUnchanged ImportAction = "unchanged"
 )
 
@@ -51,7 +50,6 @@ type ImportPreview struct {
 	CurrentCount   int            `json:"current_count"`
 	CreatedCount   int            `json:"created_count"`
 	UpdatedCount   int            `json:"updated_count"`
-	DeletedCount   int            `json:"deleted_count"`
 	UnchangedCount int            `json:"unchanged_count"`
 	IsEmpty        bool           `json:"is_empty"`
 	Columns        []string       `json:"columns"`
@@ -62,7 +60,6 @@ type ImportResult struct {
 	ImportedCount  int            `json:"imported_count"`
 	CreatedCount   int            `json:"created_count"`
 	UpdatedCount   int            `json:"updated_count"`
-	DeletedCount   int            `json:"deleted_count"`
 	UnchangedCount int            `json:"unchanged_count"`
 	Changes        []ImportChange `json:"-"`
 }

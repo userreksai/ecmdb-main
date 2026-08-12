@@ -101,38 +101,26 @@ func (s *dataIOService) PreviewImport(ctx context.Context, modelUID string, file
 	return buildImportPreview(modelUID, sheet, current), nil
 }
 
-// Import 按唯一索引 name 同步表格与模型数据。
-func (s *dataIOService) Import(ctx context.Context, modelUID string, fileData []byte, confirmEmpty bool) (ImportResult, error) {
+// Import 按唯一索引 name 新增或更新表格数据，不删除模型现有数据。
+func (s *dataIOService) Import(ctx context.Context, modelUID string, fileData []byte) (ImportResult, error) {
 	preview, err := s.PreviewImport(ctx, modelUID, fileData)
 	if err != nil {
 		return ImportResult{}, err
 	}
-	if preview.IsEmpty && !confirmEmpty {
-		return ImportResult{}, fmt.Errorf("表格数据为空，继续导入将删除当前模型全部数据，请确认后重试")
+	if preview.IsEmpty {
+		return ImportResult{}, newImportValidationError("表格数据为空，未执行导入", nil)
 	}
 
 	upserts := make([]resource.Resource, 0, preview.CreatedCount+preview.UpdatedCount)
-	deletes := make([]resource.Resource, 0, preview.DeletedCount)
 	for _, change := range preview.Rows {
-		switch change.Action {
-		case ImportActionCreate, ImportActionUpdate:
+		if change.Action == ImportActionCreate || change.Action == ImportActionUpdate {
 			upserts = append(upserts, change.Resource)
-		case ImportActionDelete:
-			deletes = append(deletes, change.Resource)
 		}
 	}
 
-	if err = s.resSvc.BatchCreateOrUpdate(ctx, upserts); err != nil {
-		return ImportResult{}, fmt.Errorf("批量创建或更新资源失败: %w", err)
-	}
-	for _, item := range deletes {
-		if _, err = s.resSvc.DeleteResource(ctx, item.ID); err != nil {
-			return ImportResult{}, fmt.Errorf("删除表格外资源 %d 失败: %w", item.ID, err)
-		}
-		if s.rrSvc != nil {
-			if _, err = s.rrSvc.DeleteRelationsByResourceID(ctx, item.ID); err != nil {
-				return ImportResult{}, fmt.Errorf("删除资源 %d 关联关系失败: %w", item.ID, err)
-			}
+	if len(upserts) > 0 {
+		if err = s.resSvc.BatchCreateOrUpdate(ctx, upserts); err != nil {
+			return ImportResult{}, fmt.Errorf("批量创建或更新资源失败: %w", err)
 		}
 	}
 
@@ -140,7 +128,6 @@ func (s *dataIOService) Import(ctx context.Context, modelUID string, fileData []
 		ImportedCount:  preview.CreatedCount + preview.UpdatedCount,
 		CreatedCount:   preview.CreatedCount,
 		UpdatedCount:   preview.UpdatedCount,
-		DeletedCount:   preview.DeletedCount,
 		UnchangedCount: preview.UnchangedCount,
 		Changes:        preview.Rows,
 	}, nil
@@ -278,11 +265,8 @@ func buildImportPreview(modelUID string, sheet parsedImportSheet, current []reso
 	for _, item := range current {
 		currentByName[strings.TrimSpace(fmt.Sprint(item.Data["name"]))] = item
 	}
-	seen := make(map[string]struct{}, len(sheet.Resources))
-
 	for _, incoming := range sheet.Resources {
 		name := strings.TrimSpace(fmt.Sprint(incoming.Data["name"]))
-		seen[name] = struct{}{}
 		existing, exists := currentByName[name]
 		if !exists {
 			preview.CreatedCount++
@@ -320,21 +304,6 @@ func buildImportPreview(modelUID string, sheet parsedImportSheet, current []reso
 			OriginalData:  cloneData(existing.Data),
 			ModifiedData:  merged,
 			Resource:      incoming,
-		})
-	}
-
-	for _, existing := range current {
-		name := strings.TrimSpace(fmt.Sprint(existing.Data["name"]))
-		if _, ok := seen[name]; ok {
-			continue
-		}
-		preview.DeletedCount++
-		preview.Rows = append(preview.Rows, ImportChange{
-			UniqueID:      name,
-			Action:        ImportActionDelete,
-			ChangedFields: sortedMapKeys(existing.Data),
-			OriginalData:  cloneData(existing.Data),
-			Resource:      existing,
 		})
 	}
 	return preview
