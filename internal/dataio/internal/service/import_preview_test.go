@@ -26,9 +26,11 @@ func TestBuildImportPreview(t *testing.T) {
 
 	assert.Equal(t, 1, preview.CreatedCount)
 	assert.Equal(t, 1, preview.UpdatedCount)
-	assert.Equal(t, 1, preview.DeletedCount)
 	assert.Zero(t, preview.UnchangedCount)
-	require.Len(t, preview.Rows, 3)
+	require.Len(t, preview.Rows, 2)
+	for _, change := range preview.Rows {
+		assert.NotEqual(t, "host-c", change.UniqueID, "表格中缺少的模型数据必须保持不变")
+	}
 
 	updated := preview.Rows[0]
 	assert.Equal(t, ImportActionUpdate, updated.Action)
@@ -46,9 +48,10 @@ func TestBuildImportPreviewEmptySheet(t *testing.T) {
 	preview := buildImportPreview("host", parsedImportSheet{Columns: []string{"name"}}, current)
 
 	assert.True(t, preview.IsEmpty)
-	assert.Equal(t, 2, preview.DeletedCount)
-	require.Len(t, preview.Rows, 2)
-	assert.Equal(t, ImportActionDelete, preview.Rows[0].Action)
+	assert.Zero(t, preview.CreatedCount)
+	assert.Zero(t, preview.UpdatedCount)
+	assert.Zero(t, preview.UnchangedCount)
+	assert.Empty(t, preview.Rows)
 }
 
 func TestBuildImportPreviewClearsIncludedBlankField(t *testing.T) {

@@ -215,7 +215,7 @@ func (h *Handler) Import(ctx *gin.Context, req ImportReq) (ginx.Result, error) {
 	}
 
 	// 2. 调用 Service 导入数据
-	result, err := h.svc.Import(ctx.Request.Context(), req.ModelUID, fileData, req.ConfirmEmpty)
+	result, err := h.svc.Import(ctx.Request.Context(), req.ModelUID, fileData)
 	if err != nil {
 		return importError(err)
 	}
@@ -275,7 +275,7 @@ func (h *Handler) recordImport(ctx *gin.Context, modelUID string, result service
 		OperationType:  operationlog.OperationImport,
 		OriginalData:   original,
 		ModifiedData:   modified,
-		ModifiedCount:  int64(result.CreatedCount + result.UpdatedCount + result.DeletedCount),
+		ModifiedCount:  int64(result.CreatedCount + result.UpdatedCount),
 	}); err != nil {
 		elog.DefaultLogger.Error("record import operation log failed", elog.FieldErr(err))
 	}
