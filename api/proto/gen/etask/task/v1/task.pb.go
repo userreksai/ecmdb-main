@@ -1099,8 +1099,8 @@ const file_etask_task_v1_task_proto_rawDesc = "" +
 	"CreateTask\x12 .etask.task.v1.CreateTaskRequest\x1a!.etask.task.v1.CreateTaskResponse\x12H\n" +
 	"\aGetTask\x12\x1d.etask.task.v1.GetTaskRequest\x1a\x1e.etask.task.v1.GetTaskResponse\x12V\n" +
 	"\rRetryTaskByID\x12#.etask.task.v1.RetryTaskByIDRequest\x1a .etask.task.v1.RetryTaskResponse\x12Z\n" +
-	"\x0fRetryTaskByName\x12%.etask.task.v1.RetryTaskByNameRequest\x1a .etask.task.v1.RetryTaskResponseB\xb2\x01\n" +
-	"\x11com.etask.task.v1B\tTaskProtoP\x01Z<github.com/userreksai/ecmdb-main/api/proto/gen/etask/task/v1;taskv1\xa2\x02\x03ETX\xaa\x02\rEtask.Task.V1\xca\x02\rEtask\\Task\\V1\xe2\x02\x19Etask\\Task\\V1\\GPBMetadata\xea\x02\x0fEtask::Task::V1b\x06proto3"
+	"\x0fRetryTaskByName\x12%.etask.task.v1.RetryTaskByNameRequest\x1a .etask.task.v1.RetryTaskResponseB\xb9\x01\n" +
+	"\x11com.etask.task.v1B\tTaskProtoP\x01ZCgithub.com/userreksai/ecmdb-main/api/proto/gen/etask/task/v1;taskv1\xa2\x02\x03ETX\xaa\x02\rEtask.Task.V1\xca\x02\rEtask\\Task\\V1\xe2\x02\x19Etask\\Task\\V1\\GPBMetadata\xea\x02\x0fEtask::Task::V1b\x06proto3"
 
 var (
 	file_etask_task_v1_task_proto_rawDescOnce sync.Once

@@ -275,8 +275,8 @@ const file_ecmdb_policy_v1_policy_proto_rawDesc = "" +
 	"\rPolicyService\x12L\n" +
 	"\n" +
 	"CheckLogin\x12\x1e.ecmdb.policy.v1.CheckLoginReq\x1a\x1e.ecmdb.policy.v1.CheckLoginRes\x12E\n" +
-	"\tAuthorize\x12\x1d.ecmdb.policy.v1.AuthorizeReq\x1a\x19.ecmdb.policy.v1.ResponseB\xc2\x01\n" +
-	"\x13com.ecmdb.policy.v1B\vPolicyProtoP\x01Z@github.com/userreksai/ecmdb-main/api/proto/gen/ecmdb/policy/v1;policyv1\xa2\x02\x03EPX\xaa\x02\x0fEcmdb.Policy.V1\xca\x02\x0fEcmdb\\Policy\\V1\xe2\x02\x1bEcmdb\\Policy\\V1\\GPBMetadata\xea\x02\x11Ecmdb::Policy::V1b\x06proto3"
+	"\tAuthorize\x12\x1d.ecmdb.policy.v1.AuthorizeReq\x1a\x19.ecmdb.policy.v1.ResponseB\xc9\x01\n" +
+	"\x13com.ecmdb.policy.v1B\vPolicyProtoP\x01ZGgithub.com/userreksai/ecmdb-main/api/proto/gen/ecmdb/policy/v1;policyv1\xa2\x02\x03EPX\xaa\x02\x0fEcmdb.Policy.V1\xca\x02\x0fEcmdb\\Policy\\V1\xe2\x02\x1bEcmdb\\Policy\\V1\\GPBMetadata\xea\x02\x11Ecmdb::Policy::V1b\x06proto3"
 
 var (
 	file_ecmdb_policy_v1_policy_proto_rawDescOnce sync.Once

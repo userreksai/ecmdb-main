@@ -225,9 +225,9 @@ const file_ecmdb_order_v1_order_proto_rawDesc = "" +
 	"\n" +
 	"\x06WECHAT\x10\x022c\n" +
 	"\x10WorkOrderService\x12O\n" +
-	"\x0fCreateWorkOrder\x12\".ecmdb.order.v1.CreateOrderRequest\x1a\x18.ecmdb.order.v1.ResponseB\xba\x01\n" +
+	"\x0fCreateWorkOrder\x12\".ecmdb.order.v1.CreateOrderRequest\x1a\x18.ecmdb.order.v1.ResponseB\xc1\x01\n" +
 	"\x12com.ecmdb.order.v1B\n" +
-	"OrderProtoP\x01Z>github.com/userreksai/ecmdb-main/api/proto/gen/ecmdb/order/v1;orderv1\xa2\x02\x03EOX\xaa\x02\x0eEcmdb.Order.V1\xca\x02\x0eEcmdb\\Order\\V1\xe2\x02\x1aEcmdb\\Order\\V1\\GPBMetadata\xea\x02\x10Ecmdb::Order::V1b\x06proto3"
+	"OrderProtoP\x01ZEgithub.com/userreksai/ecmdb-main/api/proto/gen/ecmdb/order/v1;orderv1\xa2\x02\x03EOX\xaa\x02\x0eEcmdb.Order.V1\xca\x02\x0eEcmdb\\Order\\V1\xe2\x02\x1aEcmdb\\Order\\V1\\GPBMetadata\xea\x02\x10Ecmdb::Order::V1b\x06proto3"
 
 var (
 	file_ecmdb_order_v1_order_proto_rawDescOnce sync.Once
