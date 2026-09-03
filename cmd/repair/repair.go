@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Duke1616/ecmdb/cmd/repair/ioc"
-	"github.com/Duke1616/ecmdb/internal/attribute"
-	"github.com/Duke1616/ecmdb/internal/model"
-	"github.com/Duke1616/ecmdb/internal/resource"
 	"github.com/ecodeclub/ekit/slice"
 	"github.com/spf13/cobra"
+	"github.com/userreksai/ecmdb-main/cmd/repair/ioc"
+	"github.com/userreksai/ecmdb-main/internal/attribute"
+	"github.com/userreksai/ecmdb-main/internal/model"
+	"github.com/userreksai/ecmdb-main/internal/resource"
 )
 
 var (

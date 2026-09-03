@@ -1,9 +1,9 @@
 package codebook
 
 import (
-	"github.com/Duke1616/ecmdb/internal/codebook/internal/domain"
-	"github.com/Duke1616/ecmdb/internal/codebook/internal/service"
-	"github.com/Duke1616/ecmdb/internal/codebook/internal/web"
+	"github.com/userreksai/ecmdb-main/internal/codebook/internal/domain"
+	"github.com/userreksai/ecmdb-main/internal/codebook/internal/service"
+	"github.com/userreksai/ecmdb-main/internal/codebook/internal/web"
 )
 
 type Handler = web.Handler

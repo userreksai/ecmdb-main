@@ -1,7 +1,7 @@
 package easyflow
 
 import (
-	"github.com/Bunny3th/easy-workflow/workflow/model"
+	"github.com/userreksai/easy-workflow/workflow/model"
 )
 
 // 节点类型标识，对应前端 LogicFlow DSL 中的 type 字段

@@ -3,9 +3,9 @@ package repository
 import (
 	"context"
 
-	"github.com/Duke1616/ecmdb/internal/template/internal/domain"
-	"github.com/Duke1616/ecmdb/internal/template/internal/repository/dao"
 	"github.com/ecodeclub/ekit/slice"
+	"github.com/userreksai/ecmdb-main/internal/template/internal/domain"
+	"github.com/userreksai/ecmdb-main/internal/template/internal/repository/dao"
 )
 
 type TemplateGroupRepository interface {

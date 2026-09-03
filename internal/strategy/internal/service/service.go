@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 
-	"github.com/Duke1616/ecmdb/internal/strategy/internal/domain"
+	"github.com/userreksai/ecmdb-main/internal/strategy/internal/domain"
 )
 
 type Service interface {

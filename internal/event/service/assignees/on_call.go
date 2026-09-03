@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/Duke1616/ecmdb/internal/rota"
-	"github.com/Duke1616/ecmdb/internal/user"
-	"github.com/Duke1616/ecmdb/internal/workflow/pkg/easyflow"
-	"github.com/Duke1616/ecmdb/pkg/resolve"
 	"github.com/ecodeclub/ekit/slice"
+	"github.com/userreksai/ecmdb-main/internal/rota"
+	"github.com/userreksai/ecmdb-main/internal/user"
+	"github.com/userreksai/ecmdb-main/internal/workflow/pkg/easyflow"
+	"github.com/userreksai/ecmdb-main/pkg/resolve"
 )
 
 // OnCallResolver 值班解析器

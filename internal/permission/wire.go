@@ -5,16 +5,16 @@ package permission
 import (
 	"context"
 
-	"github.com/Duke1616/ecmdb/internal/menu"
-	"github.com/Duke1616/ecmdb/internal/model"
-	"github.com/Duke1616/ecmdb/internal/permission/internal/event"
-	"github.com/Duke1616/ecmdb/internal/permission/internal/service"
-	"github.com/Duke1616/ecmdb/internal/permission/internal/web"
-	"github.com/Duke1616/ecmdb/internal/policy"
-	"github.com/Duke1616/ecmdb/internal/role"
-	"github.com/Duke1616/ecmdb/pkg/mongox"
 	"github.com/ecodeclub/mq-api"
 	"github.com/google/wire"
+	"github.com/userreksai/ecmdb-main/internal/menu"
+	"github.com/userreksai/ecmdb-main/internal/model"
+	"github.com/userreksai/ecmdb-main/internal/permission/internal/event"
+	"github.com/userreksai/ecmdb-main/internal/permission/internal/service"
+	"github.com/userreksai/ecmdb-main/internal/permission/internal/web"
+	"github.com/userreksai/ecmdb-main/internal/policy"
+	"github.com/userreksai/ecmdb-main/internal/role"
+	"github.com/userreksai/ecmdb-main/pkg/mongox"
 )
 
 func InitModule(db *mongox.Mongo, q mq.MQ, roleModule *role.Module, menuModule *menu.Module,

@@ -3,11 +3,11 @@ package dispatch
 import (
 	"context"
 
-	taskv1 "github.com/Duke1616/ecmdb/api/proto/gen/etask/task/v1"
-	"github.com/Duke1616/ecmdb/internal/task/domain"
-	"github.com/Duke1616/ecmdb/internal/task/internal/repository"
-	"github.com/Duke1616/ecmdb/internal/worker"
-	"github.com/Duke1616/ecmdb/pkg/cryptox"
+	taskv1 "github.com/userreksai/ecmdb-main/api/proto/gen/etask/task/v1"
+	"github.com/userreksai/ecmdb-main/internal/task/domain"
+	"github.com/userreksai/ecmdb-main/internal/task/internal/repository"
+	"github.com/userreksai/ecmdb-main/internal/worker"
+	"github.com/userreksai/ecmdb-main/pkg/cryptox"
 )
 
 type TaskDispatcher interface {

@@ -7,9 +7,9 @@
 package startup
 
 import (
-	"github.com/Duke1616/ecmdb/internal/policy"
-	"github.com/Duke1616/ecmdb/internal/relation"
-	"github.com/Duke1616/ecmdb/internal/role"
+	"github.com/userreksai/ecmdb-main/internal/policy"
+	"github.com/userreksai/ecmdb-main/internal/relation"
+	"github.com/userreksai/ecmdb-main/internal/role"
 )
 
 // Injectors from wire.go:

@@ -3,9 +3,9 @@ package repository
 import (
 	"context"
 
-	"github.com/Duke1616/ecmdb/internal/endpoint/internal/domain"
-	"github.com/Duke1616/ecmdb/internal/endpoint/internal/repository/dao"
 	"github.com/ecodeclub/ekit/slice"
+	"github.com/userreksai/ecmdb-main/internal/endpoint/internal/domain"
+	"github.com/userreksai/ecmdb-main/internal/endpoint/internal/repository/dao"
 )
 
 type EndpointRepository interface {

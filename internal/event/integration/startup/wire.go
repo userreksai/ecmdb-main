@@ -3,23 +3,23 @@
 package startup
 
 import (
-	notificationv1 "github.com/Duke1616/ecmdb/api/proto/gen/ealert/notification/v1"
-	teamv1 "github.com/Duke1616/ecmdb/api/proto/gen/ealert/team"
-	"github.com/Duke1616/ecmdb/internal/department"
-	"github.com/Duke1616/ecmdb/internal/engine"
-	"github.com/Duke1616/ecmdb/internal/event"
-	"github.com/Duke1616/ecmdb/internal/event/producer"
-	"github.com/Duke1616/ecmdb/internal/event/service/easyflow"
-	"github.com/Duke1616/ecmdb/internal/order"
-	"github.com/Duke1616/ecmdb/internal/pkg/notification/sender"
-	"github.com/Duke1616/ecmdb/internal/rota"
-	"github.com/Duke1616/ecmdb/internal/task"
-	"github.com/Duke1616/ecmdb/internal/template"
-	"github.com/Duke1616/ecmdb/internal/test/ioc"
-	"github.com/Duke1616/ecmdb/internal/user"
-	"github.com/Duke1616/ecmdb/internal/workflow"
 	"github.com/google/wire"
 	lark "github.com/larksuite/oapi-sdk-go/v3"
+	notificationv1 "github.com/userreksai/ecmdb-main/api/proto/gen/ealert/notification/v1"
+	teamv1 "github.com/userreksai/ecmdb-main/api/proto/gen/ealert/team"
+	"github.com/userreksai/ecmdb-main/internal/department"
+	"github.com/userreksai/ecmdb-main/internal/engine"
+	"github.com/userreksai/ecmdb-main/internal/event"
+	"github.com/userreksai/ecmdb-main/internal/event/producer"
+	"github.com/userreksai/ecmdb-main/internal/event/service/easyflow"
+	"github.com/userreksai/ecmdb-main/internal/order"
+	"github.com/userreksai/ecmdb-main/internal/pkg/notification/sender"
+	"github.com/userreksai/ecmdb-main/internal/rota"
+	"github.com/userreksai/ecmdb-main/internal/task"
+	"github.com/userreksai/ecmdb-main/internal/template"
+	"github.com/userreksai/ecmdb-main/internal/test/ioc"
+	"github.com/userreksai/ecmdb-main/internal/user"
+	"github.com/userreksai/ecmdb-main/internal/workflow"
 )
 
 type TestApp struct {

@@ -5,11 +5,11 @@ import (
 	"net/http"
 	"strconv"
 
-	policyv1 "github.com/Duke1616/ecmdb/api/proto/gen/ecmdb/policy/v1"
-	"github.com/Duke1616/ecmdb/internal/policy/internal/service"
 	"github.com/ecodeclub/ginx/gctx"
 	"github.com/ecodeclub/ginx/session"
 	"github.com/gin-gonic/gin"
+	policyv1 "github.com/userreksai/ecmdb-main/api/proto/gen/ecmdb/policy/v1"
+	"github.com/userreksai/ecmdb-main/internal/policy/internal/service"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

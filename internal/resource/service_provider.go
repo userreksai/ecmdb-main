@@ -1,11 +1,11 @@
 package resource
 
 import (
-	"github.com/Duke1616/ecmdb/internal/attribute"
-	"github.com/Duke1616/ecmdb/internal/resource/internal/repository"
-	"github.com/Duke1616/ecmdb/internal/resource/internal/service"
-	"github.com/Duke1616/ecmdb/pkg/cryptox"
-	"github.com/Duke1616/ecmdb/pkg/mongox"
+	"github.com/userreksai/ecmdb-main/internal/attribute"
+	"github.com/userreksai/ecmdb-main/internal/resource/internal/repository"
+	"github.com/userreksai/ecmdb-main/internal/resource/internal/service"
+	"github.com/userreksai/ecmdb-main/pkg/cryptox"
+	"github.com/userreksai/ecmdb-main/pkg/mongox"
 )
 
 // InitEncryptedService constructs the encrypted resource service without HTTP or event consumers.

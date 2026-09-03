@@ -1,11 +1,11 @@
 package web
 
 import (
-	"github.com/Duke1616/ecmdb/internal/template/internal/domain"
-	"github.com/Duke1616/ecmdb/internal/template/internal/service"
-	"github.com/Duke1616/ecmdb/pkg/ginx"
 	"github.com/ecodeclub/ekit/slice"
 	"github.com/gin-gonic/gin"
+	"github.com/userreksai/ecmdb-main/internal/template/internal/domain"
+	"github.com/userreksai/ecmdb-main/internal/template/internal/service"
+	"github.com/userreksai/ecmdb-main/pkg/ginx"
 )
 
 type GroupHandler struct {

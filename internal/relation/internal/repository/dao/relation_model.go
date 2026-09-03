@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Duke1616/ecmdb/internal/errs"
-	"github.com/Duke1616/ecmdb/pkg/mongox"
+	"github.com/userreksai/ecmdb-main/internal/errs"
+	"github.com/userreksai/ecmdb-main/pkg/mongox"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )

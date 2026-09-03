@@ -5,15 +5,15 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Bunny3th/easy-workflow/workflow/model"
-	"github.com/Duke1616/ecmdb/internal/event/errs"
-	"github.com/Duke1616/ecmdb/internal/event/service/strategy"
-	"github.com/Duke1616/ecmdb/internal/pkg/notification"
-	"github.com/Duke1616/ecmdb/internal/pkg/notification/sender"
-	"github.com/Duke1616/ecmdb/internal/pkg/rule"
-	"github.com/Duke1616/ecmdb/internal/workflow/pkg/easyflow"
 	"github.com/ecodeclub/ekit/slice"
 	"github.com/gotomicro/ego/core/elog"
+	"github.com/userreksai/easy-workflow/workflow/model"
+	"github.com/userreksai/ecmdb-main/internal/event/errs"
+	"github.com/userreksai/ecmdb-main/internal/event/service/strategy"
+	"github.com/userreksai/ecmdb-main/internal/pkg/notification"
+	"github.com/userreksai/ecmdb-main/internal/pkg/notification/sender"
+	"github.com/userreksai/ecmdb-main/internal/pkg/rule"
+	"github.com/userreksai/ecmdb-main/internal/workflow/pkg/easyflow"
 )
 
 type Notification struct {

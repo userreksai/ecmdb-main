@@ -7,12 +7,12 @@
 package terminal
 
 import (
-	"github.com/Duke1616/ecmdb/internal/attribute"
-	"github.com/Duke1616/ecmdb/internal/policy"
-	"github.com/Duke1616/ecmdb/internal/relation"
-	"github.com/Duke1616/ecmdb/internal/resource"
-	"github.com/Duke1616/ecmdb/internal/role"
-	"github.com/Duke1616/ecmdb/internal/terminal/internal/web"
+	"github.com/userreksai/ecmdb-main/internal/attribute"
+	"github.com/userreksai/ecmdb-main/internal/policy"
+	"github.com/userreksai/ecmdb-main/internal/relation"
+	"github.com/userreksai/ecmdb-main/internal/resource"
+	"github.com/userreksai/ecmdb-main/internal/role"
+	"github.com/userreksai/ecmdb-main/internal/terminal/internal/web"
 )
 
 // Injectors from wire.go:

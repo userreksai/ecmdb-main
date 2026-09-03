@@ -153,7 +153,7 @@ const file_ecmdb_resource_v1_resource_proto_rawDesc = "" +
 	"\aUnknown\x10\x00\x12\b\n" +
 	"\x04Host\x10\x01\x12\r\n" +
 	"\tFirewalld\x10\x02B\xd2\x01\n" +
-	"\x15com.ecmdb.resource.v1B\rResourceProtoP\x01ZDgithub.com/Duke1616/ecmdb/api/proto/gen/ecmdb/resource/v1;resourcev1\xa2\x02\x03ERX\xaa\x02\x11Ecmdb.Resource.V1\xca\x02\x11Ecmdb\\Resource\\V1\xe2\x02\x1dEcmdb\\Resource\\V1\\GPBMetadata\xea\x02\x13Ecmdb::Resource::V1b\x06proto3"
+	"\x15com.ecmdb.resource.v1B\rResourceProtoP\x01ZDgithub.com/userreksai/ecmdb-main/api/proto/gen/ecmdb/resource/v1;resourcev1\xa2\x02\x03ERX\xaa\x02\x11Ecmdb.Resource.V1\xca\x02\x11Ecmdb\\Resource\\V1\xe2\x02\x1dEcmdb\\Resource\\V1\\GPBMetadata\xea\x02\x13Ecmdb::Resource::V1b\x06proto3"
 
 var (
 	file_ecmdb_resource_v1_resource_proto_rawDescOnce sync.Once

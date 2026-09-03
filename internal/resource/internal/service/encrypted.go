@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/Duke1616/ecmdb/internal/attribute"
-	"github.com/Duke1616/ecmdb/internal/resource/internal/domain"
-	"github.com/Duke1616/ecmdb/pkg/cryptox"
 	"github.com/ecodeclub/ekit/slice"
 	"github.com/gotomicro/ego/core/elog"
+	"github.com/userreksai/ecmdb-main/internal/attribute"
+	"github.com/userreksai/ecmdb-main/internal/resource/internal/domain"
+	"github.com/userreksai/ecmdb-main/pkg/cryptox"
 )
 
 //go:generate mockgen -source=./encrypted.go -destination=../../mocks/encrypted.mock.go -package=resourcemocks -typed EncryptedSvc

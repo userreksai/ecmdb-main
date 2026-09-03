@@ -3,7 +3,7 @@ package web
 import (
 	"sort"
 
-	"github.com/Duke1616/ecmdb/internal/department/internal/domain"
+	"github.com/userreksai/ecmdb-main/internal/department/internal/domain"
 )
 
 func GetDepartmentsTree(ms []domain.Department) []*Department {

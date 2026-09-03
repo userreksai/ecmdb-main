@@ -4,9 +4,9 @@ import (
 	"context"
 	"sync"
 
-	"github.com/Duke1616/ecmdb/internal/worker/internal/service"
-	"github.com/userreksai/ecmdb-task/pkg/grpc/registry"
 	"github.com/gotomicro/ego/core/elog"
+	"github.com/userreksai/ecmdb-main/internal/worker/internal/service"
+	"github.com/userreksai/ecmdb-task/pkg/grpc/registry"
 )
 
 const SUBSCRIBE = "agent"

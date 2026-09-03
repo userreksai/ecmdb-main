@@ -13,8 +13,8 @@ import (
 	context "context"
 	reflect "reflect"
 
-	domain "github.com/Duke1616/ecmdb/internal/attribute/internal/domain"
 	gin "github.com/gin-gonic/gin"
+	domain "github.com/userreksai/ecmdb-main/internal/attribute/internal/domain"
 	gomock "go.uber.org/mock/gomock"
 )
 

@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/Duke1616/ecmdb/internal/menu"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/userreksai/ecmdb-main/internal/menu"
 )
 
 func TestHashCalculator_CalculateMenuHash(t *testing.T) {

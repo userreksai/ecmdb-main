@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Duke1616/ecmdb/internal/user/internal/domain"
 	"github.com/RediSearch/redisearch-go/v2/redisearch"
 	"github.com/gotomicro/ego/core/elog"
+	"github.com/userreksai/ecmdb-main/internal/user/internal/domain"
 )
 
 const KeyPrefix = "ecmdb:user:ldap:"

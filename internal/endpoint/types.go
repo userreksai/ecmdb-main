@@ -1,10 +1,10 @@
 package endpoint
 
 import (
-	"github.com/Duke1616/ecmdb/internal/endpoint/internal/domain"
-	"github.com/Duke1616/ecmdb/internal/endpoint/internal/grpc"
-	"github.com/Duke1616/ecmdb/internal/endpoint/internal/service"
-	"github.com/Duke1616/ecmdb/internal/endpoint/internal/web"
+	"github.com/userreksai/ecmdb-main/internal/endpoint/internal/domain"
+	"github.com/userreksai/ecmdb-main/internal/endpoint/internal/grpc"
+	"github.com/userreksai/ecmdb-main/internal/endpoint/internal/service"
+	"github.com/userreksai/ecmdb-main/internal/endpoint/internal/web"
 )
 
 type Handler = web.Handler

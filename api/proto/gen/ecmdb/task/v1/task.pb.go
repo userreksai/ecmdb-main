@@ -1194,7 +1194,7 @@ const file_ecmdb_task_v1_task_proto_rawDesc = "" +
 	"\n" +
 	"DeleteTask\x12 .ecmdb.task.v1.DeleteTaskRequest\x1a!.ecmdb.task.v1.DeleteTaskResponse\x12N\n" +
 	"\tListTasks\x12\x1f.ecmdb.task.v1.ListTasksRequest\x1a .ecmdb.task.v1.ListTasksResponseB\xb2\x01\n" +
-	"\x11com.ecmdb.task.v1B\tTaskProtoP\x01Z<github.com/Duke1616/ecmdb/api/proto/gen/ecmdb/task/v1;taskv1\xa2\x02\x03ETX\xaa\x02\rEcmdb.Task.V1\xca\x02\rEcmdb\\Task\\V1\xe2\x02\x19Ecmdb\\Task\\V1\\GPBMetadata\xea\x02\x0fEcmdb::Task::V1b\x06proto3"
+	"\x11com.ecmdb.task.v1B\tTaskProtoP\x01Z<github.com/userreksai/ecmdb-main/api/proto/gen/ecmdb/task/v1;taskv1\xa2\x02\x03ETX\xaa\x02\rEcmdb.Task.V1\xca\x02\rEcmdb\\Task\\V1\xe2\x02\x19Ecmdb\\Task\\V1\\GPBMetadata\xea\x02\x0fEcmdb::Task::V1b\x06proto3"
 
 var (
 	file_ecmdb_task_v1_task_proto_rawDescOnce sync.Once

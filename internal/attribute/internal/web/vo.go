@@ -1,7 +1,7 @@
 package web
 
 import (
-	"github.com/Duke1616/ecmdb/internal/attribute/internal/domain"
+	"github.com/userreksai/ecmdb-main/internal/attribute/internal/domain"
 )
 
 type CreateAttributeReq struct {

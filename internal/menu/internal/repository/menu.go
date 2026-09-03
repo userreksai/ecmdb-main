@@ -3,9 +3,9 @@ package repository
 import (
 	"context"
 
-	"github.com/Duke1616/ecmdb/internal/menu/internal/domain"
-	"github.com/Duke1616/ecmdb/internal/menu/internal/repository/dao"
 	"github.com/ecodeclub/ekit/slice"
+	"github.com/userreksai/ecmdb-main/internal/menu/internal/domain"
+	"github.com/userreksai/ecmdb-main/internal/menu/internal/repository/dao"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 

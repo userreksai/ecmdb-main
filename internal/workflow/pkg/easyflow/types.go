@@ -3,8 +3,8 @@ package easyflow
 import (
 	"fmt"
 
-	"github.com/Bunny3th/easy-workflow/workflow/model"
 	"github.com/mitchellh/mapstructure"
+	"github.com/userreksai/easy-workflow/workflow/model"
 )
 
 // Converter 工作流转换器接口

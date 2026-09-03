@@ -3,10 +3,10 @@
 package strategy
 
 import (
-	"github.com/Duke1616/ecmdb/internal/strategy/internal/service"
-	"github.com/Duke1616/ecmdb/internal/strategy/internal/web"
-	"github.com/Duke1616/ecmdb/internal/template"
 	"github.com/google/wire"
+	"github.com/userreksai/ecmdb-main/internal/strategy/internal/service"
+	"github.com/userreksai/ecmdb-main/internal/strategy/internal/web"
+	"github.com/userreksai/ecmdb-main/internal/template"
 )
 
 var ProviderSet = wire.NewSet(

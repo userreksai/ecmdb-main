@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Duke1616/ecmdb/pkg/ginx"
 	"github.com/gin-gonic/gin"
+	"github.com/userreksai/ecmdb-main/pkg/ginx"
 )
 
 type Handler struct{ svc Service }

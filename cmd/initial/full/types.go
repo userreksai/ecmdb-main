@@ -1,6 +1,6 @@
 package full
 
-import "github.com/Duke1616/ecmdb/cmd/initial/ioc"
+import "github.com/userreksai/ecmdb-main/cmd/initial/ioc"
 
 // 用户相关
 const (

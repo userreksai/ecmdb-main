@@ -1,10 +1,10 @@
 package attribute
 
 import (
-	"github.com/Duke1616/ecmdb/internal/attribute/internal/domain"
-	"github.com/Duke1616/ecmdb/internal/attribute/internal/event"
-	"github.com/Duke1616/ecmdb/internal/attribute/internal/service"
-	"github.com/Duke1616/ecmdb/internal/attribute/internal/web"
+	"github.com/userreksai/ecmdb-main/internal/attribute/internal/domain"
+	"github.com/userreksai/ecmdb-main/internal/attribute/internal/event"
+	"github.com/userreksai/ecmdb-main/internal/attribute/internal/service"
+	"github.com/userreksai/ecmdb-main/internal/attribute/internal/web"
 )
 
 type Handler = web.Handler

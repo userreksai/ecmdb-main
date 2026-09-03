@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/Duke1616/ecmdb/pkg/netx"
 	"github.com/gotomicro/ego/core/elog"
+	"github.com/userreksai/ecmdb-main/pkg/netx"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"go.etcd.io/etcd/client/v3/naming/endpoints"
 	"google.golang.org/grpc"

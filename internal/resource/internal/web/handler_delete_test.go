@@ -4,10 +4,10 @@ import (
 	"errors"
 	"testing"
 
-	relationmocks "github.com/Duke1616/ecmdb/internal/relation/mocks"
-	resourcemocks "github.com/Duke1616/ecmdb/internal/resource/mocks"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
+	relationmocks "github.com/userreksai/ecmdb-main/internal/relation/mocks"
+	resourcemocks "github.com/userreksai/ecmdb-main/internal/resource/mocks"
 	"go.uber.org/mock/gomock"
 )
 

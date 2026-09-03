@@ -4,17 +4,17 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/Duke1616/ecmdb/internal/pkg/authctx"
-	"github.com/Duke1616/ecmdb/internal/pkg/rule"
-	"github.com/Duke1616/ecmdb/internal/template/internal/domain"
-	"github.com/Duke1616/ecmdb/internal/template/internal/service"
-	"github.com/Duke1616/ecmdb/pkg/ginx"
 	"github.com/ecodeclub/ekit/slice"
 	"github.com/ecodeclub/ginx/gctx"
 	"github.com/ecodeclub/ginx/session"
 	"github.com/gin-gonic/gin"
 	"github.com/goccy/go-json"
 	"github.com/gotomicro/ego/core/elog"
+	"github.com/userreksai/ecmdb-main/internal/pkg/authctx"
+	"github.com/userreksai/ecmdb-main/internal/pkg/rule"
+	"github.com/userreksai/ecmdb-main/internal/template/internal/domain"
+	"github.com/userreksai/ecmdb-main/internal/template/internal/service"
+	"github.com/userreksai/ecmdb-main/pkg/ginx"
 )
 
 type Handler struct {

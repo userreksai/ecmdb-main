@@ -6,10 +6,10 @@ import (
 	"runtime/debug"
 	"sync"
 
-	"github.com/Duke1616/ecmdb/internal/user"
 	"github.com/ecodeclub/ekit/slice"
 	"github.com/hashicorp/go-multierror"
 	"github.com/samber/lo"
+	"github.com/userreksai/ecmdb-main/internal/user"
 )
 
 // Target 是一种分配策略抽象，代表向哪个维度(Type)分配哪些实体(Ids/Fields)

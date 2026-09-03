@@ -7,11 +7,11 @@
 package engine
 
 import (
-	"github.com/Duke1616/ecmdb/internal/engine/internal/repository"
-	"github.com/Duke1616/ecmdb/internal/engine/internal/repository/dao"
-	"github.com/Duke1616/ecmdb/internal/engine/internal/service"
-	"github.com/Duke1616/ecmdb/internal/engine/internal/web"
 	"github.com/google/wire"
+	"github.com/userreksai/ecmdb-main/internal/engine/internal/repository"
+	"github.com/userreksai/ecmdb-main/internal/engine/internal/repository/dao"
+	"github.com/userreksai/ecmdb-main/internal/engine/internal/service"
+	"github.com/userreksai/ecmdb-main/internal/engine/internal/web"
 	"gorm.io/gorm"
 )
 

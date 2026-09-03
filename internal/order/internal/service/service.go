@@ -8,12 +8,12 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/Duke1616/ecmdb/internal/order/internal/domain"
-	"github.com/Duke1616/ecmdb/internal/order/internal/event"
-	"github.com/Duke1616/ecmdb/internal/order/internal/repository"
-	"github.com/Duke1616/ecmdb/internal/template"
 	"github.com/ecodeclub/ekit/slice"
 	"github.com/gotomicro/ego/core/elog"
+	"github.com/userreksai/ecmdb-main/internal/order/internal/domain"
+	"github.com/userreksai/ecmdb-main/internal/order/internal/event"
+	"github.com/userreksai/ecmdb-main/internal/order/internal/repository"
+	"github.com/userreksai/ecmdb-main/internal/template"
 	"github.com/xen0n/go-workwx"
 	"golang.org/x/sync/errgroup"
 )

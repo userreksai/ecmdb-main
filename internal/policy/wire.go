@@ -3,13 +3,13 @@
 package policy
 
 import (
-	"github.com/Duke1616/ecmdb/internal/policy/internal/grpc"
-	"github.com/Duke1616/ecmdb/internal/policy/internal/service"
-	"github.com/Duke1616/ecmdb/internal/policy/internal/web"
-	"github.com/Duke1616/ecmdb/internal/pkg/servicetoken"
 	"github.com/casbin/casbin/v2"
 	"github.com/ecodeclub/ginx/session"
 	"github.com/google/wire"
+	"github.com/userreksai/ecmdb-main/internal/pkg/servicetoken"
+	"github.com/userreksai/ecmdb-main/internal/policy/internal/grpc"
+	"github.com/userreksai/ecmdb-main/internal/policy/internal/service"
+	"github.com/userreksai/ecmdb-main/internal/policy/internal/web"
 )
 
 var ProviderSet = wire.NewSet(

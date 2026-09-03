@@ -3,12 +3,12 @@
 package codebook
 
 import (
-	repository "github.com/Duke1616/ecmdb/internal/codebook/internal/repository"
-	"github.com/Duke1616/ecmdb/internal/codebook/internal/repository/dao"
-	"github.com/Duke1616/ecmdb/internal/codebook/internal/service"
-	"github.com/Duke1616/ecmdb/internal/codebook/internal/web"
-	"github.com/Duke1616/ecmdb/pkg/mongox"
 	"github.com/google/wire"
+	repository "github.com/userreksai/ecmdb-main/internal/codebook/internal/repository"
+	"github.com/userreksai/ecmdb-main/internal/codebook/internal/repository/dao"
+	"github.com/userreksai/ecmdb-main/internal/codebook/internal/service"
+	"github.com/userreksai/ecmdb-main/internal/codebook/internal/web"
+	"github.com/userreksai/ecmdb-main/pkg/mongox"
 )
 
 var ProviderSet = wire.NewSet(

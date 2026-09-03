@@ -3,9 +3,9 @@ package easyflow
 import (
 	"testing"
 
-	"github.com/Bunny3th/easy-workflow/workflow/model"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/userreksai/easy-workflow/workflow/model"
 )
 
 func TestLogicFlow_Deploy(t *testing.T) {

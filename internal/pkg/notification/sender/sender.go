@@ -4,9 +4,9 @@ import (
 	"context"
 	"sync"
 
-	"github.com/Duke1616/ecmdb/internal/pkg/notification"
-	"github.com/Duke1616/ecmdb/internal/pkg/notification/channel"
 	"github.com/gotomicro/ego/core/elog"
+	"github.com/userreksai/ecmdb-main/internal/pkg/notification"
+	"github.com/userreksai/ecmdb-main/internal/pkg/notification/channel"
 )
 
 //go:generate mockgen -source=./sender.go -package=sendermocks -destination=../../mocks/sender.mock.go -typed NotificationSender

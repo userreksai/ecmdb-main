@@ -4,13 +4,13 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/Duke1616/ecmdb/internal/pkg/authctx"
-	"github.com/Duke1616/ecmdb/internal/pkg/servicetoken"
-	"github.com/Duke1616/ecmdb/internal/user"
 	"github.com/ecodeclub/ginx/gctx"
 	"github.com/ecodeclub/ginx/session"
 	"github.com/gin-gonic/gin"
 	"github.com/gotomicro/ego/core/elog"
+	"github.com/userreksai/ecmdb-main/internal/pkg/authctx"
+	"github.com/userreksai/ecmdb-main/internal/pkg/servicetoken"
+	"github.com/userreksai/ecmdb-main/internal/user"
 )
 
 type CheckLoginMiddlewareBuilder struct {

@@ -9,17 +9,17 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Duke1616/ecmdb/internal/attribute/internal/integration/startup"
-	"github.com/Duke1616/ecmdb/internal/attribute/internal/repository/dao"
-	"github.com/Duke1616/ecmdb/internal/attribute/internal/service"
-	"github.com/Duke1616/ecmdb/internal/attribute/internal/web"
-	"github.com/Duke1616/ecmdb/pkg/ginx/test"
-	"github.com/Duke1616/ecmdb/pkg/mongox"
 	"github.com/ecodeclub/ekit/iox"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
+	"github.com/userreksai/ecmdb-main/internal/attribute/internal/integration/startup"
+	"github.com/userreksai/ecmdb-main/internal/attribute/internal/repository/dao"
+	"github.com/userreksai/ecmdb-main/internal/attribute/internal/service"
+	"github.com/userreksai/ecmdb-main/internal/attribute/internal/web"
+	"github.com/userreksai/ecmdb-main/pkg/ginx/test"
+	"github.com/userreksai/ecmdb-main/pkg/mongox"
 	"go.mongodb.org/mongo-driver/bson"
 )
 

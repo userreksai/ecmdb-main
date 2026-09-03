@@ -4,13 +4,13 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Duke1616/ecmdb/internal/menu"
-	"github.com/Duke1616/ecmdb/internal/permission/internal/domain"
-	"github.com/Duke1616/ecmdb/internal/policy"
-	"github.com/Duke1616/ecmdb/internal/role"
-	"github.com/Duke1616/ecmdb/pkg/tools"
 	"github.com/ecodeclub/ekit/slice"
 	"github.com/gotomicro/ego/core/elog"
+	"github.com/userreksai/ecmdb-main/internal/menu"
+	"github.com/userreksai/ecmdb-main/internal/permission/internal/domain"
+	"github.com/userreksai/ecmdb-main/internal/policy"
+	"github.com/userreksai/ecmdb-main/internal/role"
+	"github.com/userreksai/ecmdb-main/pkg/tools"
 	"golang.org/x/sync/errgroup"
 )
 

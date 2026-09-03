@@ -13,7 +13,7 @@ import (
 	context "context"
 	reflect "reflect"
 
-	event "github.com/Duke1616/ecmdb/internal/attribute/internal/event"
+	event "github.com/userreksai/ecmdb-main/internal/attribute/internal/event"
 	gomock "go.uber.org/mock/gomock"
 )
 

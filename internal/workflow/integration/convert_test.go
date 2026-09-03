@@ -5,13 +5,13 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/Bunny3th/easy-workflow/workflow/model"
-	ioc "github.com/Duke1616/ecmdb/internal/test/ioc"
-	"github.com/Duke1616/ecmdb/internal/workflow/internal/repository/dao"
-	"github.com/Duke1616/ecmdb/internal/workflow/pkg/easyflow"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
+	"github.com/userreksai/easy-workflow/workflow/model"
+	ioc "github.com/userreksai/ecmdb-main/internal/test/ioc"
+	"github.com/userreksai/ecmdb-main/internal/workflow/internal/repository/dao"
+	"github.com/userreksai/ecmdb-main/internal/workflow/pkg/easyflow"
 	"gorm.io/gorm"
 )
 

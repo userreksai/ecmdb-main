@@ -3,7 +3,7 @@ package service
 import (
 	"os"
 
-	"github.com/Duke1616/ecmdb/internal/bootstrap/structure"
+	"github.com/userreksai/ecmdb-main/internal/bootstrap/structure"
 	"gopkg.in/yaml.v3"
 )
 

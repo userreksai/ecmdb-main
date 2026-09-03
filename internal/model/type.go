@@ -1,9 +1,9 @@
 package model
 
 import (
-	"github.com/Duke1616/ecmdb/internal/model/internal/domain"
-	"github.com/Duke1616/ecmdb/internal/model/internal/service"
-	"github.com/Duke1616/ecmdb/internal/model/internal/web"
+	"github.com/userreksai/ecmdb-main/internal/model/internal/domain"
+	"github.com/userreksai/ecmdb-main/internal/model/internal/service"
+	"github.com/userreksai/ecmdb-main/internal/model/internal/web"
 )
 
 type Handler = web.Handler

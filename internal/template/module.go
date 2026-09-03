@@ -1,7 +1,7 @@
 package template
 
 import (
-	"github.com/Duke1616/ecmdb/internal/template/internal/event"
+	"github.com/userreksai/ecmdb-main/internal/template/internal/event"
 )
 
 type Module struct {

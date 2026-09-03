@@ -1,9 +1,9 @@
 package rota
 
 import (
-	"github.com/Duke1616/ecmdb/internal/rota/internal/grpc"
-	"github.com/Duke1616/ecmdb/internal/rota/internal/service"
-	"github.com/Duke1616/ecmdb/internal/rota/internal/web"
+	"github.com/userreksai/ecmdb-main/internal/rota/internal/grpc"
+	"github.com/userreksai/ecmdb-main/internal/rota/internal/service"
+	"github.com/userreksai/ecmdb-main/internal/rota/internal/web"
 )
 
 type Handler = web.Handler

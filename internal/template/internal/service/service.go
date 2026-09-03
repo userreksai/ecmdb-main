@@ -5,9 +5,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/Duke1616/ecmdb/internal/template/internal/domain"
-	"github.com/Duke1616/ecmdb/internal/template/internal/repository"
-	"github.com/Duke1616/ecmdb/pkg/hash"
+	"github.com/userreksai/ecmdb-main/internal/template/internal/domain"
+	"github.com/userreksai/ecmdb-main/internal/template/internal/repository"
+	"github.com/userreksai/ecmdb-main/pkg/hash"
 	"github.com/xen0n/go-workwx"
 	"golang.org/x/sync/errgroup"
 )

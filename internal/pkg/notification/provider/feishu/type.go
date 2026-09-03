@@ -1,10 +1,10 @@
 package feishu
 
 import (
-	notificationv1 "github.com/Duke1616/ecmdb/api/proto/gen/ealert/notification/v1"
-	"github.com/Duke1616/ecmdb/internal/pkg/notification"
-	"github.com/Duke1616/enotify/notify/feishu/card"
 	"github.com/ecodeclub/ekit/slice"
+	notificationv1 "github.com/userreksai/ecmdb-main/api/proto/gen/ealert/notification/v1"
+	"github.com/userreksai/ecmdb-main/internal/pkg/notification"
+	"github.com/userreksai/enotify/notify/feishu/card"
 )
 
 func toReceiverType(rt string) notificationv1.ReceiverType {

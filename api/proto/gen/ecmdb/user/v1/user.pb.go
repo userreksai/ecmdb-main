@@ -374,7 +374,7 @@ const file_ecmdb_user_v1_user_proto_rawDesc = "" +
 	"\tFindByIds\x12\x1b.ecmdb.user.v1.FindByIdsReq\x1a\x1c.ecmdb.user.v1.RetrieveUsers\x12X\n" +
 	"\x12FindByDepartmentId\x12$.ecmdb.user.v1.FindByDepartmentIdReq\x1a\x1c.ecmdb.user.v1.RetrieveUsers\x12Z\n" +
 	"\x13FindByDepartmentIds\x12%.ecmdb.user.v1.FindByDepartmentIdsReq\x1a\x1c.ecmdb.user.v1.RetrieveUsersB\xb2\x01\n" +
-	"\x11com.ecmdb.user.v1B\tUserProtoP\x01Z<github.com/Duke1616/ecmdb/api/proto/gen/ecmdb/user/v1;userv1\xa2\x02\x03EUX\xaa\x02\rEcmdb.User.V1\xca\x02\rEcmdb\\User\\V1\xe2\x02\x19Ecmdb\\User\\V1\\GPBMetadata\xea\x02\x0fEcmdb::User::V1b\x06proto3"
+	"\x11com.ecmdb.user.v1B\tUserProtoP\x01Z<github.com/userreksai/ecmdb-main/api/proto/gen/ecmdb/user/v1;userv1\xa2\x02\x03EUX\xaa\x02\rEcmdb.User.V1\xca\x02\rEcmdb\\User\\V1\xe2\x02\x19Ecmdb\\User\\V1\\GPBMetadata\xea\x02\x0fEcmdb::User::V1b\x06proto3"
 
 var (
 	file_ecmdb_user_v1_user_proto_rawDescOnce sync.Once

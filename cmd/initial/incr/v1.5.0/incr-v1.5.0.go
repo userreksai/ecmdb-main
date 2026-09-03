@@ -3,8 +3,8 @@ package v150
 import (
 	"context"
 
-	"github.com/Duke1616/ecmdb/cmd/initial/incr"
-	"github.com/Duke1616/ecmdb/cmd/initial/ioc"
+	"github.com/userreksai/ecmdb-main/cmd/initial/incr"
+	"github.com/userreksai/ecmdb-main/cmd/initial/ioc"
 )
 
 type incrV150 struct {

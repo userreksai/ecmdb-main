@@ -3,9 +3,9 @@ package service
 import (
 	"context"
 
-	"github.com/Duke1616/ecmdb/internal/user/internal/domain"
-	"github.com/Duke1616/ecmdb/internal/user/internal/repository/cache"
-	"github.com/Duke1616/ecmdb/internal/user/ldapx"
+	"github.com/userreksai/ecmdb-main/internal/user/internal/domain"
+	"github.com/userreksai/ecmdb-main/internal/user/internal/repository/cache"
+	"github.com/userreksai/ecmdb-main/internal/user/ldapx"
 )
 
 type LdapService interface {

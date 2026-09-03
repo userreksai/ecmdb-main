@@ -7,12 +7,12 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/Bunny3th/easy-workflow/workflow/engine"
-	"github.com/Duke1616/ecmdb/internal/order/internal/event"
-	"github.com/Duke1616/ecmdb/internal/order/internal/service"
-	"github.com/Duke1616/ecmdb/internal/workflow"
 	"github.com/ecodeclub/mq-api"
 	"github.com/gotomicro/ego/core/elog"
+	"github.com/userreksai/easy-workflow/workflow/engine"
+	"github.com/userreksai/ecmdb-main/internal/order/internal/event"
+	"github.com/userreksai/ecmdb-main/internal/order/internal/service"
+	"github.com/userreksai/ecmdb-main/internal/workflow"
 )
 
 type ProcessEventConsumer struct {

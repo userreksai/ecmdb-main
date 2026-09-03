@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Bunny3th/easy-workflow/workflow/model"
-	"github.com/Duke1616/ecmdb/internal/engine"
-	"github.com/Duke1616/ecmdb/internal/task/internal/service"
 	"github.com/gotomicro/ego/core/elog"
 	"github.com/gotomicro/ego/task/ecron"
+	"github.com/userreksai/easy-workflow/workflow/model"
+	"github.com/userreksai/ecmdb-main/internal/engine"
+	"github.com/userreksai/ecmdb-main/internal/task/internal/service"
 	"gorm.io/gorm"
 )
 

@@ -13,8 +13,8 @@ import (
 	context "context"
 	reflect "reflect"
 
-	model "github.com/Bunny3th/easy-workflow/workflow/model"
-	domain "github.com/Duke1616/ecmdb/internal/engine/internal/domain"
+	model "github.com/userreksai/easy-workflow/workflow/model"
+	domain "github.com/userreksai/ecmdb-main/internal/engine/internal/domain"
 	gomock "go.uber.org/mock/gomock"
 )
 

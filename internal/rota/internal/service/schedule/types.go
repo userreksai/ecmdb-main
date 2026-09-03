@@ -1,6 +1,6 @@
 package schedule
 
-import "github.com/Duke1616/ecmdb/internal/rota/internal/domain"
+import "github.com/userreksai/ecmdb-main/internal/rota/internal/domain"
 
 type Scheduler interface {
 	// GenerateSchedule 生成排班表

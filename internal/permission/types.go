@@ -1,8 +1,8 @@
 package permission
 
 import (
-	"github.com/Duke1616/ecmdb/internal/permission/internal/service"
-	"github.com/Duke1616/ecmdb/internal/permission/internal/web"
+	"github.com/userreksai/ecmdb-main/internal/permission/internal/service"
+	"github.com/userreksai/ecmdb-main/internal/permission/internal/web"
 )
 
 type Handler = web.Handler

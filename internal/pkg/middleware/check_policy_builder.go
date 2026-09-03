@@ -4,12 +4,12 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/Duke1616/ecmdb/internal/pkg/authctx"
-	"github.com/Duke1616/ecmdb/internal/policy"
 	"github.com/ecodeclub/ginx"
 	"github.com/ecodeclub/ginx/session"
 	"github.com/gin-gonic/gin"
 	"github.com/gotomicro/ego/core/elog"
+	"github.com/userreksai/ecmdb-main/internal/pkg/authctx"
+	"github.com/userreksai/ecmdb-main/internal/policy"
 )
 
 type CheckPolicyMiddlewareBuilder struct {

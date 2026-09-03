@@ -1,7 +1,7 @@
 package notification
 
 import (
-	"github.com/Duke1616/ecmdb/internal/workflow"
+	"github.com/userreksai/ecmdb-main/internal/workflow"
 )
 
 type NotificationResponse struct {

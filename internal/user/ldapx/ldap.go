@@ -7,9 +7,9 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/Duke1616/ecmdb/internal/user/internal/domain"
 	"github.com/ecodeclub/ekit/slice"
 	"github.com/go-ldap/ldap/v3"
+	"github.com/userreksai/ecmdb-main/internal/user/internal/domain"
 )
 
 const specialLDAPRunes = ",#+<>;\"="

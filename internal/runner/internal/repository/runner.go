@@ -3,9 +3,9 @@ package repository
 import (
 	"context"
 
-	"github.com/Duke1616/ecmdb/internal/runner/internal/domain"
-	"github.com/Duke1616/ecmdb/internal/runner/internal/repository/dao"
 	"github.com/ecodeclub/ekit/slice"
+	"github.com/userreksai/ecmdb-main/internal/runner/internal/domain"
+	"github.com/userreksai/ecmdb-main/internal/runner/internal/repository/dao"
 )
 
 // RunnerRepository 执行器仓储接口

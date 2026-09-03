@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/Duke1616/ecmdb/pkg/term/sshx"
 	"github.com/gorilla/websocket"
 	"github.com/pkg/sftp"
+	"github.com/userreksai/ecmdb-main/pkg/term/sshx"
 	"golang.org/x/crypto/ssh"
 )
 

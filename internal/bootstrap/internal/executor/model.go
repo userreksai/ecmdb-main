@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 
-	"github.com/Duke1616/ecmdb/internal/errs"
-	"github.com/Duke1616/ecmdb/internal/model"
 	"github.com/gotomicro/ego/core/elog"
+	"github.com/userreksai/ecmdb-main/internal/errs"
+	"github.com/userreksai/ecmdb-main/internal/model"
 )
 
 // ModelExecutor 模型执行器，负责模型的创建

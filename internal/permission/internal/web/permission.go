@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/Duke1616/ecmdb/internal/menu"
-	"github.com/Duke1616/ecmdb/internal/policy"
 	"github.com/ecodeclub/ekit/slice"
+	"github.com/userreksai/ecmdb-main/internal/menu"
+	"github.com/userreksai/ecmdb-main/internal/policy"
 	"golang.org/x/sync/errgroup"
 )
 

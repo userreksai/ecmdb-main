@@ -3,9 +3,9 @@ package repository
 import (
 	"context"
 
-	"github.com/Duke1616/ecmdb/internal/resource/internal/domain"
-	"github.com/Duke1616/ecmdb/internal/resource/internal/repository/dao"
 	"github.com/ecodeclub/ekit/slice"
+	"github.com/userreksai/ecmdb-main/internal/resource/internal/domain"
+	"github.com/userreksai/ecmdb-main/internal/resource/internal/repository/dao"
 )
 
 //go:generate mockgen -source=repository.go -destination=../../mocks/repository.mock.go --package=resourcemocks ResourceRepository

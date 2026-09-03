@@ -13,7 +13,7 @@ import (
 	context "context"
 	reflect "reflect"
 
-	notification "github.com/Duke1616/ecmdb/internal/pkg/notification"
+	notification "github.com/userreksai/ecmdb-main/internal/pkg/notification"
 	gomock "go.uber.org/mock/gomock"
 )
 

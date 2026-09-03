@@ -3,12 +3,12 @@ package strategy
 import (
 	"context"
 
-	"github.com/Bunny3th/easy-workflow/workflow/model"
-	engineSvc "github.com/Duke1616/ecmdb/internal/engine"
-	"github.com/Duke1616/ecmdb/internal/order"
-	"github.com/Duke1616/ecmdb/internal/pkg/notification"
-	"github.com/Duke1616/ecmdb/internal/workflow"
-	"github.com/Duke1616/ecmdb/internal/workflow/pkg/easyflow"
+	"github.com/userreksai/easy-workflow/workflow/model"
+	engineSvc "github.com/userreksai/ecmdb-main/internal/engine"
+	"github.com/userreksai/ecmdb-main/internal/order"
+	"github.com/userreksai/ecmdb-main/internal/pkg/notification"
+	"github.com/userreksai/ecmdb-main/internal/workflow"
+	"github.com/userreksai/ecmdb-main/internal/workflow/pkg/easyflow"
 )
 
 type NodeName string

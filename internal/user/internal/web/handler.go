@@ -5,16 +5,16 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Duke1616/ecmdb/internal/department"
-	"github.com/Duke1616/ecmdb/internal/pkg/authctx"
-	"github.com/Duke1616/ecmdb/internal/pkg/servicetoken"
-	"github.com/Duke1616/ecmdb/internal/user/internal/domain"
-	"github.com/Duke1616/ecmdb/internal/user/internal/service"
-	"github.com/Duke1616/ecmdb/pkg/ginx"
 	"github.com/ecodeclub/ekit/slice"
 	"github.com/ecodeclub/ginx/gctx"
 	"github.com/ecodeclub/ginx/session"
 	"github.com/gin-gonic/gin"
+	"github.com/userreksai/ecmdb-main/internal/department"
+	"github.com/userreksai/ecmdb-main/internal/pkg/authctx"
+	"github.com/userreksai/ecmdb-main/internal/pkg/servicetoken"
+	"github.com/userreksai/ecmdb-main/internal/user/internal/domain"
+	"github.com/userreksai/ecmdb-main/internal/user/internal/service"
+	"github.com/userreksai/ecmdb-main/pkg/ginx"
 )
 
 type Handler struct {

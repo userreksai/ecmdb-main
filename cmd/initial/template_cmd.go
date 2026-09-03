@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Duke1616/ecmdb/cmd/initial/ioc"
-	"github.com/Duke1616/ecmdb/cmd/initial/template"
 	"github.com/spf13/cobra"
+	"github.com/userreksai/ecmdb-main/cmd/initial/ioc"
+	"github.com/userreksai/ecmdb-main/cmd/initial/template"
 )
 
 var templateCmd = &cobra.Command{

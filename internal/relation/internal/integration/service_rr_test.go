@@ -4,12 +4,12 @@ import (
 	"context"
 	"testing"
 
-	"github.com/Duke1616/ecmdb/internal/relation/internal/integration/startup"
-	"github.com/Duke1616/ecmdb/internal/relation/internal/repository/dao"
-	"github.com/Duke1616/ecmdb/internal/relation/internal/service"
-	"github.com/Duke1616/ecmdb/pkg/mongox"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
+	"github.com/userreksai/ecmdb-main/internal/relation/internal/integration/startup"
+	"github.com/userreksai/ecmdb-main/internal/relation/internal/repository/dao"
+	"github.com/userreksai/ecmdb-main/internal/relation/internal/service"
+	"github.com/userreksai/ecmdb-main/pkg/mongox"
 	"go.mongodb.org/mongo-driver/bson"
 )
 

@@ -13,8 +13,8 @@ import (
 	context "context"
 	reflect "reflect"
 
-	user "github.com/Duke1616/ecmdb/internal/user"
-	resolve "github.com/Duke1616/ecmdb/pkg/resolve"
+	user "github.com/userreksai/ecmdb-main/internal/user"
+	resolve "github.com/userreksai/ecmdb-main/pkg/resolve"
 	gomock "go.uber.org/mock/gomock"
 )
 

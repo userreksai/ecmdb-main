@@ -3,9 +3,9 @@ package repository
 import (
 	"context"
 
-	"github.com/Duke1616/ecmdb/internal/model/internal/domain"
-	"github.com/Duke1616/ecmdb/internal/model/internal/repository/dao"
 	"github.com/ecodeclub/ekit/slice"
+	"github.com/userreksai/ecmdb-main/internal/model/internal/domain"
+	"github.com/userreksai/ecmdb-main/internal/model/internal/repository/dao"
 )
 
 type MGRepository interface {

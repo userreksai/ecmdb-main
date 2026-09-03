@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/Duke1616/ecmdb/internal/policy/internal/domain"
 	"github.com/casbin/casbin/v2"
 	"github.com/ecodeclub/ekit/slice"
+	"github.com/userreksai/ecmdb-main/internal/policy/internal/domain"
 )
 
 const adminRoleCode = "admin"

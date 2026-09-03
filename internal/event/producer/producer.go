@@ -3,8 +3,8 @@ package producer
 import (
 	"context"
 
-	"github.com/Duke1616/ecmdb/pkg/mqx"
 	"github.com/ecodeclub/mq-api"
+	"github.com/userreksai/ecmdb-main/pkg/mqx"
 )
 
 type OrderStatusModifyEventProducer interface {

@@ -3,9 +3,9 @@ package repository
 import (
 	"context"
 
-	"github.com/Duke1616/ecmdb/internal/role/internal/domain"
-	"github.com/Duke1616/ecmdb/internal/role/internal/repository/dao"
 	"github.com/ecodeclub/ekit/slice"
+	"github.com/userreksai/ecmdb-main/internal/role/internal/domain"
+	"github.com/userreksai/ecmdb-main/internal/role/internal/repository/dao"
 )
 
 type RoleRepository interface {

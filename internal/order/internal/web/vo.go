@@ -1,7 +1,7 @@
 package web
 
 import (
-	"github.com/Bunny3th/easy-workflow/workflow/database"
+	"github.com/userreksai/easy-workflow/workflow/database"
 )
 
 type CreateOrderReq struct {

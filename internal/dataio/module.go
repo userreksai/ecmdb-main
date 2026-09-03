@@ -1,8 +1,8 @@
 package dataio
 
 import (
-	"github.com/Duke1616/ecmdb/internal/dataio/internal/service"
-	"github.com/Duke1616/ecmdb/internal/dataio/internal/web"
+	"github.com/userreksai/ecmdb-main/internal/dataio/internal/service"
+	"github.com/userreksai/ecmdb-main/internal/dataio/internal/web"
 )
 
 // IDataIOService 数据导入导出服务接口

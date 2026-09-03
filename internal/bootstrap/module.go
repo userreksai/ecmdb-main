@@ -1,6 +1,6 @@
 package bootstrap
 
-import "github.com/Duke1616/ecmdb/internal/bootstrap/internal/service"
+import "github.com/userreksai/ecmdb-main/internal/bootstrap/internal/service"
 
 type Service = service.Loader
 

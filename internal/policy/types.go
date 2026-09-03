@@ -1,10 +1,10 @@
 package policy
 
 import (
-	"github.com/Duke1616/ecmdb/internal/policy/internal/domain"
-	"github.com/Duke1616/ecmdb/internal/policy/internal/grpc"
-	"github.com/Duke1616/ecmdb/internal/policy/internal/service"
-	"github.com/Duke1616/ecmdb/internal/policy/internal/web"
+	"github.com/userreksai/ecmdb-main/internal/policy/internal/domain"
+	"github.com/userreksai/ecmdb-main/internal/policy/internal/grpc"
+	"github.com/userreksai/ecmdb-main/internal/policy/internal/service"
+	"github.com/userreksai/ecmdb-main/internal/policy/internal/web"
 )
 
 type Handler = web.Handler

@@ -1,10 +1,10 @@
 package web
 
 import (
-	"github.com/Duke1616/ecmdb/internal/department/internal/domain"
-	"github.com/Duke1616/ecmdb/internal/department/internal/service"
-	"github.com/Duke1616/ecmdb/pkg/ginx"
 	"github.com/gin-gonic/gin"
+	"github.com/userreksai/ecmdb-main/internal/department/internal/domain"
+	"github.com/userreksai/ecmdb-main/internal/department/internal/service"
+	"github.com/userreksai/ecmdb-main/pkg/ginx"
 )
 
 type Handler struct {

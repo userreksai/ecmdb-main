@@ -5,14 +5,14 @@ package attribute
 import (
 	"sync"
 
-	"github.com/Duke1616/ecmdb/internal/attribute/internal/event"
-	"github.com/Duke1616/ecmdb/internal/attribute/internal/repository"
-	"github.com/Duke1616/ecmdb/internal/attribute/internal/repository/dao"
-	"github.com/Duke1616/ecmdb/internal/attribute/internal/service"
-	"github.com/Duke1616/ecmdb/internal/attribute/internal/web"
-	"github.com/Duke1616/ecmdb/pkg/mongox"
 	"github.com/ecodeclub/mq-api"
 	"github.com/google/wire"
+	"github.com/userreksai/ecmdb-main/internal/attribute/internal/event"
+	"github.com/userreksai/ecmdb-main/internal/attribute/internal/repository"
+	"github.com/userreksai/ecmdb-main/internal/attribute/internal/repository/dao"
+	"github.com/userreksai/ecmdb-main/internal/attribute/internal/service"
+	"github.com/userreksai/ecmdb-main/internal/attribute/internal/web"
+	"github.com/userreksai/ecmdb-main/pkg/mongox"
 )
 
 var ProviderSet = wire.NewSet(

@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"time"
 
-	notificationv1 "github.com/Duke1616/ecmdb/api/proto/gen/ealert/notification/v1"
-	templatev1 "github.com/Duke1616/ecmdb/api/proto/gen/ealert/template/v1"
-	"github.com/Duke1616/ecmdb/cmd/initial/ioc"
-	"github.com/Duke1616/ecmdb/internal/workflow"
+	notificationv1 "github.com/userreksai/ecmdb-main/api/proto/gen/ealert/notification/v1"
+	templatev1 "github.com/userreksai/ecmdb-main/api/proto/gen/ealert/template/v1"
+	"github.com/userreksai/ecmdb-main/cmd/initial/ioc"
+	"github.com/userreksai/ecmdb-main/internal/workflow"
 )
 
 //go:embed fs/approval.tmpl

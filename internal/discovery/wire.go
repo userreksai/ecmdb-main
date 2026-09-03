@@ -3,12 +3,12 @@
 package discovery
 
 import (
-	"github.com/Duke1616/ecmdb/internal/discovery/internal/repository"
-	"github.com/Duke1616/ecmdb/internal/discovery/internal/repository/dao"
-	"github.com/Duke1616/ecmdb/internal/discovery/internal/service"
-	"github.com/Duke1616/ecmdb/internal/discovery/internal/web"
-	"github.com/Duke1616/ecmdb/pkg/mongox"
 	"github.com/google/wire"
+	"github.com/userreksai/ecmdb-main/internal/discovery/internal/repository"
+	"github.com/userreksai/ecmdb-main/internal/discovery/internal/repository/dao"
+	"github.com/userreksai/ecmdb-main/internal/discovery/internal/service"
+	"github.com/userreksai/ecmdb-main/internal/discovery/internal/web"
+	"github.com/userreksai/ecmdb-main/pkg/mongox"
 )
 
 var ProviderSet = wire.NewSet(

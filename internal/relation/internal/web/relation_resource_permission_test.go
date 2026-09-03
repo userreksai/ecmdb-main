@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Duke1616/ecmdb/internal/relation/internal/domain"
+	"github.com/userreksai/ecmdb-main/internal/relation/internal/domain"
 )
 
 func TestRelationModelUIDs(t *testing.T) {

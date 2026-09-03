@@ -1,8 +1,8 @@
 package task
 
 import (
-	"github.com/Duke1616/ecmdb/internal/task/internal/event"
-	"github.com/Duke1616/ecmdb/internal/task/internal/web"
+	"github.com/userreksai/ecmdb-main/internal/task/internal/event"
+	"github.com/userreksai/ecmdb-main/internal/task/internal/web"
 )
 
 type Module struct {

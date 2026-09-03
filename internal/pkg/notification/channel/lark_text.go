@@ -1,8 +1,8 @@
 package channel
 
 import (
-	"github.com/Duke1616/ecmdb/internal/pkg/notification/provider"
 	"github.com/gotomicro/ego/core/elog"
+	"github.com/userreksai/ecmdb-main/internal/pkg/notification/provider"
 )
 
 type larkTextChannel struct {

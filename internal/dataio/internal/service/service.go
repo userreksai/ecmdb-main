@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 
-	"github.com/Duke1616/ecmdb/internal/resource"
+	"github.com/userreksai/ecmdb-main/internal/resource"
 )
 
 // IDataIOService 数据交换服务接口

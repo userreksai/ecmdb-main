@@ -1,11 +1,11 @@
 package web
 
 import (
-	"github.com/Duke1616/ecmdb/internal/attribute/internal/domain"
-	"github.com/Duke1616/ecmdb/internal/attribute/internal/service"
-	"github.com/Duke1616/ecmdb/pkg/ginx"
 	"github.com/ecodeclub/ekit/slice"
 	"github.com/gin-gonic/gin"
+	"github.com/userreksai/ecmdb-main/internal/attribute/internal/domain"
+	"github.com/userreksai/ecmdb-main/internal/attribute/internal/service"
+	"github.com/userreksai/ecmdb-main/pkg/ginx"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 

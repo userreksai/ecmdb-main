@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Duke1616/ecmdb/internal/rota/internal/domain"
 	"github.com/ecodeclub/ekit/slice"
 	"github.com/teambition/rrule-go"
+	"github.com/userreksai/ecmdb-main/internal/rota/internal/domain"
 )
 
 const TITLE = "调班组"

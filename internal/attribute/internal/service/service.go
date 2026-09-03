@@ -6,12 +6,12 @@ import (
 	"slices"
 	"time"
 
-	"github.com/Duke1616/ecmdb/internal/attribute/internal/domain"
-	"github.com/Duke1616/ecmdb/internal/attribute/internal/event"
-	"github.com/Duke1616/ecmdb/internal/attribute/internal/repository"
-	"github.com/Duke1616/ecmdb/pkg/sorter"
 	"github.com/ecodeclub/ekit/slice"
 	"github.com/gin-gonic/gin"
+	"github.com/userreksai/ecmdb-main/internal/attribute/internal/domain"
+	"github.com/userreksai/ecmdb-main/internal/attribute/internal/event"
+	"github.com/userreksai/ecmdb-main/internal/attribute/internal/repository"
+	"github.com/userreksai/ecmdb-main/pkg/sorter"
 	"golang.org/x/sync/errgroup"
 )
 

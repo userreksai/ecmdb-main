@@ -6,14 +6,14 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/Duke1616/ecmdb/internal/pkg/authctx"
-	"github.com/Duke1616/ecmdb/internal/policy"
-	"github.com/Duke1616/ecmdb/internal/relation/internal/domain"
-	"github.com/Duke1616/ecmdb/internal/relation/internal/service"
-	"github.com/Duke1616/ecmdb/internal/role"
-	"github.com/Duke1616/ecmdb/pkg/ginx"
 	"github.com/ecodeclub/ekit/slice"
 	"github.com/gin-gonic/gin"
+	"github.com/userreksai/ecmdb-main/internal/pkg/authctx"
+	"github.com/userreksai/ecmdb-main/internal/policy"
+	"github.com/userreksai/ecmdb-main/internal/relation/internal/domain"
+	"github.com/userreksai/ecmdb-main/internal/relation/internal/service"
+	"github.com/userreksai/ecmdb-main/internal/role"
+	"github.com/userreksai/ecmdb-main/pkg/ginx"
 	"golang.org/x/sync/errgroup"
 )
 

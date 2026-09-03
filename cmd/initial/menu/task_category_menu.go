@@ -1,6 +1,6 @@
 package menu
 
-import domainmenu "github.com/Duke1616/ecmdb/internal/menu"
+import domainmenu "github.com/userreksai/ecmdb-main/internal/menu"
 
 func init() {
 	for i := range DefaultMenus {

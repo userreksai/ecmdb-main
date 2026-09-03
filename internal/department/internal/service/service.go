@@ -3,8 +3,8 @@ package service
 import (
 	"context"
 
-	"github.com/Duke1616/ecmdb/internal/department/internal/domain"
-	"github.com/Duke1616/ecmdb/internal/department/internal/repository"
+	"github.com/userreksai/ecmdb-main/internal/department/internal/domain"
+	"github.com/userreksai/ecmdb-main/internal/department/internal/repository"
 )
 
 //go:generate mockgen -source=./service.go -package=departmentmocks -destination=../../mocks/department.mock.go -typed Service

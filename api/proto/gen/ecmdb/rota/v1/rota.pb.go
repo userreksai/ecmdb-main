@@ -318,7 +318,7 @@ const file_ecmdb_rota_v1_rota_proto_rawDesc = "" +
 	"\rOnCallService\x12W\n" +
 	"\x12GetCurrentSchedule\x12(.ecmdb.rota.v1.GetCurrentScheduleRequest\x1a\x17.ecmdb.rota.v1.Schedule\x12d\n" +
 	"\x18GetCurrentSchedulesByIDs\x12..ecmdb.rota.v1.GetCurrentSchedulesByIDsRequest\x1a\x18.ecmdb.rota.v1.SchedulesB\xb2\x01\n" +
-	"\x11com.ecmdb.rota.v1B\tRotaProtoP\x01Z<github.com/Duke1616/ecmdb/api/proto/gen/ecmdb/rota/v1;rotav1\xa2\x02\x03ERX\xaa\x02\rEcmdb.Rota.V1\xca\x02\rEcmdb\\Rota\\V1\xe2\x02\x19Ecmdb\\Rota\\V1\\GPBMetadata\xea\x02\x0fEcmdb::Rota::V1b\x06proto3"
+	"\x11com.ecmdb.rota.v1B\tRotaProtoP\x01Z<github.com/userreksai/ecmdb-main/api/proto/gen/ecmdb/rota/v1;rotav1\xa2\x02\x03ERX\xaa\x02\rEcmdb.Rota.V1\xca\x02\rEcmdb\\Rota\\V1\xe2\x02\x19Ecmdb\\Rota\\V1\\GPBMetadata\xea\x02\x0fEcmdb::Rota::V1b\x06proto3"
 
 var (
 	file_ecmdb_rota_v1_rota_proto_rawDescOnce sync.Once

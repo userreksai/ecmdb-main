@@ -3,9 +3,9 @@ package executor
 import (
 	"context"
 
-	"github.com/Duke1616/ecmdb/internal/model"
 	"github.com/ecodeclub/ekit/slice"
 	"github.com/gotomicro/ego/core/elog"
+	"github.com/userreksai/ecmdb-main/internal/model"
 )
 
 // ModelGroupExecutor 模型分组执行器，负责模型分组的创建
