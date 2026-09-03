@@ -179,14 +179,7 @@ func (dao *orderDAO) ListOrderByProcessInstanceIds(ctx context.Context, instance
 
 func (dao *orderDAO) ListOrder(ctx context.Context, userId string, status []int, offset, limit int64) ([]Order, error) {
 	col := dao.db.Collection(OrderCollection)
-	filter := bson.M{}
-	if userId != "" {
-		filter = bson.M{"create_by": userId}
-	}
-
-	if status != nil && len(status) > 0 {
-		filter = bson.M{"status": bson.M{"$in": status}}
-	}
+	filter := buildOrderFilter(userId, status)
 
 	opts := &options.FindOptions{
 		Sort:  bson.D{{Key: "ctime", Value: -1}},
@@ -206,14 +199,7 @@ func (dao *orderDAO) ListOrder(ctx context.Context, userId string, status []int,
 
 func (dao *orderDAO) CountOrder(ctx context.Context, userId string, status []int) (int64, error) {
 	col := dao.db.Collection(OrderCollection)
-	filter := bson.M{}
-	if userId != "" {
-		filter = bson.M{"create_by": userId}
-	}
-
-	if status != nil && len(status) > 0 {
-		filter = bson.M{"status": bson.M{"$in": status}}
-	}
+	filter := buildOrderFilter(userId, status)
 
 	count, err := col.CountDocuments(ctx, filter)
 	if err != nil {
@@ -221,6 +207,19 @@ func (dao *orderDAO) CountOrder(ctx context.Context, userId string, status []int
 	}
 
 	return count, nil
+}
+
+func buildOrderFilter(userId string, status []int) bson.M {
+	filter := bson.M{}
+	if userId != "" {
+		filter["create_by"] = userId
+	}
+
+	if len(status) > 0 {
+		filter["status"] = bson.M{"$in": status}
+	}
+
+	return filter
 }
 
 func (dao *orderDAO) FindByBizIdAndKey(ctx context.Context, bizId int64, key string, status []uint8) (Order, error) {

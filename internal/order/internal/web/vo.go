@@ -73,6 +73,7 @@ type StartUser struct {
 type StartUserReq struct {
 	ProcessInstId int    `json:"process_inst_id"`
 	Starter       string `json:"starter"`
+	ProcessName   string `json:"process_name"`
 	Offset        int64  `json:"offset,omitempty"`
 	Limit         int64  `json:"limit,omitempty"`
 }
