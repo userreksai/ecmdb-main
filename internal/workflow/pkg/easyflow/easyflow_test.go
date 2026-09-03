@@ -61,7 +61,7 @@ func TestLogicFlow_Deploy(t *testing.T) {
 					},
 					Edges: []map[string]interface{}{
 						{"id": "e1", "sourceNodeId": "n1", "targetNodeId": "n2"},
-						{"id": "e2", "sourceNodeId": "n2", "targetNodeId": "n3", "properties": map[string]interface{}{"expression": "a == 1"}},
+						{"id": "e2", "sourceNodeId": "n2", "targetNodeId": "n3", "properties": map[string]interface{}{"expression": "$a = '1'"}},
 						{"id": "e3", "sourceNodeId": "n3", "targetNodeId": "n4"},
 					},
 				},

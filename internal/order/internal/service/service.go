@@ -272,10 +272,10 @@ func (s *service) sendGenerateFlowEvent(ctx context.Context, req domain.Order,
 
 	err = s.producer.Produce(ctx, evt)
 	if err != nil {
-		// 要做好监控和告警
 		s.l.Error("发送创建流程事件失败",
 			elog.FieldErr(err),
 			elog.Any("evt", evt))
+		return fmt.Errorf("发送创建流程事件失败: %w", err)
 	}
 
 	return nil

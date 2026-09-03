@@ -135,10 +135,7 @@ func (dao *taskDAO) FindTaskResult(ctx context.Context, instanceId int, nodeId s
 
 func (dao *taskDAO) ListSuccessTasksByUtime(ctx context.Context, offset, limit int64, utime int64) ([]Task, error) {
 	col := dao.db.Collection(TaskCollection)
-	filter := bson.M{}
-	filter["status"] = bson.M{"$eq": domain.SUCCESS}
-	filter["utime"] = bson.M{"$gte": utime}
-	filter["mark_passed"] = bson.M{"$eq": false}
+	filter := successTasksByUtimeFilter(utime)
 
 	opts := &options.FindOptions{
 		Sort:  bson.D{{Key: "ctime", Value: -1}},
@@ -164,10 +161,7 @@ func (dao *taskDAO) ListSuccessTasksByUtime(ctx context.Context, offset, limit i
 
 func (dao *taskDAO) TotalByUtime(ctx context.Context, utime int64) (int64, error) {
 	col := dao.db.Collection(TaskCollection)
-	filter := bson.M{}
-	filter["status"] = bson.M{"$eq": domain.SUCCESS}
-	filter["utime"] = bson.M{"$lte": utime}
-	filter["mark_passed"] = bson.M{"$eq": false}
+	filter := successTasksByUtimeFilter(utime)
 
 	count, err := col.CountDocuments(ctx, filter)
 	if err != nil {
@@ -175,6 +169,14 @@ func (dao *taskDAO) TotalByUtime(ctx context.Context, utime int64) (int64, error
 	}
 
 	return count, nil
+}
+
+func successTasksByUtimeFilter(utime int64) bson.M {
+	return bson.M{
+		"status":      bson.M{"$eq": domain.SUCCESS},
+		"utime":       bson.M{"$lte": utime},
+		"mark_passed": bson.M{"$eq": false},
+	}
 }
 
 func (dao *taskDAO) MarkTaskAsAutoPassed(ctx context.Context, id int64) error {

@@ -337,7 +337,11 @@ func (e *ProcessEvent) EventSelectiveGatewaySplit(instID int, node *model.Node, 
 		// 只要分支内有一个 Expression 成立，该分支即为“激活”
 		branchActive := false
 		for _, cond := range condNode.GWConfig.Conditions {
-			if passed, _ := e.evaluateExpression(instID, cond.Expression); passed {
+			passed, evaluateErr := e.evaluateExpression(instID, cond.Expression)
+			if evaluateErr != nil {
+				return fmt.Errorf("评估条件节点 %s 表达式失败: %w", condNodeID, evaluateErr)
+			}
+			if passed {
 				branchActive = true
 				break
 			}

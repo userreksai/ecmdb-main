@@ -101,7 +101,7 @@ func (h *Handler) Deploy(ctx *gin.Context, req DeployReq) (ginx.Result, error) {
 
 	err = h.svc.Deploy(ctx, flow)
 	if err != nil {
-		return systemErrorResult, fmt.Errorf("发布失败")
+		return systemErrorResult, fmt.Errorf("发布失败: %w", err)
 	}
 
 	return ginx.Result{
