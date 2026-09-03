@@ -6,9 +6,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/Duke1616/ecmdb/internal/tools/service"
-	"github.com/Duke1616/ecmdb/pkg/ginx"
 	"github.com/gin-gonic/gin"
+	"github.com/userreksai/ecmdb-main/internal/tools/service"
+	"github.com/userreksai/ecmdb-main/pkg/ginx"
 )
 
 const DefaultBucket = "ecmdb"

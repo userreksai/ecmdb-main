@@ -6,14 +6,14 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Duke1616/ecmdb/internal/rota/internal/grpc"
-	"github.com/Duke1616/ecmdb/internal/rota/internal/repository"
-	"github.com/Duke1616/ecmdb/internal/rota/internal/repository/dao"
-	"github.com/Duke1616/ecmdb/internal/rota/internal/service"
-	"github.com/Duke1616/ecmdb/internal/rota/internal/service/schedule"
-	"github.com/Duke1616/ecmdb/internal/rota/internal/web"
-	"github.com/Duke1616/ecmdb/pkg/mongox"
 	"github.com/google/wire"
+	"github.com/userreksai/ecmdb-main/internal/rota/internal/grpc"
+	"github.com/userreksai/ecmdb-main/internal/rota/internal/repository"
+	"github.com/userreksai/ecmdb-main/internal/rota/internal/repository/dao"
+	"github.com/userreksai/ecmdb-main/internal/rota/internal/service"
+	"github.com/userreksai/ecmdb-main/internal/rota/internal/service/schedule"
+	"github.com/userreksai/ecmdb-main/internal/rota/internal/web"
+	"github.com/userreksai/ecmdb-main/pkg/mongox"
 )
 
 var ProviderSet = wire.NewSet(

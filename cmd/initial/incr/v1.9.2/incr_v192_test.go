@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/Duke1616/ecmdb/cmd/initial/incr/version"
+	"github.com/userreksai/ecmdb-main/cmd/initial/incr/version"
 )
 
 func TestVersion192Logic(t *testing.T) {

@@ -3,11 +3,11 @@ package grpc
 import (
 	"context"
 
-	orderv1 "github.com/Duke1616/ecmdb/api/proto/gen/ecmdb/order/v1"
-	"github.com/Duke1616/ecmdb/internal/order/internal/domain"
-	"github.com/Duke1616/ecmdb/internal/order/internal/service"
-	"github.com/Duke1616/ecmdb/internal/template"
-	"github.com/Duke1616/ecmdb/pkg/protox"
+	orderv1 "github.com/userreksai/ecmdb-main/api/proto/gen/ecmdb/order/v1"
+	"github.com/userreksai/ecmdb-main/internal/order/internal/domain"
+	"github.com/userreksai/ecmdb-main/internal/order/internal/service"
+	"github.com/userreksai/ecmdb-main/internal/template"
+	"github.com/userreksai/ecmdb-main/pkg/protox"
 
 	"google.golang.org/grpc"
 )

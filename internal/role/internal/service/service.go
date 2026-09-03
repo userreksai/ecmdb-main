@@ -4,8 +4,8 @@ import (
 	"context"
 	"strings"
 
-	"github.com/Duke1616/ecmdb/internal/role/internal/domain"
-	"github.com/Duke1616/ecmdb/internal/role/internal/repository"
+	"github.com/userreksai/ecmdb-main/internal/role/internal/domain"
+	"github.com/userreksai/ecmdb-main/internal/role/internal/repository"
 	"golang.org/x/sync/errgroup"
 )
 

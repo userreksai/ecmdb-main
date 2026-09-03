@@ -3,8 +3,8 @@ package ioc
 import (
 	"fmt"
 
-	"github.com/Duke1616/ecmdb/internal/user/ldapx"
 	"github.com/spf13/viper"
+	"github.com/userreksai/ecmdb-main/internal/user/ldapx"
 )
 
 func InitLdapConfig() ldapx.Config {

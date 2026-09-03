@@ -7,14 +7,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Duke1616/ecmdb/internal/attribute"
-	"github.com/Duke1616/ecmdb/internal/resource/internal/domain"
-	"github.com/Duke1616/ecmdb/internal/resource/internal/service"
-	"github.com/Duke1616/ecmdb/pkg/cryptox"
-	"github.com/Duke1616/ecmdb/pkg/mongox"
 	"github.com/ecodeclub/ekit/slice"
 	"github.com/ecodeclub/mq-api"
 	"github.com/gotomicro/ego/core/elog"
+	"github.com/userreksai/ecmdb-main/internal/attribute"
+	"github.com/userreksai/ecmdb-main/internal/resource/internal/domain"
+	"github.com/userreksai/ecmdb-main/internal/resource/internal/service"
+	"github.com/userreksai/ecmdb-main/pkg/cryptox"
+	"github.com/userreksai/ecmdb-main/pkg/mongox"
 )
 
 const FieldSecureAttrChangeName = "field_secure_attr_change"

@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Duke1616/ecmdb/internal/pkg/notification"
-	"github.com/Duke1616/ecmdb/internal/pkg/notification/provider"
+	"github.com/userreksai/ecmdb-main/internal/pkg/notification"
+	"github.com/userreksai/ecmdb-main/internal/pkg/notification/provider"
 )
 
 var (

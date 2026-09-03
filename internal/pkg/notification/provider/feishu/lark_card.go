@@ -3,14 +3,14 @@ package feishu
 import (
 	"context"
 
-	"github.com/Duke1616/ecmdb/internal/pkg/notification"
-	"github.com/Duke1616/ecmdb/internal/pkg/notification/provider"
-	"github.com/Duke1616/enotify/notify"
-	"github.com/Duke1616/enotify/notify/feishu"
-	"github.com/Duke1616/enotify/notify/feishu/card"
-	"github.com/Duke1616/enotify/notify/feishu/message"
-	"github.com/Duke1616/enotify/template"
 	lark "github.com/larksuite/oapi-sdk-go/v3"
+	"github.com/userreksai/ecmdb-main/internal/pkg/notification"
+	"github.com/userreksai/ecmdb-main/internal/pkg/notification/provider"
+	"github.com/userreksai/enotify/notify"
+	"github.com/userreksai/enotify/notify/feishu"
+	"github.com/userreksai/enotify/notify/feishu/card"
+	"github.com/userreksai/enotify/notify/feishu/message"
+	"github.com/userreksai/enotify/template"
 )
 
 type larkCardProvider struct {

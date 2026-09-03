@@ -3,9 +3,9 @@
 package worker
 
 import (
-	"github.com/Duke1616/ecmdb/internal/worker/internal/event"
-	"github.com/Duke1616/ecmdb/internal/worker/internal/job"
-	"github.com/Duke1616/ecmdb/internal/worker/internal/service"
+	"github.com/userreksai/ecmdb-main/internal/worker/internal/event"
+	"github.com/userreksai/ecmdb-main/internal/worker/internal/job"
+	"github.com/userreksai/ecmdb-main/internal/worker/internal/service"
 	"github.com/userreksai/ecmdb-task/pkg/grpc/registry"
 	"github.com/userreksai/ecmdb-task/pkg/grpc/registry/etcd"
 	clientv3 "go.etcd.io/etcd/client/v3"

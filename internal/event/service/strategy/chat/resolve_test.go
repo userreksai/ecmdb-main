@@ -3,10 +3,10 @@ package chat
 import (
 	"testing"
 
-	"github.com/Duke1616/ecmdb/internal/event/service/strategy"
-	"github.com/Duke1616/ecmdb/internal/order"
-	"github.com/Duke1616/ecmdb/internal/user"
 	"github.com/stretchr/testify/assert"
+	"github.com/userreksai/ecmdb-main/internal/event/service/strategy"
+	"github.com/userreksai/ecmdb-main/internal/order"
+	"github.com/userreksai/ecmdb-main/internal/user"
 )
 
 func TestResolveDynamicString(t *testing.T) {

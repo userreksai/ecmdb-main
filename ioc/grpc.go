@@ -1,11 +1,11 @@
 package ioc
 
 import (
-	"github.com/Duke1616/ecmdb/internal/endpoint"
-	"github.com/Duke1616/ecmdb/internal/order"
-	"github.com/Duke1616/ecmdb/internal/policy"
-	"github.com/Duke1616/ecmdb/internal/rota"
-	"github.com/Duke1616/ecmdb/internal/user"
+	"github.com/userreksai/ecmdb-main/internal/endpoint"
+	"github.com/userreksai/ecmdb-main/internal/order"
+	"github.com/userreksai/ecmdb-main/internal/policy"
+	"github.com/userreksai/ecmdb-main/internal/rota"
+	"github.com/userreksai/ecmdb-main/internal/user"
 
 	grpcpkg "github.com/userreksai/ecmdb-task/pkg/grpc"
 	registrysdk "github.com/userreksai/ecmdb-task/pkg/grpc/registry"

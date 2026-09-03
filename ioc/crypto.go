@@ -3,8 +3,8 @@ package ioc
 import (
 	"fmt"
 
-	"github.com/Duke1616/ecmdb/pkg/cryptox"
 	"github.com/spf13/viper"
+	"github.com/userreksai/ecmdb-main/pkg/cryptox"
 )
 
 func InitModuleCrypto() *cryptox.CryptoRegistry {

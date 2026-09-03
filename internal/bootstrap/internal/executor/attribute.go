@@ -3,9 +3,9 @@ package executor
 import (
 	"context"
 
-	"github.com/Duke1616/ecmdb/internal/attribute"
 	"github.com/ecodeclub/ekit/slice"
 	"github.com/gotomicro/ego/core/elog"
+	"github.com/userreksai/ecmdb-main/internal/attribute"
 )
 
 // AttributeExecutor 属性执行器，负责属性分组和字段的创建

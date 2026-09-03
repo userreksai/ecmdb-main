@@ -6,15 +6,15 @@ import (
 	"sort"
 	"time"
 
-	"github.com/Duke1616/ecmdb/cmd/initial/incr"
-	v150 "github.com/Duke1616/ecmdb/cmd/initial/incr/v1.5.0"
-	v192 "github.com/Duke1616/ecmdb/cmd/initial/incr/v1.9.2"
-	v193 "github.com/Duke1616/ecmdb/cmd/initial/incr/v1.9.3"
-	v194 "github.com/Duke1616/ecmdb/cmd/initial/incr/v1.9.4"
-	v195 "github.com/Duke1616/ecmdb/cmd/initial/incr/v1.9.5"
-	"github.com/Duke1616/ecmdb/cmd/initial/incr/version"
-	"github.com/Duke1616/ecmdb/cmd/initial/ioc"
 	"github.com/spf13/cobra"
+	"github.com/userreksai/ecmdb-main/cmd/initial/incr"
+	v150 "github.com/userreksai/ecmdb-main/cmd/initial/incr/v1.5.0"
+	v192 "github.com/userreksai/ecmdb-main/cmd/initial/incr/v1.9.2"
+	v193 "github.com/userreksai/ecmdb-main/cmd/initial/incr/v1.9.3"
+	v194 "github.com/userreksai/ecmdb-main/cmd/initial/incr/v1.9.4"
+	v195 "github.com/userreksai/ecmdb-main/cmd/initial/incr/v1.9.5"
+	"github.com/userreksai/ecmdb-main/cmd/initial/incr/version"
+	"github.com/userreksai/ecmdb-main/cmd/initial/ioc"
 )
 
 // ErrDuplicateVersion 表示版本重复的错误

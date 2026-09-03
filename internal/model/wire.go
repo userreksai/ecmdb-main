@@ -5,17 +5,17 @@ package model
 import (
 	"sync"
 
-	"github.com/Duke1616/ecmdb/internal/attribute"
-	"github.com/Duke1616/ecmdb/internal/model/internal/repository"
-	"github.com/Duke1616/ecmdb/internal/model/internal/repository/dao"
-	"github.com/Duke1616/ecmdb/internal/model/internal/service"
-	"github.com/Duke1616/ecmdb/internal/model/internal/web"
-	"github.com/Duke1616/ecmdb/internal/policy"
-	"github.com/Duke1616/ecmdb/internal/relation"
-	"github.com/Duke1616/ecmdb/internal/resource"
-	"github.com/Duke1616/ecmdb/internal/role"
-	"github.com/Duke1616/ecmdb/pkg/mongox"
 	"github.com/google/wire"
+	"github.com/userreksai/ecmdb-main/internal/attribute"
+	"github.com/userreksai/ecmdb-main/internal/model/internal/repository"
+	"github.com/userreksai/ecmdb-main/internal/model/internal/repository/dao"
+	"github.com/userreksai/ecmdb-main/internal/model/internal/service"
+	"github.com/userreksai/ecmdb-main/internal/model/internal/web"
+	"github.com/userreksai/ecmdb-main/internal/policy"
+	"github.com/userreksai/ecmdb-main/internal/relation"
+	"github.com/userreksai/ecmdb-main/internal/resource"
+	"github.com/userreksai/ecmdb-main/internal/role"
+	"github.com/userreksai/ecmdb-main/pkg/mongox"
 )
 
 var ProviderSet = wire.NewSet(

@@ -1,8 +1,8 @@
 package web
 
 import (
-	"github.com/Duke1616/ecmdb/internal/task/internal/errs"
-	"github.com/Duke1616/ecmdb/pkg/ginx"
+	"github.com/userreksai/ecmdb-main/internal/task/internal/errs"
+	"github.com/userreksai/ecmdb-main/pkg/ginx"
 )
 
 var (

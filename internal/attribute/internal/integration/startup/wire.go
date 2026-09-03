@@ -3,8 +3,8 @@
 package startup
 
 import (
-	"github.com/Duke1616/ecmdb/internal/attribute"
 	"github.com/google/wire"
+	"github.com/userreksai/ecmdb-main/internal/attribute"
 )
 
 func InitHandler() (*attribute.Handler, error) {

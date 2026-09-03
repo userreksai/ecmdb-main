@@ -3,8 +3,8 @@ package service
 import (
 	"context"
 
-	"github.com/Duke1616/ecmdb/internal/runner/internal/domain"
-	"github.com/Duke1616/ecmdb/internal/runner/internal/repository"
+	"github.com/userreksai/ecmdb-main/internal/runner/internal/domain"
+	"github.com/userreksai/ecmdb-main/internal/runner/internal/repository"
 	"golang.org/x/sync/errgroup"
 )
 

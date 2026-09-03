@@ -1,9 +1,9 @@
 package engine
 
 import (
-	"github.com/Duke1616/ecmdb/internal/engine/internal/domain"
-	"github.com/Duke1616/ecmdb/internal/engine/internal/service"
-	"github.com/Duke1616/ecmdb/internal/engine/internal/web"
+	"github.com/userreksai/ecmdb-main/internal/engine/internal/domain"
+	"github.com/userreksai/ecmdb-main/internal/engine/internal/service"
+	"github.com/userreksai/ecmdb-main/internal/engine/internal/web"
 )
 
 type Service = service.Service

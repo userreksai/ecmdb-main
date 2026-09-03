@@ -1,8 +1,8 @@
 package workflow
 
 import (
-	"github.com/Duke1616/ecmdb/internal/workflow/internal/service"
-	"github.com/Duke1616/ecmdb/internal/workflow/internal/web"
+	"github.com/userreksai/ecmdb-main/internal/workflow/internal/service"
+	"github.com/userreksai/ecmdb-main/internal/workflow/internal/web"
 )
 
 type Module struct {

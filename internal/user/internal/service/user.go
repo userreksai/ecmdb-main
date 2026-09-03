@@ -5,11 +5,11 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/Duke1616/ecmdb/internal/policy"
-	"github.com/Duke1616/ecmdb/internal/user/internal/domain"
-	"github.com/Duke1616/ecmdb/internal/user/internal/repository"
-	"github.com/Duke1616/ecmdb/pkg/cryptox"
 	"github.com/gotomicro/ego/core/elog"
+	"github.com/userreksai/ecmdb-main/internal/policy"
+	"github.com/userreksai/ecmdb-main/internal/user/internal/domain"
+	"github.com/userreksai/ecmdb-main/internal/user/internal/repository"
+	"github.com/userreksai/ecmdb-main/pkg/cryptox"
 	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/sync/errgroup"
 )

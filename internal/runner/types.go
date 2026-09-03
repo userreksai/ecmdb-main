@@ -1,9 +1,9 @@
 package runner
 
 import (
-	"github.com/Duke1616/ecmdb/internal/runner/internal/domain"
-	"github.com/Duke1616/ecmdb/internal/runner/internal/service"
-	"github.com/Duke1616/ecmdb/internal/runner/internal/web"
+	"github.com/userreksai/ecmdb-main/internal/runner/internal/domain"
+	"github.com/userreksai/ecmdb-main/internal/runner/internal/service"
+	"github.com/userreksai/ecmdb-main/internal/runner/internal/web"
 )
 
 type Service = service.Service

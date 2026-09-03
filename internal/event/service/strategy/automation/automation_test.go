@@ -4,15 +4,15 @@ import (
 	"context"
 	"testing"
 
-	"github.com/Bunny3th/easy-workflow/workflow/model"
-	strategymocks "github.com/Duke1616/ecmdb/internal/event/mocks"
-	"github.com/Duke1616/ecmdb/internal/event/service/strategy"
-	"github.com/Duke1616/ecmdb/internal/event/service/strategy/automation"
-	"github.com/Duke1616/ecmdb/internal/pkg/notification"
-	sendermocks "github.com/Duke1616/ecmdb/internal/pkg/notification/mocks"
-	"github.com/Duke1616/ecmdb/internal/user"
-	"github.com/Duke1616/ecmdb/internal/workflow/pkg/easyflow"
 	"github.com/stretchr/testify/suite"
+	"github.com/userreksai/easy-workflow/workflow/model"
+	strategymocks "github.com/userreksai/ecmdb-main/internal/event/mocks"
+	"github.com/userreksai/ecmdb-main/internal/event/service/strategy"
+	"github.com/userreksai/ecmdb-main/internal/event/service/strategy/automation"
+	"github.com/userreksai/ecmdb-main/internal/pkg/notification"
+	sendermocks "github.com/userreksai/ecmdb-main/internal/pkg/notification/mocks"
+	"github.com/userreksai/ecmdb-main/internal/user"
+	"github.com/userreksai/ecmdb-main/internal/workflow/pkg/easyflow"
 	"go.uber.org/mock/gomock"
 )
 

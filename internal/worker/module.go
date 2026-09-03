@@ -1,7 +1,7 @@
 package worker
 
 import (
-	"github.com/Duke1616/ecmdb/internal/worker/internal/job"
+	"github.com/userreksai/ecmdb-main/internal/worker/internal/job"
 )
 
 type Module struct {

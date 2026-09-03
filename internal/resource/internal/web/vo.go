@@ -1,6 +1,6 @@
 package web
 
-import "github.com/Duke1616/ecmdb/pkg/mongox"
+import "github.com/userreksai/ecmdb-main/pkg/mongox"
 
 type CreateResourceReq struct {
 	Name     string        `json:"name"`

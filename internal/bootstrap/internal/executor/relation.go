@@ -3,9 +3,9 @@ package executor
 import (
 	"context"
 
-	"github.com/Duke1616/ecmdb/internal/relation"
 	"github.com/ecodeclub/ekit/slice"
 	"github.com/gotomicro/ego/core/elog"
+	"github.com/userreksai/ecmdb-main/internal/relation"
 )
 
 // RelationExecutor 关联执行器，负责关联类型和模型关联的创建

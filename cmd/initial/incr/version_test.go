@@ -4,7 +4,7 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/Duke1616/ecmdb/cmd/initial/incr/version"
+	"github.com/userreksai/ecmdb-main/cmd/initial/incr/version"
 )
 
 func TestVersionComparison(t *testing.T) {

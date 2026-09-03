@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Duke1616/ecmdb/cmd/initial/menu"
-	"github.com/Duke1616/ecmdb/internal/role"
-	userStruct "github.com/Duke1616/ecmdb/internal/user"
+	"github.com/userreksai/ecmdb-main/cmd/initial/menu"
+	"github.com/userreksai/ecmdb-main/internal/role"
+	userStruct "github.com/userreksai/ecmdb-main/internal/user"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 

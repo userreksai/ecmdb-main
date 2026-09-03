@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Duke1616/ecmdb/internal/user"
-	"github.com/Duke1616/ecmdb/internal/workflow/pkg/easyflow"
-	"github.com/Duke1616/ecmdb/pkg/resolve"
+	"github.com/userreksai/ecmdb-main/internal/user"
+	"github.com/userreksai/ecmdb-main/internal/workflow/pkg/easyflow"
+	"github.com/userreksai/ecmdb-main/pkg/resolve"
 )
 
 // FounderResolver 发起人解析器

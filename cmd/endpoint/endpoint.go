@@ -6,10 +6,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Duke1616/ecmdb/internal/endpoint"
-	"github.com/Duke1616/ecmdb/ioc"
 	"github.com/gotomicro/ego/server/egin"
 	"github.com/spf13/cobra"
+	"github.com/userreksai/ecmdb-main/internal/endpoint"
+	"github.com/userreksai/ecmdb-main/ioc"
 )
 
 const Resource = "CMDB"

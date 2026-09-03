@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/Duke1616/ecmdb/internal/attribute"
-	attributemocks "github.com/Duke1616/ecmdb/internal/attribute/mocks"
-	"github.com/Duke1616/ecmdb/internal/resource/internal/domain"
-	resourcemocks "github.com/Duke1616/ecmdb/internal/resource/mocks"
-	"github.com/Duke1616/ecmdb/pkg/cryptox"
 	"github.com/stretchr/testify/assert"
+	"github.com/userreksai/ecmdb-main/internal/attribute"
+	attributemocks "github.com/userreksai/ecmdb-main/internal/attribute/mocks"
+	"github.com/userreksai/ecmdb-main/internal/resource/internal/domain"
+	resourcemocks "github.com/userreksai/ecmdb-main/internal/resource/mocks"
+	"github.com/userreksai/ecmdb-main/pkg/cryptox"
 	"go.uber.org/mock/gomock"
 )
 

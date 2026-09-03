@@ -3,12 +3,12 @@ package web
 import (
 	"errors"
 
-	"github.com/Duke1616/ecmdb/internal/menu/internal/domain"
-	"github.com/Duke1616/ecmdb/internal/menu/internal/errs"
-	"github.com/Duke1616/ecmdb/internal/menu/internal/service"
-	"github.com/Duke1616/ecmdb/pkg/ginx"
 	"github.com/ecodeclub/ekit/slice"
 	"github.com/gin-gonic/gin"
+	"github.com/userreksai/ecmdb-main/internal/menu/internal/domain"
+	"github.com/userreksai/ecmdb-main/internal/menu/internal/errs"
+	"github.com/userreksai/ecmdb-main/internal/menu/internal/service"
+	"github.com/userreksai/ecmdb-main/pkg/ginx"
 )
 
 type Handler struct {

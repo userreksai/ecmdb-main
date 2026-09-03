@@ -3,11 +3,11 @@
 package bootstrap
 
 import (
-	"github.com/Duke1616/ecmdb/internal/attribute"
-	"github.com/Duke1616/ecmdb/internal/bootstrap/internal/service"
-	"github.com/Duke1616/ecmdb/internal/model"
-	"github.com/Duke1616/ecmdb/internal/relation"
 	"github.com/google/wire"
+	"github.com/userreksai/ecmdb-main/internal/attribute"
+	"github.com/userreksai/ecmdb-main/internal/bootstrap/internal/service"
+	"github.com/userreksai/ecmdb-main/internal/model"
+	"github.com/userreksai/ecmdb-main/internal/relation"
 )
 
 var ProviderSet = wire.NewSet(

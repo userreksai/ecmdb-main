@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"strconv"
 
-	teamv1 "github.com/Duke1616/ecmdb/api/proto/gen/ealert/team"
-	"github.com/Duke1616/ecmdb/internal/user"
-	"github.com/Duke1616/ecmdb/internal/workflow/pkg/easyflow"
-	"github.com/Duke1616/ecmdb/pkg/resolve"
 	"github.com/ecodeclub/ekit/slice"
+	teamv1 "github.com/userreksai/ecmdb-main/api/proto/gen/ealert/team"
+	"github.com/userreksai/ecmdb-main/internal/user"
+	"github.com/userreksai/ecmdb-main/internal/workflow/pkg/easyflow"
+	"github.com/userreksai/ecmdb-main/pkg/resolve"
 )
 
 // TeamResolver 团队解析器

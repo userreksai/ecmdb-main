@@ -3,9 +3,9 @@ package repository
 import (
 	"context"
 
-	"github.com/Duke1616/ecmdb/internal/relation/internal/domain"
-	"github.com/Duke1616/ecmdb/internal/relation/internal/repository/dao"
 	"github.com/ecodeclub/ekit/slice"
+	"github.com/userreksai/ecmdb-main/internal/relation/internal/domain"
+	"github.com/userreksai/ecmdb-main/internal/relation/internal/repository/dao"
 )
 
 type RelationResourceRepository interface {

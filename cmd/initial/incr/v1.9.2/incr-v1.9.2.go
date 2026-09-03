@@ -3,11 +3,11 @@ package v192
 import (
 	"context"
 
-	"github.com/Duke1616/ecmdb/cmd/initial/backup"
-	"github.com/Duke1616/ecmdb/cmd/initial/incr"
-	"github.com/Duke1616/ecmdb/cmd/initial/ioc"
-	"github.com/Duke1616/ecmdb/cmd/initial/menu"
 	"github.com/gotomicro/ego/core/elog"
+	"github.com/userreksai/ecmdb-main/cmd/initial/backup"
+	"github.com/userreksai/ecmdb-main/cmd/initial/incr"
+	"github.com/userreksai/ecmdb-main/cmd/initial/ioc"
+	"github.com/userreksai/ecmdb-main/cmd/initial/menu"
 	"gorm.io/gorm"
 )
 

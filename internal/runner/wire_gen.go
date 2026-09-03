@@ -7,15 +7,15 @@
 package runner
 
 import (
-	"github.com/Duke1616/ecmdb/internal/codebook"
-	"github.com/Duke1616/ecmdb/internal/runner/internal/repository"
-	"github.com/Duke1616/ecmdb/internal/runner/internal/repository/dao"
-	"github.com/Duke1616/ecmdb/internal/runner/internal/service"
-	"github.com/Duke1616/ecmdb/internal/runner/internal/web"
-	"github.com/Duke1616/ecmdb/internal/workflow"
-	"github.com/Duke1616/ecmdb/pkg/cryptox"
-	"github.com/Duke1616/ecmdb/pkg/mongox"
 	"github.com/google/wire"
+	"github.com/userreksai/ecmdb-main/internal/codebook"
+	"github.com/userreksai/ecmdb-main/internal/runner/internal/repository"
+	"github.com/userreksai/ecmdb-main/internal/runner/internal/repository/dao"
+	"github.com/userreksai/ecmdb-main/internal/runner/internal/service"
+	"github.com/userreksai/ecmdb-main/internal/runner/internal/web"
+	"github.com/userreksai/ecmdb-main/internal/workflow"
+	"github.com/userreksai/ecmdb-main/pkg/cryptox"
+	"github.com/userreksai/ecmdb-main/pkg/mongox"
 )
 
 // Injectors from wire.go:

@@ -1,9 +1,9 @@
 package model
 
 import (
-	"github.com/Duke1616/ecmdb/internal/model/internal/repository"
-	"github.com/Duke1616/ecmdb/internal/model/internal/service"
-	"github.com/Duke1616/ecmdb/pkg/mongox"
+	"github.com/userreksai/ecmdb-main/internal/model/internal/repository"
+	"github.com/userreksai/ecmdb-main/internal/model/internal/service"
+	"github.com/userreksai/ecmdb-main/pkg/mongox"
 )
 
 // InitService constructs the model service without the HTTP handler dependencies.

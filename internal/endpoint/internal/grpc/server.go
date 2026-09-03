@@ -3,10 +3,10 @@ package grpc
 import (
 	"context"
 
-	endpointv1 "github.com/Duke1616/ecmdb/api/proto/gen/ecmdb/endpoint/v1"
-	"github.com/Duke1616/ecmdb/internal/endpoint/internal/domain"
-	"github.com/Duke1616/ecmdb/internal/endpoint/internal/service"
 	"github.com/ecodeclub/ekit/slice"
+	endpointv1 "github.com/userreksai/ecmdb-main/api/proto/gen/ecmdb/endpoint/v1"
+	"github.com/userreksai/ecmdb-main/internal/endpoint/internal/domain"
+	"github.com/userreksai/ecmdb-main/internal/endpoint/internal/service"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
 )

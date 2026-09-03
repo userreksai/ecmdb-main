@@ -9,13 +9,13 @@ import (
 	"strconv"
 	"time"
 
-	taskv1 "github.com/Duke1616/ecmdb/api/proto/gen/etask/task/v1"
-	"github.com/Duke1616/ecmdb/internal/task/domain"
-	"github.com/Duke1616/ecmdb/internal/task/internal/repository"
-	"github.com/Duke1616/ecmdb/pkg/cryptox"
-	"github.com/userreksai/ecmdb-task/pkg/grpc/interceptors/bizid"
 	"github.com/ecodeclub/ekit/slice"
 	"github.com/gotomicro/ego/core/elog"
+	taskv1 "github.com/userreksai/ecmdb-main/api/proto/gen/etask/task/v1"
+	"github.com/userreksai/ecmdb-main/internal/task/domain"
+	"github.com/userreksai/ecmdb-main/internal/task/internal/repository"
+	"github.com/userreksai/ecmdb-main/pkg/cryptox"
+	"github.com/userreksai/ecmdb-task/pkg/grpc/interceptors/bizid"
 )
 
 type executeService struct {

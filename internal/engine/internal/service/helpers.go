@@ -1,8 +1,8 @@
 package service
 
 import (
-	"github.com/Bunny3th/easy-workflow/workflow/model"
-	"github.com/Duke1616/ecmdb/internal/workflow/pkg/easyflow"
+	"github.com/userreksai/easy-workflow/workflow/model"
+	"github.com/userreksai/ecmdb-main/internal/workflow/pkg/easyflow"
 )
 
 // NodeStatusAnalyzer 负责分析节点和批次的状态

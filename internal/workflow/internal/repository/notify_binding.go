@@ -3,8 +3,8 @@ package repository
 import (
 	"context"
 
-	"github.com/Duke1616/ecmdb/internal/workflow/internal/domain"
-	"github.com/Duke1616/ecmdb/internal/workflow/internal/repository/dao"
+	"github.com/userreksai/ecmdb-main/internal/workflow/internal/domain"
+	"github.com/userreksai/ecmdb-main/internal/workflow/internal/repository/dao"
 )
 
 type NotifyBindingRepository interface {

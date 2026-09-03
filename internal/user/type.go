@@ -1,10 +1,10 @@
 package user
 
 import (
-	"github.com/Duke1616/ecmdb/internal/user/internal/domain"
-	"github.com/Duke1616/ecmdb/internal/user/internal/grpc"
-	"github.com/Duke1616/ecmdb/internal/user/internal/service"
-	"github.com/Duke1616/ecmdb/internal/user/internal/web"
+	"github.com/userreksai/ecmdb-main/internal/user/internal/domain"
+	"github.com/userreksai/ecmdb-main/internal/user/internal/grpc"
+	"github.com/userreksai/ecmdb-main/internal/user/internal/service"
+	"github.com/userreksai/ecmdb-main/internal/user/internal/web"
 )
 
 type Handler = web.Handler

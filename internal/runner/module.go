@@ -1,8 +1,8 @@
 package runner
 
 import (
-	"github.com/Duke1616/ecmdb/internal/runner/internal/service"
-	"github.com/Duke1616/ecmdb/internal/runner/internal/web"
+	"github.com/userreksai/ecmdb-main/internal/runner/internal/service"
+	"github.com/userreksai/ecmdb-main/internal/runner/internal/web"
 )
 
 type Module struct {

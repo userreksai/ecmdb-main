@@ -3,10 +3,10 @@ package grpc
 import (
 	"context"
 
-	rotav1 "github.com/Duke1616/ecmdb/api/proto/gen/ecmdb/rota/v1"
-	"github.com/Duke1616/ecmdb/internal/rota/internal/domain"
-	"github.com/Duke1616/ecmdb/internal/rota/internal/service"
 	"github.com/ecodeclub/ekit/slice"
+	rotav1 "github.com/userreksai/ecmdb-main/api/proto/gen/ecmdb/rota/v1"
+	"github.com/userreksai/ecmdb-main/internal/rota/internal/domain"
+	"github.com/userreksai/ecmdb-main/internal/rota/internal/service"
 
 	"google.golang.org/grpc"
 )

@@ -5,11 +5,11 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/Duke1616/ecmdb/internal/worker/internal/domain"
-	"github.com/Duke1616/ecmdb/internal/worker/internal/event"
 	"github.com/ecodeclub/mq-api"
 	"github.com/gotomicro/ego/core/elog"
 	kafkago "github.com/segmentio/kafka-go"
+	"github.com/userreksai/ecmdb-main/internal/worker/internal/domain"
+	"github.com/userreksai/ecmdb-main/internal/worker/internal/event"
 )
 
 type Service interface {

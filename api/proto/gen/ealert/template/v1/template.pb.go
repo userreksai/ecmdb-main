@@ -7,7 +7,7 @@
 package templatev1
 
 import (
-	v1 "github.com/Duke1616/ecmdb/api/proto/gen/ealert/notification/v1"
+	v1 "github.com/userreksai/ecmdb-main/api/proto/gen/ealert/notification/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -874,7 +874,7 @@ const file_ealert_template_v1_template_proto_rawDesc = "" +
 	"\x0fPublishTemplate\x12*.ealert.template.v1.PublishTemplateRequest\x1a+.ealert.template.v1.PublishTemplateResponse\x12d\n" +
 	"\rListTemplates\x12(.ealert.template.v1.ListTemplatesRequest\x1a).ealert.template.v1.ListTemplatesResponse\x12|\n" +
 	"\x15CreateTemplateVersion\x120.ealert.template.v1.CreateTemplateVersionRequest\x1a1.ealert.template.v1.CreateTemplateVersionResponseB\xd8\x01\n" +
-	"\x16com.ealert.template.v1B\rTemplateProtoP\x01ZEgithub.com/Duke1616/ecmdb/api/proto/gen/ealert/template/v1;templatev1\xa2\x02\x03ETX\xaa\x02\x12Ealert.Template.V1\xca\x02\x12Ealert\\Template\\V1\xe2\x02\x1eEalert\\Template\\V1\\GPBMetadata\xea\x02\x14Ealert::Template::V1b\x06proto3"
+	"\x16com.ealert.template.v1B\rTemplateProtoP\x01ZEgithub.com/userreksai/ecmdb-main/api/proto/gen/ealert/template/v1;templatev1\xa2\x02\x03ETX\xaa\x02\x12Ealert.Template.V1\xca\x02\x12Ealert\\Template\\V1\xe2\x02\x1eEalert\\Template\\V1\\GPBMetadata\xea\x02\x14Ealert::Template::V1b\x06proto3"
 
 var (
 	file_ealert_template_v1_template_proto_rawDescOnce sync.Once

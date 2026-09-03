@@ -7,7 +7,7 @@
 package startup
 
 import (
-	"github.com/Duke1616/ecmdb/internal/attribute"
+	"github.com/userreksai/ecmdb-main/internal/attribute"
 )
 
 // Injectors from wire.go:

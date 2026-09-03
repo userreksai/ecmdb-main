@@ -5,11 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/Duke1616/ecmdb/internal/pkg/notification"
-	"github.com/Duke1616/ecmdb/internal/pkg/notification/provider"
-	"github.com/Duke1616/enotify/notify"
-	"github.com/Duke1616/enotify/notify/feishu"
 	lark "github.com/larksuite/oapi-sdk-go/v3"
+	"github.com/userreksai/ecmdb-main/internal/pkg/notification"
+	"github.com/userreksai/ecmdb-main/internal/pkg/notification/provider"
+	"github.com/userreksai/enotify/notify"
+	"github.com/userreksai/enotify/notify/feishu"
 )
 
 type larkTextProvider struct {

@@ -4,10 +4,10 @@ import (
 	"context"
 	_ "embed"
 
-	"github.com/Duke1616/ecmdb/cmd/initial/incr"
-	"github.com/Duke1616/ecmdb/cmd/initial/ioc"
-	"github.com/Duke1616/ecmdb/internal/bootstrap/structure"
 	"github.com/gotomicro/ego/core/elog"
+	"github.com/userreksai/ecmdb-main/cmd/initial/incr"
+	"github.com/userreksai/ecmdb-main/cmd/initial/ioc"
+	"github.com/userreksai/ecmdb-main/internal/bootstrap/structure"
 	"gopkg.in/yaml.v3"
 )
 

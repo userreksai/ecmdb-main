@@ -5,13 +5,13 @@ package endpoint
 import (
 	"sync"
 
-	"github.com/Duke1616/ecmdb/internal/endpoint/internal/grpc"
-	"github.com/Duke1616/ecmdb/internal/endpoint/internal/repository"
-	"github.com/Duke1616/ecmdb/internal/endpoint/internal/repository/dao"
-	"github.com/Duke1616/ecmdb/internal/endpoint/internal/service"
-	"github.com/Duke1616/ecmdb/internal/endpoint/internal/web"
-	"github.com/Duke1616/ecmdb/pkg/mongox"
 	"github.com/google/wire"
+	"github.com/userreksai/ecmdb-main/internal/endpoint/internal/grpc"
+	"github.com/userreksai/ecmdb-main/internal/endpoint/internal/repository"
+	"github.com/userreksai/ecmdb-main/internal/endpoint/internal/repository/dao"
+	"github.com/userreksai/ecmdb-main/internal/endpoint/internal/service"
+	"github.com/userreksai/ecmdb-main/internal/endpoint/internal/web"
+	"github.com/userreksai/ecmdb-main/pkg/mongox"
 )
 
 var ProviderSet = wire.NewSet(

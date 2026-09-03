@@ -4,13 +4,13 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Duke1616/ecmdb/internal/attribute"
-	"github.com/Duke1616/ecmdb/internal/bootstrap/internal/executor"
-	"github.com/Duke1616/ecmdb/internal/bootstrap/structure"
-	"github.com/Duke1616/ecmdb/internal/model"
-	"github.com/Duke1616/ecmdb/internal/relation"
 	"github.com/ecodeclub/ekit/slice"
 	"github.com/gotomicro/ego/core/elog"
+	"github.com/userreksai/ecmdb-main/internal/attribute"
+	"github.com/userreksai/ecmdb-main/internal/bootstrap/internal/executor"
+	"github.com/userreksai/ecmdb-main/internal/bootstrap/structure"
+	"github.com/userreksai/ecmdb-main/internal/model"
+	"github.com/userreksai/ecmdb-main/internal/relation"
 )
 
 // Loader 配置加载器，负责加载和执行配置文件

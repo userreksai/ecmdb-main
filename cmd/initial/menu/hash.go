@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/Duke1616/ecmdb/internal/menu"
 	"github.com/gotomicro/ego/core/elog"
+	"github.com/userreksai/ecmdb-main/internal/menu"
 )
 
 // HashCalculator 菜单哈希计算器

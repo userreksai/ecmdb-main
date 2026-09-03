@@ -7,12 +7,12 @@
 package role
 
 import (
-	"github.com/Duke1616/ecmdb/internal/role/internal/repository"
-	"github.com/Duke1616/ecmdb/internal/role/internal/repository/dao"
-	"github.com/Duke1616/ecmdb/internal/role/internal/service"
-	"github.com/Duke1616/ecmdb/internal/role/internal/web"
-	"github.com/Duke1616/ecmdb/pkg/mongox"
 	"github.com/google/wire"
+	"github.com/userreksai/ecmdb-main/internal/role/internal/repository"
+	"github.com/userreksai/ecmdb-main/internal/role/internal/repository/dao"
+	"github.com/userreksai/ecmdb-main/internal/role/internal/service"
+	"github.com/userreksai/ecmdb-main/internal/role/internal/web"
+	"github.com/userreksai/ecmdb-main/pkg/mongox"
 	"sync"
 )
 

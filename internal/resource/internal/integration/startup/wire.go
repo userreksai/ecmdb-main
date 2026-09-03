@@ -3,13 +3,13 @@
 package startup
 
 import (
-	"github.com/Duke1616/ecmdb/internal/attribute"
-	"github.com/Duke1616/ecmdb/internal/operationlog"
-	"github.com/Duke1616/ecmdb/internal/policy"
-	"github.com/Duke1616/ecmdb/internal/relation"
-	"github.com/Duke1616/ecmdb/internal/resource"
-	"github.com/Duke1616/ecmdb/internal/role"
 	"github.com/google/wire"
+	"github.com/userreksai/ecmdb-main/internal/attribute"
+	"github.com/userreksai/ecmdb-main/internal/operationlog"
+	"github.com/userreksai/ecmdb-main/internal/policy"
+	"github.com/userreksai/ecmdb-main/internal/relation"
+	"github.com/userreksai/ecmdb-main/internal/resource"
+	"github.com/userreksai/ecmdb-main/internal/role"
 )
 
 func InitHandler(attributeModule *attribute.Module, relationModule *relation.Module,

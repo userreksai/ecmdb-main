@@ -3,9 +3,9 @@ package assignees
 import (
 	"context"
 
-	"github.com/Duke1616/ecmdb/internal/user"
-	"github.com/Duke1616/ecmdb/internal/workflow/pkg/easyflow"
-	"github.com/Duke1616/ecmdb/pkg/resolve"
+	"github.com/userreksai/ecmdb-main/internal/user"
+	"github.com/userreksai/ecmdb-main/internal/workflow/pkg/easyflow"
+	"github.com/userreksai/ecmdb-main/pkg/resolve"
 )
 
 // TemplateResolver 模版字段解析器

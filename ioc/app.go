@@ -1,11 +1,11 @@
 package ioc
 
 import (
-	"github.com/Duke1616/ecmdb/internal/endpoint"
-	"github.com/Duke1616/ecmdb/internal/event/service/easyflow"
-	grpcpkg "github.com/userreksai/ecmdb-task/pkg/grpc"
 	"github.com/gotomicro/ego/server/egin"
 	"github.com/gotomicro/ego/task/ecron"
+	"github.com/userreksai/ecmdb-main/internal/endpoint"
+	"github.com/userreksai/ecmdb-main/internal/event/service/easyflow"
+	grpcpkg "github.com/userreksai/ecmdb-task/pkg/grpc"
 )
 
 type App struct {

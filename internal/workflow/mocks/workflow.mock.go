@@ -13,9 +13,9 @@ import (
 	context "context"
 	reflect "reflect"
 
-	domain "github.com/Duke1616/ecmdb/internal/workflow/internal/domain"
-	service "github.com/Duke1616/ecmdb/internal/workflow/internal/service"
-	easyflow "github.com/Duke1616/ecmdb/internal/workflow/pkg/easyflow"
+	domain "github.com/userreksai/ecmdb-main/internal/workflow/internal/domain"
+	service "github.com/userreksai/ecmdb-main/internal/workflow/internal/service"
+	easyflow "github.com/userreksai/ecmdb-main/internal/workflow/pkg/easyflow"
 	gomock "go.uber.org/mock/gomock"
 )
 

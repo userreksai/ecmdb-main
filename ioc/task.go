@@ -3,11 +3,11 @@ package ioc
 import (
 	"time"
 
-	executorv1 "github.com/Duke1616/ecmdb/api/proto/gen/etask/executor/v1"
-	taskv1 "github.com/Duke1616/ecmdb/api/proto/gen/etask/task/v1"
+	"github.com/spf13/viper"
+	executorv1 "github.com/userreksai/ecmdb-main/api/proto/gen/etask/executor/v1"
+	taskv1 "github.com/userreksai/ecmdb-main/api/proto/gen/etask/task/v1"
 	grpcpkg "github.com/userreksai/ecmdb-task/pkg/grpc"
 	"github.com/userreksai/ecmdb-task/pkg/grpc/registry"
-	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 )
 

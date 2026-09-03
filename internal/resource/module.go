@@ -1,6 +1,6 @@
 package resource
 
-import "github.com/Duke1616/ecmdb/internal/resource/internal/event"
+import "github.com/userreksai/ecmdb-main/internal/resource/internal/event"
 
 type Module struct {
 	Svc          Service

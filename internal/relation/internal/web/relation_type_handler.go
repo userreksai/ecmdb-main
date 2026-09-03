@@ -3,11 +3,11 @@ package web
 import (
 	"errors"
 
-	"github.com/Duke1616/ecmdb/internal/relation/internal/domain"
-	"github.com/Duke1616/ecmdb/internal/relation/internal/service"
-	"github.com/Duke1616/ecmdb/pkg/ginx"
 	"github.com/ecodeclub/ekit/slice"
 	"github.com/gin-gonic/gin"
+	"github.com/userreksai/ecmdb-main/internal/relation/internal/domain"
+	"github.com/userreksai/ecmdb-main/internal/relation/internal/service"
+	"github.com/userreksai/ecmdb-main/pkg/ginx"
 )
 
 type RelationTypeHandler struct {

@@ -8,14 +8,14 @@ package template
 
 import (
 	"context"
-	"github.com/Duke1616/ecmdb/internal/template/internal/event"
-	"github.com/Duke1616/ecmdb/internal/template/internal/repository"
-	"github.com/Duke1616/ecmdb/internal/template/internal/repository/dao"
-	"github.com/Duke1616/ecmdb/internal/template/internal/service"
-	"github.com/Duke1616/ecmdb/internal/template/internal/web"
-	"github.com/Duke1616/ecmdb/pkg/mongox"
 	"github.com/ecodeclub/mq-api"
 	"github.com/google/wire"
+	"github.com/userreksai/ecmdb-main/internal/template/internal/event"
+	"github.com/userreksai/ecmdb-main/internal/template/internal/repository"
+	"github.com/userreksai/ecmdb-main/internal/template/internal/repository/dao"
+	"github.com/userreksai/ecmdb-main/internal/template/internal/service"
+	"github.com/userreksai/ecmdb-main/internal/template/internal/web"
+	"github.com/userreksai/ecmdb-main/pkg/mongox"
 	"github.com/xen0n/go-workwx"
 	"sync"
 )

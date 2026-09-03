@@ -5,12 +5,12 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/Duke1616/ecmdb/internal/task/domain"
-	"github.com/Duke1616/ecmdb/internal/worker"
-	"github.com/Duke1616/ecmdb/pkg/cryptox"
 	"github.com/ecodeclub/ekit/slice"
 	"github.com/gotomicro/ego/core/elog"
 	"github.com/robfig/cron/v3"
+	"github.com/userreksai/ecmdb-main/internal/task/domain"
+	"github.com/userreksai/ecmdb-main/internal/worker"
+	"github.com/userreksai/ecmdb-main/pkg/cryptox"
 )
 
 type kafkaService struct {

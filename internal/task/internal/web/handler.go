@@ -7,12 +7,12 @@ import (
 	"strings"
 	"time"
 
-	executorv1 "github.com/Duke1616/ecmdb/api/proto/gen/etask/executor/v1"
-	"github.com/Duke1616/ecmdb/internal/task/domain"
-	"github.com/Duke1616/ecmdb/internal/task/internal/service"
-	"github.com/Duke1616/ecmdb/pkg/ginx"
 	"github.com/ecodeclub/ekit/slice"
 	"github.com/gin-gonic/gin"
+	executorv1 "github.com/userreksai/ecmdb-main/api/proto/gen/etask/executor/v1"
+	"github.com/userreksai/ecmdb-main/internal/task/domain"
+	"github.com/userreksai/ecmdb-main/internal/task/internal/service"
+	"github.com/userreksai/ecmdb-main/pkg/ginx"
 )
 
 type Handler struct {

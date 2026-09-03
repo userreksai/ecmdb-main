@@ -3,9 +3,9 @@ package service
 import (
 	"context"
 
-	"github.com/Duke1616/ecmdb/internal/rota/internal/domain"
-	"github.com/Duke1616/ecmdb/internal/rota/internal/repository"
-	"github.com/Duke1616/ecmdb/internal/rota/internal/service/schedule"
+	"github.com/userreksai/ecmdb-main/internal/rota/internal/domain"
+	"github.com/userreksai/ecmdb-main/internal/rota/internal/repository"
+	"github.com/userreksai/ecmdb-main/internal/rota/internal/service/schedule"
 	"golang.org/x/sync/errgroup"
 )
 

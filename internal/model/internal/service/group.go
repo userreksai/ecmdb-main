@@ -5,8 +5,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/Duke1616/ecmdb/internal/model/internal/domain"
-	"github.com/Duke1616/ecmdb/internal/model/internal/repository"
+	"github.com/userreksai/ecmdb-main/internal/model/internal/domain"
+	"github.com/userreksai/ecmdb-main/internal/model/internal/repository"
 	"golang.org/x/sync/errgroup"
 )
 

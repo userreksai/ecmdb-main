@@ -3,7 +3,7 @@ package domain
 import (
 	"fmt"
 
-	"github.com/Duke1616/ecmdb/internal/order/internal/errs"
+	"github.com/userreksai/ecmdb-main/internal/order/internal/errs"
 )
 
 type Channel string

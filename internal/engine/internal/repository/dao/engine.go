@@ -7,9 +7,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Bunny3th/easy-workflow/workflow/database"
-	"github.com/Bunny3th/easy-workflow/workflow/model"
 	"github.com/ecodeclub/ekit/slice"
+	"github.com/userreksai/easy-workflow/workflow/database"
+	"github.com/userreksai/easy-workflow/workflow/model"
 	"gorm.io/gorm"
 )
 

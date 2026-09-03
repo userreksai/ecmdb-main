@@ -1,9 +1,9 @@
 package task
 
 import (
-	"github.com/Duke1616/ecmdb/internal/task/internal/job"
-	"github.com/Duke1616/ecmdb/internal/task/internal/service"
-	"github.com/Duke1616/ecmdb/internal/task/internal/web"
+	"github.com/userreksai/ecmdb-main/internal/task/internal/job"
+	"github.com/userreksai/ecmdb-main/internal/task/internal/service"
+	"github.com/userreksai/ecmdb-main/internal/task/internal/web"
 )
 
 type Service = service.Service

@@ -3,15 +3,15 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/Duke1616/ecmdb/cmd/backup"
-	"github.com/Duke1616/ecmdb/cmd/endpoint"
-	"github.com/Duke1616/ecmdb/cmd/initial"
-	"github.com/Duke1616/ecmdb/cmd/repair"
-	"github.com/Duke1616/ecmdb/cmd/start"
 	"github.com/fsnotify/fsnotify"
 	"github.com/gotomicro/ego/core/elog"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/userreksai/ecmdb-main/cmd/backup"
+	"github.com/userreksai/ecmdb-main/cmd/endpoint"
+	"github.com/userreksai/ecmdb-main/cmd/initial"
+	"github.com/userreksai/ecmdb-main/cmd/repair"
+	"github.com/userreksai/ecmdb-main/cmd/start"
 )
 
 var (

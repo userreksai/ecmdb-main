@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Duke1616/ecmdb/cmd/initial/full"
-	"github.com/Duke1616/ecmdb/cmd/initial/incr/register"
-	"github.com/Duke1616/ecmdb/cmd/initial/ioc"
 	"github.com/spf13/cobra"
+	"github.com/userreksai/ecmdb-main/cmd/initial/full"
+	"github.com/userreksai/ecmdb-main/cmd/initial/incr/register"
+	"github.com/userreksai/ecmdb-main/cmd/initial/ioc"
 )
 
 var (

@@ -6,12 +6,12 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Duke1616/ecmdb/internal/menu"
-	"github.com/Duke1616/ecmdb/internal/permission/internal/domain"
-	"github.com/Duke1616/ecmdb/internal/permission/internal/service"
 	"github.com/ecodeclub/ekit/slice"
 	"github.com/ecodeclub/mq-api"
 	"github.com/gotomicro/ego/core/elog"
+	"github.com/userreksai/ecmdb-main/internal/menu"
+	"github.com/userreksai/ecmdb-main/internal/permission/internal/domain"
+	"github.com/userreksai/ecmdb-main/internal/permission/internal/service"
 )
 
 type MenuChangeEventConsumer struct {

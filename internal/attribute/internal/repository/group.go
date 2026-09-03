@@ -3,9 +3,9 @@ package repository
 import (
 	"context"
 
-	"github.com/Duke1616/ecmdb/internal/attribute/internal/domain"
-	"github.com/Duke1616/ecmdb/internal/attribute/internal/repository/dao"
 	"github.com/ecodeclub/ekit/slice"
+	"github.com/userreksai/ecmdb-main/internal/attribute/internal/domain"
+	"github.com/userreksai/ecmdb-main/internal/attribute/internal/repository/dao"
 )
 
 type AttributeGroupRepository interface {

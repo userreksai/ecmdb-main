@@ -1,7 +1,7 @@
 package easyflow
 
 import (
-	"github.com/Bunny3th/easy-workflow/workflow/model"
+	"github.com/userreksai/easy-workflow/workflow/model"
 )
 
 // StartNodeHandler 处理开始节点

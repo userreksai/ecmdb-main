@@ -14,15 +14,15 @@ import (
 	reflect "reflect"
 	time "time"
 
-	model "github.com/Bunny3th/easy-workflow/workflow/model"
-	strategy "github.com/Duke1616/ecmdb/internal/event/service/strategy"
-	order "github.com/Duke1616/ecmdb/internal/order"
-	notification "github.com/Duke1616/ecmdb/internal/pkg/notification"
-	user "github.com/Duke1616/ecmdb/internal/user"
-	workflow "github.com/Duke1616/ecmdb/internal/workflow"
-	easyflow "github.com/Duke1616/ecmdb/internal/workflow/pkg/easyflow"
-	resolve "github.com/Duke1616/ecmdb/pkg/resolve"
 	elog "github.com/gotomicro/ego/core/elog"
+	model "github.com/userreksai/easy-workflow/workflow/model"
+	strategy "github.com/userreksai/ecmdb-main/internal/event/service/strategy"
+	order "github.com/userreksai/ecmdb-main/internal/order"
+	notification "github.com/userreksai/ecmdb-main/internal/pkg/notification"
+	user "github.com/userreksai/ecmdb-main/internal/user"
+	workflow "github.com/userreksai/ecmdb-main/internal/workflow"
+	easyflow "github.com/userreksai/ecmdb-main/internal/workflow/pkg/easyflow"
+	resolve "github.com/userreksai/ecmdb-main/pkg/resolve"
 	gomock "go.uber.org/mock/gomock"
 )
 

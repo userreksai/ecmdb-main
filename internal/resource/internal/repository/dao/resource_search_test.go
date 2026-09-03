@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Duke1616/ecmdb/internal/resource/internal/domain"
+	"github.com/userreksai/ecmdb-main/internal/resource/internal/domain"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )

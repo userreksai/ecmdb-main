@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Duke1616/ecmdb/internal/task/domain"
-	"github.com/Duke1616/ecmdb/internal/task/internal/service"
 	"github.com/ecodeclub/ekit/retry"
 	"github.com/gotomicro/ego/core/elog"
 	"github.com/gotomicro/ego/task/ecron"
+	"github.com/userreksai/ecmdb-main/internal/task/domain"
+	"github.com/userreksai/ecmdb-main/internal/task/internal/service"
 )
 
 var _ ecron.NamedJob = (*StartTaskJob)(nil)

@@ -7,14 +7,14 @@
 package workflow
 
 import (
-	"github.com/Duke1616/ecmdb/internal/engine"
-	"github.com/Duke1616/ecmdb/internal/workflow/internal/repository"
-	"github.com/Duke1616/ecmdb/internal/workflow/internal/repository/dao"
-	"github.com/Duke1616/ecmdb/internal/workflow/internal/service"
-	"github.com/Duke1616/ecmdb/internal/workflow/internal/web"
-	"github.com/Duke1616/ecmdb/internal/workflow/pkg/easyflow"
-	"github.com/Duke1616/ecmdb/pkg/mongox"
 	"github.com/google/wire"
+	"github.com/userreksai/ecmdb-main/internal/engine"
+	"github.com/userreksai/ecmdb-main/internal/workflow/internal/repository"
+	"github.com/userreksai/ecmdb-main/internal/workflow/internal/repository/dao"
+	"github.com/userreksai/ecmdb-main/internal/workflow/internal/service"
+	"github.com/userreksai/ecmdb-main/internal/workflow/internal/web"
+	"github.com/userreksai/ecmdb-main/internal/workflow/pkg/easyflow"
+	"github.com/userreksai/ecmdb-main/pkg/mongox"
 )
 
 // Injectors from wire.go:

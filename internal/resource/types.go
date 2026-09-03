@@ -1,9 +1,9 @@
 package resource
 
 import (
-	"github.com/Duke1616/ecmdb/internal/resource/internal/domain"
-	"github.com/Duke1616/ecmdb/internal/resource/internal/service"
-	"github.com/Duke1616/ecmdb/internal/resource/internal/web"
+	"github.com/userreksai/ecmdb-main/internal/resource/internal/domain"
+	"github.com/userreksai/ecmdb-main/internal/resource/internal/service"
+	"github.com/userreksai/ecmdb-main/internal/resource/internal/web"
 )
 
 type Handler = web.Handler

@@ -3,9 +3,9 @@ package repository
 import (
 	"context"
 
-	"github.com/Duke1616/ecmdb/internal/discovery/internal/domain"
-	"github.com/Duke1616/ecmdb/internal/discovery/internal/repository/dao"
 	"github.com/ecodeclub/ekit/slice"
+	"github.com/userreksai/ecmdb-main/internal/discovery/internal/domain"
+	"github.com/userreksai/ecmdb-main/internal/discovery/internal/repository/dao"
 )
 
 type DiscoveryRepository interface {

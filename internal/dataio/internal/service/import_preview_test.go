@@ -3,10 +3,10 @@ package service
 import (
 	"testing"
 
-	"github.com/Duke1616/ecmdb/internal/resource"
-	"github.com/Duke1616/ecmdb/pkg/mongox"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/userreksai/ecmdb-main/internal/resource"
+	"github.com/userreksai/ecmdb-main/pkg/mongox"
 )
 
 func TestBuildImportPreview(t *testing.T) {

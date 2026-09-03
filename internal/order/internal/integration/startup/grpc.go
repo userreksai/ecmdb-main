@@ -1,11 +1,11 @@
 package startup
 
 import (
-	"github.com/Duke1616/ecmdb/internal/order"
-	"github.com/Duke1616/ecmdb/pkg/grpcx"
-	"github.com/Duke1616/ecmdb/pkg/grpcx/interceptors/jwt"
 	"github.com/gotomicro/ego/core/elog"
 	"github.com/spf13/viper"
+	"github.com/userreksai/ecmdb-main/internal/order"
+	"github.com/userreksai/ecmdb-main/pkg/grpcx"
+	"github.com/userreksai/ecmdb-main/pkg/grpcx/interceptors/jwt"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"google.golang.org/grpc"
 )

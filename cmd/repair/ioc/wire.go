@@ -3,11 +3,11 @@
 package ioc
 
 import (
-	"github.com/Duke1616/ecmdb/internal/attribute"
-	"github.com/Duke1616/ecmdb/internal/model"
-	"github.com/Duke1616/ecmdb/internal/resource"
-	"github.com/Duke1616/ecmdb/ioc"
 	"github.com/google/wire"
+	"github.com/userreksai/ecmdb-main/internal/attribute"
+	"github.com/userreksai/ecmdb-main/internal/model"
+	"github.com/userreksai/ecmdb-main/internal/resource"
+	"github.com/userreksai/ecmdb-main/ioc"
 )
 
 var BaseSet = wire.NewSet(ioc.InitMongoDB, ioc.InitMQ, ioc.InitModuleCrypto)

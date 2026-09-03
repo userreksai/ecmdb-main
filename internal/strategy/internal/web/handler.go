@@ -3,12 +3,12 @@ package web
 import (
 	"fmt"
 
-	"github.com/Duke1616/ecmdb/internal/strategy/internal/domain"
-	"github.com/Duke1616/ecmdb/internal/strategy/internal/service"
-	"github.com/Duke1616/ecmdb/internal/template"
-	"github.com/Duke1616/ecmdb/pkg/ginx"
 	"github.com/ecodeclub/ekit/slice"
 	"github.com/gin-gonic/gin"
+	"github.com/userreksai/ecmdb-main/internal/strategy/internal/domain"
+	"github.com/userreksai/ecmdb-main/internal/strategy/internal/service"
+	"github.com/userreksai/ecmdb-main/internal/template"
+	"github.com/userreksai/ecmdb-main/pkg/ginx"
 	"github.com/xen0n/go-workwx"
 )
 

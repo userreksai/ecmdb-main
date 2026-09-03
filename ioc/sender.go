@@ -1,16 +1,16 @@
 package ioc
 
 import (
-	notificationv1 "github.com/Duke1616/ecmdb/api/proto/gen/ealert/notification/v1"
-	"github.com/Duke1616/ecmdb/internal/pkg/notification"
-	"github.com/Duke1616/ecmdb/internal/pkg/notification/channel"
-	"github.com/Duke1616/ecmdb/internal/pkg/notification/provider"
-	"github.com/Duke1616/ecmdb/internal/pkg/notification/provider/feishu"
-	"github.com/Duke1616/ecmdb/internal/pkg/notification/provider/sequential"
-	"github.com/Duke1616/ecmdb/internal/pkg/notification/sender"
-	"github.com/Duke1616/ecmdb/internal/workflow"
 	"github.com/google/wire"
 	lark "github.com/larksuite/oapi-sdk-go/v3"
+	notificationv1 "github.com/userreksai/ecmdb-main/api/proto/gen/ealert/notification/v1"
+	"github.com/userreksai/ecmdb-main/internal/pkg/notification"
+	"github.com/userreksai/ecmdb-main/internal/pkg/notification/channel"
+	"github.com/userreksai/ecmdb-main/internal/pkg/notification/provider"
+	"github.com/userreksai/ecmdb-main/internal/pkg/notification/provider/feishu"
+	"github.com/userreksai/ecmdb-main/internal/pkg/notification/provider/sequential"
+	"github.com/userreksai/ecmdb-main/internal/pkg/notification/sender"
+	"github.com/userreksai/ecmdb-main/internal/workflow"
 )
 
 var InitSender = wire.NewSet(

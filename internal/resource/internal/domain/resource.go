@@ -1,6 +1,6 @@
 package domain
 
-import "github.com/Duke1616/ecmdb/pkg/mongox"
+import "github.com/userreksai/ecmdb-main/pkg/mongox"
 
 // Operator 导出操作符枚举
 type Operator string

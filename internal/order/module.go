@@ -1,8 +1,8 @@
 package order
 
 import (
-	"github.com/Duke1616/ecmdb/internal/order/internal/event/consumer"
-	"github.com/Duke1616/ecmdb/internal/order/internal/web"
+	"github.com/userreksai/ecmdb-main/internal/order/internal/event/consumer"
+	"github.com/userreksai/ecmdb-main/internal/order/internal/web"
 )
 
 type Module struct {

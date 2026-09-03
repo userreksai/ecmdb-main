@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Duke1616/ecmdb/internal/role/internal/domain"
+	"github.com/userreksai/ecmdb-main/internal/role/internal/domain"
 )
 
 func TestFilterAccessibleModelUIDs(t *testing.T) {

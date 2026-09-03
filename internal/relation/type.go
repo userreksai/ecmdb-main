@@ -1,9 +1,9 @@
 package relation
 
 import (
-	"github.com/Duke1616/ecmdb/internal/relation/internal/domain"
-	"github.com/Duke1616/ecmdb/internal/relation/internal/service"
-	"github.com/Duke1616/ecmdb/internal/relation/internal/web"
+	"github.com/userreksai/ecmdb-main/internal/relation/internal/domain"
+	"github.com/userreksai/ecmdb-main/internal/relation/internal/service"
+	"github.com/userreksai/ecmdb-main/internal/relation/internal/web"
 )
 
 // RR => RelationResource

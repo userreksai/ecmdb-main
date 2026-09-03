@@ -3,12 +3,12 @@
 package department
 
 import (
-	"github.com/Duke1616/ecmdb/internal/department/internal/repository"
-	"github.com/Duke1616/ecmdb/internal/department/internal/repository/dao"
-	"github.com/Duke1616/ecmdb/internal/department/internal/service"
-	"github.com/Duke1616/ecmdb/internal/department/internal/web"
-	"github.com/Duke1616/ecmdb/pkg/mongox"
 	"github.com/google/wire"
+	"github.com/userreksai/ecmdb-main/internal/department/internal/repository"
+	"github.com/userreksai/ecmdb-main/internal/department/internal/repository/dao"
+	"github.com/userreksai/ecmdb-main/internal/department/internal/service"
+	"github.com/userreksai/ecmdb-main/internal/department/internal/web"
+	"github.com/userreksai/ecmdb-main/pkg/mongox"
 )
 
 var ProviderSet = wire.NewSet(

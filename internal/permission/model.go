@@ -1,6 +1,6 @@
 package permission
 
-import "github.com/Duke1616/ecmdb/internal/permission/internal/event"
+import "github.com/userreksai/ecmdb-main/internal/permission/internal/event"
 
 type Module struct {
 	Hdl *Handler

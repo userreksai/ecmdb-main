@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Duke1616/ecmdb/internal/user/internal/domain"
 	"github.com/redis/go-redis/v9"
+	"github.com/userreksai/ecmdb-main/internal/user/internal/domain"
 )
 
 type LdapUserCache interface {

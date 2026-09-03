@@ -6,18 +6,18 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/Duke1616/ecmdb/internal/attribute"
-	"github.com/Duke1616/ecmdb/internal/operationlog"
-	"github.com/Duke1616/ecmdb/internal/pkg/authctx"
-	"github.com/Duke1616/ecmdb/internal/policy"
-	"github.com/Duke1616/ecmdb/internal/relation"
-	"github.com/Duke1616/ecmdb/internal/resource/internal/domain"
-	"github.com/Duke1616/ecmdb/internal/resource/internal/service"
-	"github.com/Duke1616/ecmdb/internal/role"
-	"github.com/Duke1616/ecmdb/pkg/ginx"
 	"github.com/ecodeclub/ekit/slice"
 	"github.com/gin-gonic/gin"
 	"github.com/gotomicro/ego/core/elog"
+	"github.com/userreksai/ecmdb-main/internal/attribute"
+	"github.com/userreksai/ecmdb-main/internal/operationlog"
+	"github.com/userreksai/ecmdb-main/internal/pkg/authctx"
+	"github.com/userreksai/ecmdb-main/internal/policy"
+	"github.com/userreksai/ecmdb-main/internal/relation"
+	"github.com/userreksai/ecmdb-main/internal/resource/internal/domain"
+	"github.com/userreksai/ecmdb-main/internal/resource/internal/service"
+	"github.com/userreksai/ecmdb-main/internal/role"
+	"github.com/userreksai/ecmdb-main/pkg/ginx"
 )
 
 type Handler struct {

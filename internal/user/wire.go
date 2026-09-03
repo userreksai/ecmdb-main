@@ -3,21 +3,21 @@
 package user
 
 import (
-	"github.com/Duke1616/ecmdb/internal/department"
-	"github.com/Duke1616/ecmdb/internal/pkg/servicetoken"
-	"github.com/Duke1616/ecmdb/internal/policy"
-	"github.com/Duke1616/ecmdb/internal/user/internal/grpc"
-	"github.com/Duke1616/ecmdb/internal/user/internal/repository"
-	"github.com/Duke1616/ecmdb/internal/user/internal/repository/cache"
-	"github.com/Duke1616/ecmdb/internal/user/internal/repository/dao"
-	"github.com/Duke1616/ecmdb/internal/user/internal/service"
-	"github.com/Duke1616/ecmdb/internal/user/internal/web"
-	"github.com/Duke1616/ecmdb/internal/user/ldapx"
-	"github.com/Duke1616/ecmdb/pkg/cryptox"
-	"github.com/Duke1616/ecmdb/pkg/mongox"
 	"github.com/RediSearch/redisearch-go/v2/redisearch"
 	"github.com/ecodeclub/ginx/session"
 	"github.com/google/wire"
+	"github.com/userreksai/ecmdb-main/internal/department"
+	"github.com/userreksai/ecmdb-main/internal/pkg/servicetoken"
+	"github.com/userreksai/ecmdb-main/internal/policy"
+	"github.com/userreksai/ecmdb-main/internal/user/internal/grpc"
+	"github.com/userreksai/ecmdb-main/internal/user/internal/repository"
+	"github.com/userreksai/ecmdb-main/internal/user/internal/repository/cache"
+	"github.com/userreksai/ecmdb-main/internal/user/internal/repository/dao"
+	"github.com/userreksai/ecmdb-main/internal/user/internal/service"
+	"github.com/userreksai/ecmdb-main/internal/user/internal/web"
+	"github.com/userreksai/ecmdb-main/internal/user/ldapx"
+	"github.com/userreksai/ecmdb-main/pkg/cryptox"
+	"github.com/userreksai/ecmdb-main/pkg/mongox"
 )
 
 var ProviderSet = wire.NewSet(

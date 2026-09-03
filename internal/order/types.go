@@ -1,11 +1,11 @@
 package order
 
 import (
-	notificationv1 "github.com/Duke1616/ecmdb/api/proto/gen/ealert/notification/v1"
-	"github.com/Duke1616/ecmdb/internal/order/internal/domain"
-	"github.com/Duke1616/ecmdb/internal/order/internal/grpc"
-	"github.com/Duke1616/ecmdb/internal/order/internal/service"
-	"github.com/Duke1616/ecmdb/internal/order/internal/web"
+	notificationv1 "github.com/userreksai/ecmdb-main/api/proto/gen/ealert/notification/v1"
+	"github.com/userreksai/ecmdb-main/internal/order/internal/domain"
+	"github.com/userreksai/ecmdb-main/internal/order/internal/grpc"
+	"github.com/userreksai/ecmdb-main/internal/order/internal/service"
+	"github.com/userreksai/ecmdb-main/internal/order/internal/web"
 )
 
 type Service = service.Service

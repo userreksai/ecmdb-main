@@ -8,12 +8,12 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/Duke1616/ecmdb/internal/attribute"
-	"github.com/Duke1616/ecmdb/internal/dataio/internal/domain"
-	"github.com/Duke1616/ecmdb/internal/model"
-	"github.com/Duke1616/ecmdb/internal/relation"
-	"github.com/Duke1616/ecmdb/internal/resource"
 	"github.com/ecodeclub/ekit/slice"
+	"github.com/userreksai/ecmdb-main/internal/attribute"
+	"github.com/userreksai/ecmdb-main/internal/dataio/internal/domain"
+	"github.com/userreksai/ecmdb-main/internal/model"
+	"github.com/userreksai/ecmdb-main/internal/relation"
+	"github.com/userreksai/ecmdb-main/internal/resource"
 	"github.com/xuri/excelize/v2"
 	"golang.org/x/sync/errgroup"
 )

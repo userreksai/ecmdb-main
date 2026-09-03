@@ -61,8 +61,8 @@ cp /usr/local/src/docker-compose-linux-x86_64 /usr/local/bin/docker-compose && c
 docker-compose -v
 
 mkdir -pv /opt/ecmdb_project && cd /opt/ecmdb_project
-git clone https://github.com/Duke1616/ecmdb.git
-git clone https://github.com/Duke1616/ecmdb-web.git
+git clone https://github.com/userreksai/ecmdb-main.git
+git clone https://github.com/userreksai/ecmdb-web.git
 ```
 
 ## 执行安装脚本（需要魔法）

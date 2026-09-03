@@ -1,9 +1,9 @@
 package workflow
 
 import (
-	"github.com/Duke1616/ecmdb/internal/workflow/internal/domain"
-	"github.com/Duke1616/ecmdb/internal/workflow/internal/service"
-	"github.com/Duke1616/ecmdb/internal/workflow/internal/web"
+	"github.com/userreksai/ecmdb-main/internal/workflow/internal/domain"
+	"github.com/userreksai/ecmdb-main/internal/workflow/internal/service"
+	"github.com/userreksai/ecmdb-main/internal/workflow/internal/web"
 )
 
 type Handler = web.Handler

@@ -48,8 +48,8 @@ package v{version}
 
 import (
     "context"
-    "github.com/Duke1616/ecmdb/cmd/initial/ioc"
-    "github.com/Duke1616/ecmdb/cmd/initial/incr"
+    "github.com/userreksai/ecmdb-main/cmd/initial/ioc"
+    "github.com/userreksai/ecmdb-main/cmd/initial/incr"
 )
 
 type incrV{version} struct {
@@ -125,7 +125,7 @@ func TestVersion{version}Logic(t *testing.T) {
 ```go
 import (
     // ... 其他导入
-    "github.com/Duke1616/ecmdb/cmd/initial/incr/v{version}"
+    "github.com/userreksai/ecmdb-main/cmd/initial/incr/v{version}"
 )
 
 func RegisterIncr(app *ioc.App) {

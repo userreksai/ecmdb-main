@@ -6,8 +6,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/Duke1616/ecmdb/internal/pkg/wechat"
 	"github.com/ecodeclub/ekit/slice"
+	"github.com/userreksai/ecmdb-main/internal/pkg/wechat"
 	"github.com/xen0n/go-workwx"
 )
 

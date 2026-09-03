@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Duke1616/ecmdb/internal/order/internal/event"
-	"github.com/Duke1616/ecmdb/internal/order/internal/service"
 	"github.com/ecodeclub/mq-api"
 	"github.com/gotomicro/ego/core/elog"
+	"github.com/userreksai/ecmdb-main/internal/order/internal/event"
+	"github.com/userreksai/ecmdb-main/internal/order/internal/service"
 )
 
 type OrderStatusModifyEventConsumer struct {

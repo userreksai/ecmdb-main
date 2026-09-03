@@ -6,14 +6,14 @@ import (
 	"fmt"
 	"time"
 
-	notificationv1 "github.com/Duke1616/ecmdb/api/proto/gen/ealert/notification/v1"
-	"github.com/Duke1616/ecmdb/internal/event/errs"
-	"github.com/Duke1616/ecmdb/internal/pkg/notification"
-	"github.com/Duke1616/ecmdb/internal/pkg/notification/provider"
-	"github.com/Duke1616/ecmdb/internal/workflow"
-	"github.com/Duke1616/enotify/notify/feishu/card"
 	"github.com/google/uuid"
 	"github.com/gotomicro/ego/core/elog"
+	notificationv1 "github.com/userreksai/ecmdb-main/api/proto/gen/ealert/notification/v1"
+	"github.com/userreksai/ecmdb-main/internal/event/errs"
+	"github.com/userreksai/ecmdb-main/internal/pkg/notification"
+	"github.com/userreksai/ecmdb-main/internal/pkg/notification/provider"
+	"github.com/userreksai/ecmdb-main/internal/workflow"
+	"github.com/userreksai/enotify/notify/feishu/card"
 	"google.golang.org/protobuf/types/known/structpb"
 )
 

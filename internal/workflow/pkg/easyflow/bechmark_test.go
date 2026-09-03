@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/Bunny3th/easy-workflow/workflow/model"
 	"github.com/stretchr/testify/require"
+	"github.com/userreksai/easy-workflow/workflow/model"
 )
 
 func TestLogicFlow_Deploy_Benchmark(t *testing.T) {
