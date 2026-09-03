@@ -873,8 +873,8 @@ const file_ealert_template_v1_template_proto_rawDesc = "" +
 	"\x0eUpdateTemplate\x12).ealert.template.v1.UpdateTemplateRequest\x1a*.ealert.template.v1.UpdateTemplateResponse\x12j\n" +
 	"\x0fPublishTemplate\x12*.ealert.template.v1.PublishTemplateRequest\x1a+.ealert.template.v1.PublishTemplateResponse\x12d\n" +
 	"\rListTemplates\x12(.ealert.template.v1.ListTemplatesRequest\x1a).ealert.template.v1.ListTemplatesResponse\x12|\n" +
-	"\x15CreateTemplateVersion\x120.ealert.template.v1.CreateTemplateVersionRequest\x1a1.ealert.template.v1.CreateTemplateVersionResponseB\xd8\x01\n" +
-	"\x16com.ealert.template.v1B\rTemplateProtoP\x01ZEgithub.com/userreksai/ecmdb-main/api/proto/gen/ealert/template/v1;templatev1\xa2\x02\x03ETX\xaa\x02\x12Ealert.Template.V1\xca\x02\x12Ealert\\Template\\V1\xe2\x02\x1eEalert\\Template\\V1\\GPBMetadata\xea\x02\x14Ealert::Template::V1b\x06proto3"
+	"\x15CreateTemplateVersion\x120.ealert.template.v1.CreateTemplateVersionRequest\x1a1.ealert.template.v1.CreateTemplateVersionResponseB\xdf\x01\n" +
+	"\x16com.ealert.template.v1B\rTemplateProtoP\x01ZLgithub.com/userreksai/ecmdb-main/api/proto/gen/ealert/template/v1;templatev1\xa2\x02\x03ETX\xaa\x02\x12Ealert.Template.V1\xca\x02\x12Ealert\\Template\\V1\xe2\x02\x1eEalert\\Template\\V1\\GPBMetadata\xea\x02\x14Ealert::Template::V1b\x06proto3"
 
 var (
 	file_ealert_template_v1_template_proto_rawDescOnce sync.Once

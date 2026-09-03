@@ -777,8 +777,8 @@ const file_ealert_notification_v1_notification_proto_rawDesc = "" +
 	"\x12PROVIDER_NOT_FOUND\x10\x0f\x12\x13\n" +
 	"\x0fUNKNOWN_CHANNEL\x10\x102\x8c\x01\n" +
 	"\x13NotificationService\x12u\n" +
-	"\x10SendNotification\x12/.ealert.notification.v1.SendNotificationRequest\x1a0.ealert.notification.v1.SendNotificationResponseB\xf8\x01\n" +
-	"\x1acom.ealert.notification.v1B\x11NotificationProtoP\x01ZMgithub.com/userreksai/ecmdb-main/api/proto/gen/ealert/notification/v1;notificationv1\xa2\x02\x03ENX\xaa\x02\x16Ealert.Notification.V1\xca\x02\x16Ealert\\Notification\\V1\xe2\x02\"Ealert\\Notification\\V1\\GPBMetadata\xea\x02\x18Ealert::Notification::V1b\x06proto3"
+	"\x10SendNotification\x12/.ealert.notification.v1.SendNotificationRequest\x1a0.ealert.notification.v1.SendNotificationResponseB\xff\x01\n" +
+	"\x1acom.ealert.notification.v1B\x11NotificationProtoP\x01ZTgithub.com/userreksai/ecmdb-main/api/proto/gen/ealert/notification/v1;notificationv1\xa2\x02\x03ENX\xaa\x02\x16Ealert.Notification.V1\xca\x02\x16Ealert\\Notification\\V1\xe2\x02\"Ealert\\Notification\\V1\\GPBMetadata\xea\x02\x18Ealert::Notification::V1b\x06proto3"
 
 var (
 	file_ealert_notification_v1_notification_proto_rawDescOnce sync.Once

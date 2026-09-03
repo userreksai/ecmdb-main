@@ -1348,8 +1348,8 @@ const file_ealert_team_team_proto_rawDesc = "" +
 	"\x0fUnbindChatGroup\x12&.ealert.team.v1.UnbindChatGroupRequest\x1a'.ealert.team.v1.UnbindChatGroupResponse\x12q\n" +
 	"\x14GetDefaultChatGroups\x12+.ealert.team.v1.GetDefaultChatGroupsRequest\x1a,.ealert.team.v1.GetDefaultChatGroupsResponse\x12e\n" +
 	"\x10GetChatGroupById\x12'.ealert.team.v1.GetChatGroupByIdRequest\x1a(.ealert.team.v1.GetChatGroupByIdResponse\x12h\n" +
-	"\x11GetChatGroupByIds\x12(.ealert.team.v1.GetChatGroupByIdsRequest\x1a).ealert.team.v1.GetChatGroupByIdsResponseB\xb5\x01\n" +
-	"\x12com.ealert.team.v1B\tTeamProtoP\x01Z:github.com/userreksai/ecmdb-main/api/proto/gen/ealert/team;teamv1\xa2\x02\x03ETX\xaa\x02\x0eEalert.Team.V1\xca\x02\x0eEalert\\Team\\V1\xe2\x02\x1aEalert\\Team\\V1\\GPBMetadata\xea\x02\x10Ealert::Team::V1b\x06proto3"
+	"\x11GetChatGroupByIds\x12(.ealert.team.v1.GetChatGroupByIdsRequest\x1a).ealert.team.v1.GetChatGroupByIdsResponseB\xbc\x01\n" +
+	"\x12com.ealert.team.v1B\tTeamProtoP\x01ZAgithub.com/userreksai/ecmdb-main/api/proto/gen/ealert/team;teamv1\xa2\x02\x03ETX\xaa\x02\x0eEalert.Team.V1\xca\x02\x0eEalert\\Team\\V1\xe2\x02\x1aEalert\\Team\\V1\\GPBMetadata\xea\x02\x10Ealert::Team::V1b\x06proto3"
 
 var (
 	file_ealert_team_team_proto_rawDescOnce sync.Once
