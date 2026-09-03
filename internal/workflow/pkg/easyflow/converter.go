@@ -40,6 +40,10 @@ func (c *DefaultConverter) Register(handler INodeHandler) {
 
 // Convert 执行转换流程 (Pipeline)
 func (c *DefaultConverter) Convert(wf Workflow) (*model.Process, error) {
+	if err := ValidateWorkflow(wf); err != nil {
+		return nil, err
+	}
+
 	// 注入 context
 	ctx, err := c.initContext(wf)
 	if err != nil {
@@ -68,9 +72,14 @@ func (c *DefaultConverter) Convert(wf Workflow) (*model.Process, error) {
 	// 此处可以扩展如 GraphRewriter, EventInjector 等
 	// 目前逻辑简单，直接组装结果
 
+	source := "工单系统"
+	if wf.Id > 0 {
+		source = fmt.Sprintf("工单系统:%d", wf.Id)
+	}
+
 	process := &model.Process{
 		ProcessName:  wf.Name,
-		Source:       "工单系统",
+		Source:       source,
 		RevokeEvents: []string{EventRevoke},
 		Nodes:        ctx.OutputNodes,
 	}

@@ -55,9 +55,8 @@ func (c *StartTaskJob) Run(ctx context.Context) error {
 		for _, task := range tasks {
 			go func(t domain.Task) {
 				// 独立 Context 避免受 Job 周期 Context 过期影响
-				err = c.start(context.Background(), t.Id)
-				if err != nil {
-					c.logger.Error("就绪任务启动失败", elog.FieldErr(err), elog.Int64("taskId", t.Id))
+				if startErr := c.start(context.Background(), t.Id); startErr != nil {
+					c.logger.Error("就绪任务启动失败", elog.FieldErr(startErr), elog.Int64("taskId", t.Id))
 				}
 			}(task)
 		}

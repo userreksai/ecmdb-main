@@ -240,7 +240,18 @@ func (s *service) CreateTask(ctx context.Context, orderId int64, processInstId i
 	//  如果不是定时任务，立即触发下发执行，无需等待 Job 扫描
 	if !task.IsTiming {
 		if startErr := s.StartTask(ctx, task.Id); startErr != nil {
-			s.logger.Error("即时任务自动启动失败", elog.FieldErr(startErr), elog.Int64("taskId", task.Id))
+			s.logger.Error("即时任务自动启动失败，登记为待补发", elog.FieldErr(startErr), elog.Int64("taskId", task.Id))
+			_, recoveryErr := s.UpdateTaskStatus(ctx, domain.TaskResult{
+				Id:              task.Id,
+				Status:          domain.SCHEDULED,
+				TriggerPosition: domain.TriggerPositionAutoRetry.ToString(),
+				Result:          startErr.Error(),
+			})
+			if recoveryErr != nil {
+				return task, fmt.Errorf("即时任务启动失败且无法登记补发状态: %w", errors.Join(startErr, recoveryErr))
+			}
+			task.Status = domain.SCHEDULED
+			task.TriggerPosition = domain.TriggerPositionAutoRetry.ToString()
 		}
 	}
 

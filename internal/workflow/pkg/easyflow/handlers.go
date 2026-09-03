@@ -178,9 +178,11 @@ func (h *ConditionHandler) Handle(ctx *Context, node Node) ([]model.Node, error)
 		})
 	}
 	gw := model.HybridGateway{
-		Conditions:         conditions,
-		InevitableNodes:    []string{},
-		WaitForAllPrevNode: 3,
+		Conditions:      conditions,
+		InevitableNodes: []string{},
+		// 条件节点按包容网关语义处理：任一实际分支到达即可判断。
+		// easy-workflow 只定义 0（任一）和 1（全部）两种等待模式。
+		WaitForAllPrevNode: 0,
 	}
 	n := model.Node{
 		NodeID:      node.ID,
