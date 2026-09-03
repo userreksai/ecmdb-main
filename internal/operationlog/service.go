@@ -10,15 +10,18 @@ import (
 	"gorm.io/gorm"
 )
 
-const retentionMonths = -1
+const (
+	retentionMonths            = -1
+	ignoredOperationLogAccount = "svc_ecmdb_script"
+)
 
 type logEntity struct {
 	ID             int64     `gorm:"column:id;primaryKey;autoIncrement"`
 	Account        string    `gorm:"column:account;type:varchar(128);not null;index:idx_operation_log_account"`
 	OperationModel string    `gorm:"column:operation_model;type:varchar(128);not null;index:idx_operation_log_model"`
 	OperationType  string    `gorm:"column:operation_type;type:varchar(16);not null;index:idx_operation_log_type"`
-	OriginalData   []byte    `gorm:"column:original_data;type:json"`
-	ModifiedData   []byte    `gorm:"column:modified_data;type:json"`
+	OriginalData   string    `gorm:"column:original_data;type:json"`
+	ModifiedData   string    `gorm:"column:modified_data;type:json"`
 	OperationTime  time.Time `gorm:"column:operation_time;type:datetime(3);not null;index:idx_operation_log_time"`
 	ModifiedCount  int64     `gorm:"column:modified_count;not null;default:0"`
 }
@@ -35,6 +38,11 @@ func NewService(db *gorm.DB) (Service, error) {
 }
 
 func (s *service) Record(ctx context.Context, record Record) error {
+	account := strings.TrimSpace(record.Account)
+	if shouldIgnoreAccount(account) {
+		return nil
+	}
+
 	original, err := json.Marshal(record.OriginalData)
 	if err != nil {
 		return fmt.Errorf("序列化原数据失败: %w", err)
@@ -45,11 +53,11 @@ func (s *service) Record(ctx context.Context, record Record) error {
 	}
 
 	entity := logEntity{
-		Account:        strings.TrimSpace(record.Account),
+		Account:        account,
 		OperationModel: strings.TrimSpace(record.OperationModel),
 		OperationType:  strings.ToUpper(strings.TrimSpace(record.OperationType)),
-		OriginalData:   original,
-		ModifiedData:   modified,
+		OriginalData:   string(original),
+		ModifiedData:   string(modified),
 		OperationTime:  time.Now(),
 		ModifiedCount:  record.ModifiedCount,
 	}
@@ -60,6 +68,10 @@ func (s *service) Record(ctx context.Context, record Record) error {
 		return fmt.Errorf("写入操作日志失败: %w", err)
 	}
 	return nil
+}
+
+func shouldIgnoreAccount(account string) bool {
+	return strings.EqualFold(strings.TrimSpace(account), ignoredOperationLogAccount)
 }
 
 func (s *service) List(ctx context.Context, query Query) ([]Log, int64, error) {
@@ -107,8 +119,8 @@ func (s *service) List(ctx context.Context, query Query) ([]Log, int64, error) {
 			Account:        entity.Account,
 			OperationModel: entity.OperationModel,
 			OperationType:  entity.OperationType,
-			OriginalData:   json.RawMessage(entity.OriginalData),
-			ModifiedData:   json.RawMessage(entity.ModifiedData),
+			OriginalData:   json.RawMessage([]byte(entity.OriginalData)),
+			ModifiedData:   json.RawMessage([]byte(entity.ModifiedData)),
 			OperationTime:  entity.OperationTime,
 			ModifiedCount:  entity.ModifiedCount,
 		})

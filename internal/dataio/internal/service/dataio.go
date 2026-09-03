@@ -101,38 +101,26 @@ func (s *dataIOService) PreviewImport(ctx context.Context, modelUID string, file
 	return buildImportPreview(modelUID, sheet, current), nil
 }
 
-// Import 按唯一索引 name 同步表格与模型数据。
-func (s *dataIOService) Import(ctx context.Context, modelUID string, fileData []byte, confirmEmpty bool) (ImportResult, error) {
+// Import 按唯一索引 name 新增或更新表格数据，不删除模型现有数据。
+func (s *dataIOService) Import(ctx context.Context, modelUID string, fileData []byte) (ImportResult, error) {
 	preview, err := s.PreviewImport(ctx, modelUID, fileData)
 	if err != nil {
 		return ImportResult{}, err
 	}
-	if preview.IsEmpty && !confirmEmpty {
-		return ImportResult{}, fmt.Errorf("表格数据为空，继续导入将删除当前模型全部数据，请确认后重试")
+	if preview.IsEmpty {
+		return ImportResult{}, newImportValidationError("表格数据为空，未执行导入", nil)
 	}
 
 	upserts := make([]resource.Resource, 0, preview.CreatedCount+preview.UpdatedCount)
-	deletes := make([]resource.Resource, 0, preview.DeletedCount)
 	for _, change := range preview.Rows {
-		switch change.Action {
-		case ImportActionCreate, ImportActionUpdate:
+		if change.Action == ImportActionCreate || change.Action == ImportActionUpdate {
 			upserts = append(upserts, change.Resource)
-		case ImportActionDelete:
-			deletes = append(deletes, change.Resource)
 		}
 	}
 
-	if err = s.resSvc.BatchCreateOrUpdate(ctx, upserts); err != nil {
-		return ImportResult{}, fmt.Errorf("批量创建或更新资源失败: %w", err)
-	}
-	for _, item := range deletes {
-		if _, err = s.resSvc.DeleteResource(ctx, item.ID); err != nil {
-			return ImportResult{}, fmt.Errorf("删除表格外资源 %d 失败: %w", item.ID, err)
-		}
-		if s.rrSvc != nil {
-			if _, err = s.rrSvc.DeleteRelationsByResourceID(ctx, item.ID); err != nil {
-				return ImportResult{}, fmt.Errorf("删除资源 %d 关联关系失败: %w", item.ID, err)
-			}
+	if len(upserts) > 0 {
+		if err = s.resSvc.BatchCreateOrUpdate(ctx, upserts); err != nil {
+			return ImportResult{}, fmt.Errorf("批量创建或更新资源失败: %w", err)
 		}
 	}
 
@@ -140,7 +128,6 @@ func (s *dataIOService) Import(ctx context.Context, modelUID string, fileData []
 		ImportedCount:  preview.CreatedCount + preview.UpdatedCount,
 		CreatedCount:   preview.CreatedCount,
 		UpdatedCount:   preview.UpdatedCount,
-		DeletedCount:   preview.DeletedCount,
 		UnchangedCount: preview.UnchangedCount,
 		Changes:        preview.Rows,
 	}, nil
@@ -149,7 +136,10 @@ func (s *dataIOService) Import(ctx context.Context, modelUID string, fileData []
 func (s *dataIOService) parseImportSheet(ctx context.Context, modelUID string, fileData []byte) (parsedImportSheet, error) {
 	f, err := excelize.OpenReader(bytes.NewReader(fileData))
 	if err != nil {
-		return parsedImportSheet{}, fmt.Errorf("解析 Excel 文件失败: %w", err)
+		return parsedImportSheet{}, newImportValidationError(
+			"Excel 文件格式错误，仅支持由本系统导出或下载模板生成的 .xlsx 文件",
+			err,
+		)
 	}
 	defer f.Close()
 
@@ -166,10 +156,10 @@ func (s *dataIOService) parseImportSheet(ctx context.Context, modelUID string, f
 	sheetName := f.GetSheetName(0)
 	rows, err := f.GetRows(sheetName)
 	if err != nil {
-		return parsedImportSheet{}, fmt.Errorf("读取 Excel 数据失败: %w", err)
+		return parsedImportSheet{}, newImportValidationError("读取 Excel 数据失败，请重新下载模板后填写", err)
 	}
 	if len(rows) < 3 {
-		return parsedImportSheet{}, fmt.Errorf("excel 文件格式错误，至少需要导出文件中的 3 行表头")
+		return parsedImportSheet{}, newImportValidationError("Excel 文件格式错误，至少需要保留导出文件中的 3 行表头", nil)
 	}
 
 	fieldUIDRow := rows[1]
@@ -181,10 +171,13 @@ func (s *dataIOService) parseImportSheet(ctx context.Context, modelUID string, f
 		fieldUID = strings.TrimSpace(fieldUID)
 		if fieldUID != "" {
 			if _, ok := attributeMap[fieldUID]; !ok {
-				return parsedImportSheet{}, fmt.Errorf("表格包含模型中不存在的字段: %s", fieldUID)
+				return parsedImportSheet{}, newImportValidationError(
+					fmt.Sprintf("表格包含模型中不存在的字段: %s", fieldUID),
+					nil,
+				)
 			}
 			if _, exists := seenColumns[fieldUID]; exists {
-				return parsedImportSheet{}, fmt.Errorf("表格字段重复: %s", fieldUID)
+				return parsedImportSheet{}, newImportValidationError(fmt.Sprintf("表格字段重复: %s", fieldUID), nil)
 			}
 			seenColumns[fieldUID] = struct{}{}
 			colIndexMap[colIdx] = fieldUID
@@ -195,7 +188,7 @@ func (s *dataIOService) parseImportSheet(ctx context.Context, modelUID string, f
 		}
 	}
 	if !hasNameField {
-		return parsedImportSheet{}, fmt.Errorf("表格缺少唯一索引字段: name")
+		return parsedImportSheet{}, newImportValidationError("表格缺少唯一索引字段: name", nil)
 	}
 
 	resources := make([]resource.Resource, 0, len(rows)-3)
@@ -222,10 +215,16 @@ func (s *dataIOService) parseImportSheet(ctx context.Context, modelUID string, f
 		name, ok := data["name"]
 		nameStr := strings.TrimSpace(fmt.Sprint(name))
 		if !ok || nameStr == "" {
-			return parsedImportSheet{}, fmt.Errorf("excel 第 %d 行缺少唯一索引字段 name", rowIdx+4)
+			return parsedImportSheet{}, newImportValidationError(
+				fmt.Sprintf("Excel 第 %d 行缺少唯一索引字段 name", rowIdx+4),
+				nil,
+			)
 		}
 		if firstRow, exists := seenNames[nameStr]; exists {
-			return parsedImportSheet{}, fmt.Errorf("excel 第 %d 行唯一索引 %q 重复，首次出现在第 %d 行", rowIdx+4, nameStr, firstRow)
+			return parsedImportSheet{}, newImportValidationError(
+				fmt.Sprintf("Excel 第 %d 行唯一索引 %q 重复，首次出现在第 %d 行", rowIdx+4, nameStr, firstRow),
+				nil,
+			)
 		}
 		seenNames[nameStr] = rowIdx + 4
 		resources = append(resources, resource.Resource{
@@ -266,11 +265,8 @@ func buildImportPreview(modelUID string, sheet parsedImportSheet, current []reso
 	for _, item := range current {
 		currentByName[strings.TrimSpace(fmt.Sprint(item.Data["name"]))] = item
 	}
-	seen := make(map[string]struct{}, len(sheet.Resources))
-
 	for _, incoming := range sheet.Resources {
 		name := strings.TrimSpace(fmt.Sprint(incoming.Data["name"]))
-		seen[name] = struct{}{}
 		existing, exists := currentByName[name]
 		if !exists {
 			preview.CreatedCount++
@@ -308,21 +304,6 @@ func buildImportPreview(modelUID string, sheet parsedImportSheet, current []reso
 			OriginalData:  cloneData(existing.Data),
 			ModifiedData:  merged,
 			Resource:      incoming,
-		})
-	}
-
-	for _, existing := range current {
-		name := strings.TrimSpace(fmt.Sprint(existing.Data["name"]))
-		if _, ok := seen[name]; ok {
-			continue
-		}
-		preview.DeletedCount++
-		preview.Rows = append(preview.Rows, ImportChange{
-			UniqueID:      name,
-			Action:        ImportActionDelete,
-			ChangedFields: sortedMapKeys(existing.Data),
-			OriginalData:  cloneData(existing.Data),
-			Resource:      existing,
 		})
 	}
 	return preview
