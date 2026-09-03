@@ -336,19 +336,15 @@ func (h *Handler) StartUser(ctx *gin.Context, req StartUserReq) (ginx.Result, er
 		return systemErrorResult, err
 	}
 
-	// 查找本地存储，关于我的工单（未完成）
-	orders, total, err := h.svc.ListOrdersByUser(ctx, u.Username, req.Offset, req.Limit)
-	if err != nil {
-		return systemErrorResult, err
-	}
-
-	// 查找出所有的流程ID
-	procInstIds := slice.Map(orders, func(idx int, src domain.Order) int {
-		return src.Process.InstanceId
-	})
-
-	// 查询所有流程等待运行的信息 ( 当前步骤、审批人 ）
-	processTasks, err := h.engineSvc.ListPendingStepsOfMyTask(ctx, procInstIds, u.Username)
+	// 列表和总数必须来自同一个流程查询。旧实现先从 MongoDB 取总数，
+	// 再到 MySQL 按发起人过滤任务，容易出现 total > 0 但 orders 为空。
+	processTasks, total, err := h.engineSvc.ListByStartUser(
+		ctx,
+		u.Username,
+		req.ProcessName,
+		int(req.Offset),
+		int(req.Limit),
+	)
 	if err != nil {
 		return systemErrorResult, err
 	}
