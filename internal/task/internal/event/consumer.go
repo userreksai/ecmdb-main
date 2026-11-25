@@ -54,6 +54,12 @@ func (c *ExecuteResultConsumer) Consume(ctx context.Context) error {
 		return fmt.Errorf("解析消息失败: %w", err)
 	}
 
+	// 非正数 task_id 属于 ecmdb-task 为 eflow 提交的工作流执行（task_id 为负的执行 ID），
+	// 由 ecmdb-task 自己处理；这里跳过，避免误更新或误发失败通知
+	if evt.TaskId <= 0 {
+		return nil
+	}
+
 	triggerPosition := domain.TriggerPositionTaskExecutionSuccess
 	if domain.Status(evt.Status) == domain.FAILED {
 		triggerPosition = domain.TriggerPositionTaskExecutionFailed
