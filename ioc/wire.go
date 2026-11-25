@@ -14,6 +14,7 @@ import (
 	"github.com/userreksai/ecmdb-main/internal/codebook"
 	"github.com/userreksai/ecmdb-main/internal/dataio"
 	"github.com/userreksai/ecmdb-main/internal/department"
+	"github.com/userreksai/ecmdb-main/internal/eflowcompat"
 	"github.com/userreksai/ecmdb-main/internal/discovery"
 	"github.com/userreksai/ecmdb-main/internal/endpoint"
 	"github.com/userreksai/ecmdb-main/internal/engine"
@@ -72,10 +73,10 @@ func InitApp() (*App, error) {
 		template.InitModule,
 		wire.FieldsOf(new(*template.Module), "Hdl", "GroupHdl"),
 		codebook.InitModule,
-		wire.FieldsOf(new(*codebook.Module), "Hdl"),
+		wire.FieldsOf(new(*codebook.Module), "Hdl", "Svc"),
 		worker.InitModule,
 		runner.InitModule,
-		wire.FieldsOf(new(*runner.Module), "Hdl"),
+		wire.FieldsOf(new(*runner.Module), "Hdl", "Svc"),
 		order.InitModule,
 		wire.FieldsOf(new(*order.Module), "Hdl", "RpcServer"),
 		strategy.InitModule,
@@ -97,7 +98,7 @@ func InitApp() (*App, error) {
 		endpoint.InitModule,
 		wire.FieldsOf(new(*endpoint.Module), "Hdl", "Svc", "RpcServer"),
 		department.InitModule,
-		wire.FieldsOf(new(*department.Module), "Hdl"),
+		wire.FieldsOf(new(*department.Module), "Hdl", "Svc"),
 		role.InitModule,
 		wire.FieldsOf(new(*role.Module), "Hdl"),
 		permission.InitModule,
@@ -118,6 +119,8 @@ func InitApp() (*App, error) {
 		initCronJobs,
 		InitWebServer,
 		InitListener,
+		// eflow / ecmdb-task 兼容 gRPC：eiam 用户与部门、执行单元解析
+		eflowcompat.NewRpcServer,
 		InitGrpcServer,
 		InitGinMiddlewares,
 

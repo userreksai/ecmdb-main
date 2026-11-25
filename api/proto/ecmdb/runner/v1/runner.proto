@@ -1,0 +1,64 @@
+syntax = "proto3";
+
+package ecmdb.runner.v1;
+
+option go_package = "ecmdb/runner/v1;runner";
+
+// ECMDB 执行单元（Runner）与代码模板（Codebook）查询服务。
+// 执行单元与脚本仍由 ECMDB 管理；ecmdb-task 在为 eflow 提交工作流执行时按 runner_id 解析执行所需信息。
+
+message Variable {
+  string key = 1;
+  string value = 2; // ResolveExecution 中为解密后的明文；其它接口中 secret 变量值为空
+  bool secret = 3;
+}
+
+message Runner {
+  int64 id = 1;
+  string name = 2;
+  int64 codebook_id = 3;     // 代码模板数字 ID
+  string codebook_uid = 4;   // 代码模板唯一标识（ECMDB 内部关联键）
+  string kind = 5;           // GRPC | KAFKA
+  string target = 6;         // GRPC: 执行器服务名；KAFKA: Agent 监听的 Topic
+  string handler = 7;        // 执行方法，如 shell / python
+  repeated string tags = 8;
+  string desc = 9;
+}
+
+message FindRunnerByIDRequest {
+  int64 id = 1;
+}
+
+message FindRunnerByIDResponse {
+  Runner runner = 1;
+}
+
+message ListRunnersByCodebookIDRequest {
+  int64 codebook_id = 1;
+}
+
+message ListRunnersByCodebookIDResponse {
+  repeated Runner runners = 1;
+}
+
+message ResolveExecutionRequest {
+  int64 runner_id = 1;
+}
+
+// RunnerExecution 一次执行所需的完整信息（脚本源码与解密后的变量），仅供内部服务调用。
+message RunnerExecution {
+  Runner runner = 1;
+  string code = 2;
+  string language = 3;
+  repeated Variable variables = 4;
+}
+
+message ResolveExecutionResponse {
+  RunnerExecution execution = 1;
+}
+
+service RunnerService {
+  rpc FindRunnerByID(FindRunnerByIDRequest) returns (FindRunnerByIDResponse);
+  rpc ListRunnersByCodebookID(ListRunnersByCodebookIDRequest) returns (ListRunnersByCodebookIDResponse);
+  rpc ResolveExecution(ResolveExecutionRequest) returns (ResolveExecutionResponse);
+}

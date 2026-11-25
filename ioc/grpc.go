@@ -1,6 +1,7 @@
 package ioc
 
 import (
+	"github.com/userreksai/ecmdb-main/internal/eflowcompat"
 	"github.com/userreksai/ecmdb-main/internal/endpoint"
 	"github.com/userreksai/ecmdb-main/internal/order"
 	"github.com/userreksai/ecmdb-main/internal/policy"
@@ -14,7 +15,8 @@ import (
 )
 
 func InitGrpcServer(registry registrysdk.Registry, orderRpc *order.RpcServer, policyRpc *policy.RpcServer,
-	endpointRpc *endpoint.RpcServer, userRpc *user.RpcServer, rotaRpc *rota.RpcServer) *grpcpkg.Server {
+	endpointRpc *endpoint.RpcServer, userRpc *user.RpcServer, rotaRpc *rota.RpcServer,
+	eflowRpc *eflowcompat.RpcServer) *grpcpkg.Server {
 	var cfg grpcpkg.ServerConfig
 	if err := viper.UnmarshalKey("grpc.server.ecmdb", &cfg); err != nil {
 		panic(err)
@@ -27,6 +29,8 @@ func InitGrpcServer(registry registrysdk.Registry, orderRpc *order.RpcServer, po
 	endpointRpc.Register(server)
 	userRpc.Register(server)
 	rotaRpc.Register(server)
+	// eflow（eiam.user.v1 / eiam.department.v1）与 ecmdb-task（ecmdb.runner.v1）兼容服务
+	eflowRpc.Register(server)
 
 	return server
 }
